@@ -1,4 +1,4 @@
-package com.popush.triela.distribution;
+package com.popush.triela.distributionmanager;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

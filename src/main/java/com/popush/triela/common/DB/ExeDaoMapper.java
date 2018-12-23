@@ -23,4 +23,5 @@ public interface ExeDaoMapper {
     })
     @Select("SELECT * FROM exe")
     List<ExeDao> list();
+
 }

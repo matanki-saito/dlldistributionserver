@@ -1,6 +1,6 @@
-package com.popush.triela.distribution;
+package com.popush.triela.distributionmanager;
 
-import com.popush.triela.exeregister.ExeRegisterService;
+import com.popush.triela.exemanager.ExeRegisterService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,10 +14,10 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
-public class DistributionController {
+public class DistributionMgrController {
     //private final OAuth2RestTemplate auth2RestTemplate;
 
-    private final DistributionService distributionService;
+    private final DistributionMgrService distributionMgrService;
     private final ExeRegisterService exeRegisterService;
 
     @GetMapping("/distribution")
@@ -29,7 +29,7 @@ public class DistributionController {
         //URI uri = UriComponentsBuilder.fromUriString("https://api.github.com/user/repos").build().toUri();
         //model.addAttribute("repos", auth2RestTemplate.getForEntity(uri, GitHubRepoDto[].class).getBody());
 
-        model.addAttribute("assetList", distributionService.list());
+        model.addAttribute("assetList", distributionMgrService.list());
         model.addAttribute("exeRegisterList", exeRegisterService.list());
 
         return "distribution";
@@ -47,7 +47,7 @@ public class DistributionController {
                         e->Integer.parseInt(e.getValue().get(0))
                 ));
 
-        distributionService.update(m,"eu4dll");
+        distributionMgrService.update(m,"eu4dll");
 
         return "redirect:distribution";
     }

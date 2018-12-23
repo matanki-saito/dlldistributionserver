@@ -1,4 +1,4 @@
-package com.popush.triela.exeregister;
+package com.popush.triela.exemanager;
 
 import com.popush.triela.common.DB.ExeDao;
 import com.popush.triela.common.DB.ExeDaoMapper;

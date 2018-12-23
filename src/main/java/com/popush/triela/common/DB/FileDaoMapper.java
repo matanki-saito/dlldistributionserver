@@ -19,4 +19,14 @@ public interface FileDaoMapper {
     })
     @Select("SELECT * FROM file WHERE asset_id = #{assetId}")
     FileDao selectByAssetId(int asset_id);
+
+    @Select("<script>SELECT b.* FROM exe a " +
+            "LEFT JOIN file b ON a.distribution_asset_id = b.asset_id " +
+            "WHERE a.md5 = #{distributedExeMd5} " +
+            "<if test=\"md5 != null\">" +
+            "AND b.md5 &lt;&gt; #{md5}" +
+            "</if></script>")
+    FileDao selectByExeMd5(
+            @NonNull FileSelectCondition condition
+    );
 }

@@ -1,4 +1,4 @@
-package com.popush.triela.exeregister;
+package com.popush.triela.exemanager;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
