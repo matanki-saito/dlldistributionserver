@@ -11,14 +11,18 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/v1/distribution")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class DistributionApiController {
 
     private final DistributionMgrService distributionMgrService;
 
+    @GetMapping("/test")
+    public String test() {
+        return "test";
+    }
 
-    @GetMapping("/{product}/{exe_md5}")
+    @GetMapping("/distribution/{product}/{exe_md5}")
     public HttpEntity<byte[]> fileGet(@PathVariable(value = "product") String product,
                                       @PathVariable(value = "exe_md5") String exeMd5,
                                       @RequestParam(value = "dll_md5", required = false) String dllMd5) {

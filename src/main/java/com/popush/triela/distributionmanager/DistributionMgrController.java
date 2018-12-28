@@ -7,6 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
@@ -14,8 +15,9 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
+@RequestMapping("/mgr/v1")
 public class DistributionMgrController {
-    //private final OAuth2RestTemplate auth2RestTemplate;
+
 
     private final DistributionMgrService distributionMgrService;
     private final ExeRegisterService exeRegisterService;
@@ -37,17 +39,17 @@ public class DistributionMgrController {
 
 
     @PostMapping("/distribution")
-    public String distributionPost(@RequestParam MultiValueMap<String, String> params,Model model) {
+    public String distributionPost(@RequestParam MultiValueMap<String, String> params, Model model) {
 
         /* exe-hash:asset-id */
-        final Map<String,Integer> m = params.entrySet().stream()
-                .filter(entry-> !entry.getKey().equals("_csrf"))
+        final Map<String, Integer> m = params.entrySet().stream()
+                .filter(entry -> !entry.getKey().equals("_csrf"))
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
-                        e->Integer.parseInt(e.getValue().get(0))
+                        e -> Integer.parseInt(e.getValue().get(0))
                 ));
 
-        distributionMgrService.update(m,"eu4dll");
+        distributionMgrService.update(m, "eu4dll");
 
         return "redirect:distribution";
     }
