@@ -4,16 +4,20 @@ buildscript {
     }
     repositories {
         mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath("gradle.plugin.com.palantir.gradle.docker:gradle-docker:0.20.1")
     }
 }
 
 apply plugin: 'java'
-apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'com.palantir.docker'
 
 group = 'com.popush'
 version = '0.0.1-SNAPSHOT'
@@ -25,13 +29,32 @@ repositories {
 
 ext['azureVersion'] = '2.0.5'
 
+bootJar {
+    baseName = 'triela-docker'
+    version = '1.0.0'
+}
+
+sourceCompatibility = 11
+targetCompatibility = 11
+
+task unpack(type: Copy) {
+    dependsOn bootJar
+    from(zipTree(tasks.bootJar.outputs.files.singleFile))
+    into("build/dependency")
+}
+
+docker {
+    name "${project.group}/${bootJar.baseName}"
+    copySpec.from(tasks.unpack.outputs).into("dependency")
+    buildArgs(['DEPENDENCY': "dependency"])
+}
+
 dependencies {
     implementation('org.springframework.boot:spring-boot-starter-aop')
     implementation('org.springframework.boot:spring-boot-starter-cache')
     //implementation('org.springframework.boot:spring-boot-starter-data-elasticsearch')
     //implementation('org.springframework.boot:spring-boot-starter-data-redis')
     implementation('org.springframework.boot:spring-boot-starter-security')
-    // https://mvnrepository.com/artifact/org.springframework.security.oauth/spring-security-oauth2
     implementation('org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:2.1.1.RELEASE')
     implementation('org.springframework.boot:spring-boot-starter-thymeleaf')
     implementation('com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.7')
@@ -51,8 +74,10 @@ dependencies {
     compileOnly('org.projectlombok:lombok')
     testImplementation('org.springframework.boot:spring-boot-starter-test')
     testImplementation('org.springframework.security:spring-security-test')
-    // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
+    
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+    compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.8.0'
+    compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.8.0'
 
 }
 

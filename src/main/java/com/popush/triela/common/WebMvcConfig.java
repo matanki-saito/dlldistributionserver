@@ -12,15 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WebMvcConfig implements WebMvcConfigurer {
 
-    //private final GitHubReposInterceptor gitHubReposInterceptor;
     private final GitHubReposResolver gitHubReposResolver;
-//
-//    @Override
-//    public void addInterceptors(InterceptorRegistry registry) {
-//        registry.addInterceptor(gitHubReposInterceptor)
-//                .addPathPatterns("/**")
-//                .excludePathPatterns("/static/**");
-//    }
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
