@@ -7,21 +7,23 @@ import java.util.List;
 
 @Mapper
 public interface ExeDaoMapper {
-    @Insert("INSERT INTO exe (md5, version,product, description, distribution_asset_id) " +
-            "VALUES (#{md5},#{version}, #{product}, #{description}, #{distributionAssetId})" +
+    @Insert("INSERT INTO exe (id,md5, version,github_repo_id, description, distribution_asset_id) " +
+            "VALUES (#{id}, #{md5},#{version}, #{gitHubRepoId}, #{description}, #{distributionAssetId})" +
             "ON DUPLICATE KEY UPDATE distribution_asset_id = #{distributionAssetId} ")
     void upsert(@NonNull ExeDao exeDao);
 
     @Results({
-            @Result(property = "distributionAssetId", column = "distribution_asset_id")
+            @Result(property = "distributionAssetId", column = "distribution_asset_id"),
+            @Result(property = "gitHubRepoId", column = "github_repo_id")
     })
-    @Select("SELECT * FROM exe WHERE md5 = #{md5}")
-    ExeDao selectByMd5(@NonNull String md5);
-
-    @Results({
-            @Result(property = "distributionAssetId", column = "distribution_asset_id")
-    })
-    @Select("SELECT * FROM exe")
-    List<ExeDao> list();
+    @Select("<script>" +
+            "SELECT * FROM exe" +
+            "<where>" +
+            "<if test=\"gitHubRepoId != null\">" +
+            "AND github_repo_id = #{gitHubRepoId}" +
+            "</if>" +
+            "</where>" +
+            "</script>")
+    List<ExeDao> list(@NonNull ExeSelectCondition condition);
 
 }

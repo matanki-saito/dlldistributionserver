@@ -1,39 +1,41 @@
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org"
->
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
-    <title>Distribution Manager</title>
+    <title>Product Manager</title>
     <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
           integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" rel="stylesheet">
+
 </head>
 
 <body>
 <div class="container">
     <header th:include="header"></header>
-    <form enctype="multipart/form-data" method="post"
-          th:action="@{'/mgr/v1/product/' + ${gitHubRepositoryId} + '/distribution'}">
-        <table class="table table-striped">
-            <thead class="thead-light">
-            <tr>
-                <th>name</th>
-                <th scope="col" th:each="exe : ${exeRegisterList}" th:object="${exe}" th:text="*{version}"></th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="asset : ${assetList}">
-                <td><a th:href="${asset.url}" th:text="${asset.name}"></a></td>
-                <td th:each="exe : ${exeRegisterList}">
-                    <input th:checked="${exe.distributionAssetId != null and asset.assetId != null and exe.distributionAssetId.toString() == asset.assetId.toString()}"
-                           th:name="${exe.md5}" th:radiogroup="${exe.md5}" th:value="${asset.assetId}"
-                           type="radio"/>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-        <button type="submit">submit</button>
-    </form>
+
+    <p>productはあなたがadminのgithubのrepositoryと対応します。</p>
+    <table class="table table-striped">
+        <thead>
+        <tr class="thead-light">
+            <th scope="col">GitHub repository id</th>
+            <th scope="col">GitHub repository name</th>
+            <th scope="col">exe</th>
+            <th scope="col">distribution</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="product : ${list}" th:object="${product}">
+            <td th:text="*{gitHubRepositoryId}"></td>
+            <td th:text="*{gitHubRepositoryName}"></td>
+            <td>
+                <a th:href="@{'/mgr/v1/product/' + ${product.gitHubRepositoryId} + '/exe'}">link</a>
+            </td>
+            <td>
+                <a th:href="@{'/mgr/v1/product/' + ${product.gitHubRepositoryId} + '/distribution'}">link</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
 </div>
 
 

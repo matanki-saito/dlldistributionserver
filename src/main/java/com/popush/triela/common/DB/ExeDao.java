@@ -8,7 +8,9 @@ import lombok.*;
 @NoArgsConstructor
 public class ExeDao {
     @NonNull
-    private String product;
+    private int id;
+    @NonNull
+    private int gitHubRepoId;
     @NonNull
     private String md5;
     @NonNull

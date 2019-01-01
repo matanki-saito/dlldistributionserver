@@ -1,0 +1,144 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
+    <title>Exe Manager</title>
+    <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+          integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" rel="stylesheet">
+
+</head>
+
+<body>
+<div class="container">
+    <header th:include="header"></header>
+    <p>exeはrepositoryに対して存在します。</p>
+    <table class="table table-striped">
+        <tbody>
+        <tr class="thead-light">
+            <th scope="col">md5</th>
+            <th scope="col">version</th>
+            <th scope="col">description</th>
+            <th scope="col">operation</th>
+        </tr>
+        <tr>
+            <form enctype="multipart/form-data" method="post"
+                  th:action="@{'/mgr/v1/product/' + ${gitHubRepositoryId} + '/exe'}" th:object="${form}">
+                <td><input id="md5" th:field="*{md5}" type="text"/></td>
+                <td><input th:field="*{version}" type="text"/></td>
+                <td><input id="description" th:field="*{description}" type="text"/></td>
+                <td>
+                    <button type="submit">register</button>
+                </td>
+            </form>
+        </tr>
+        <tr class="thead-light">
+            <th scope="col">md5</th>
+            <th scope="col">version</th>
+            <th scope="col">description</th>
+            <th scope="col">operation</th>
+        </tr>
+        <tr th:each="exe : ${list}" th:object="${exe}">
+            <td th:text="*{md5}"></td>
+            <td th:text="*{version}"></td>
+            <td th:text="*{description}"></td>
+            <td>
+                <button>delete</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script crossorigin="anonymous"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script crossorigin="anonymous"
+        integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut"
+        src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"></script>
+<script crossorigin="anonymous"
+        integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k"
+        src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+<script src=src="/js/md5.min.js" th:src="@{/js/md5.min.js}"></script>
+<script>
+    $(window).on("dragover", function (event) {
+        event.preventDefault();
+    });
+
+    $(window).on("dragleave", function (event) {
+        event.preventDefault();
+    });
+
+    $(window).on("drop", function (event) {
+        event.preventDefault();
+
+        var files = event.originalEvent.dataTransfer.files;
+        for (var i = 0; i < files.length; i++) {
+            var obj = files[i];
+
+            // ファイル名
+            var fName = obj.name;
+            // ファイルの種別
+            var fType = obj.type;
+            // ファイルのサイズ（キロバイトに変換し、小数点以下1桁を表示）
+            var fSize = (obj.size / 1024).toFixed(1);
+            // ファイルの最終更新日時
+            var fDate = obj.lastModifiedDate;
+
+            $('#description').val([fType, fName, fSize, fDate].join("-"));
+
+            getMd5(obj);
+
+            // 1つのみ
+            break;
+        }
+    });
+
+    /**
+     * 入力されたファイルに対してMD5を計算して取得
+     * @property {Object} file Fileオブジェクト
+     */
+    function getMd5(file) {
+        var hash = md5.create();
+        var chunkSize = 2000000; // 一度に読み取るサイズを指定
+        var offset = 0; // 読込開始位置
+        var blockRead = null;
+
+        // 分割されたファイルの読み込み関数
+        var readContent = function (evt) {
+            var result = new Uint8Array(evt.target.result);
+
+            if (evt.target.error) {
+                // エラー処理を記述・・・
+            }
+
+            offset += result.length;
+            hash.update(result);
+
+            if (offset >= file.size) {
+                // 計算結果表示
+                console.log("md5");
+                $('#md5').val(hash.hex());
+            } else {
+                blockRead(offset);
+            }
+        };
+
+        // 再帰読込関数
+        var blockRead = function (_offset) {
+            var blob = file.slice(_offset, chunkSize + _offset);
+            var fileReader = new FileReader();
+            fileReader.onloadend = readContent;
+            fileReader.readAsArrayBuffer(blob);
+        };
+
+        // ファイル読み込み開始
+        blockRead(offset);
+    }
+
+</script>
+</body>
+</html>
