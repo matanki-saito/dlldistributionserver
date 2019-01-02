@@ -18,4 +18,8 @@ security:
 spring:
   profiles:
     active: dev
+  cache:
+    cache-names: dllCache
+    caffeine:
+      spec: maximumSize=1000000, expireAfterWrite=3600s
 
