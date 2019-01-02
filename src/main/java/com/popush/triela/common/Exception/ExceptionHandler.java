@@ -12,10 +12,20 @@ import java.util.Map;
 
 @ControllerAdvice
 public class ExceptionHandler {
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @org.springframework.web.bind.annotation.ExceptionHandler({NotModifiedException.class})
+    @ResponseBody
+    public Map<String, Object> handleErrorNotModifiedException() {
+        Map<String, Object> errorMap = new HashMap<>();
+        errorMap.put("message", "-");
+        errorMap.put("status", HttpStatus.BAD_REQUEST);
+        return errorMap;
+    }
+
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     @org.springframework.web.bind.annotation.ExceptionHandler({HttpRequestMethodNotSupportedException.class})
     @ResponseBody
-    public Map<String, Object> handleError() {
+    public Map<String, Object> handleErrorHttpRequestMethodNotSupportedException() {
         Map<String, Object> errorMap = new HashMap<>();
         errorMap.put("message", "許可されていないメソッド");
         errorMap.put("status", HttpStatus.METHOD_NOT_ALLOWED);

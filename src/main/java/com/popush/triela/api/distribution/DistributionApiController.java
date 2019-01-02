@@ -3,6 +3,7 @@ package com.popush.triela.api.distribution;
 import com.popush.triela.Manager.distribution.DistributionService;
 import com.popush.triela.api.TrielaApiV1Controller;
 import com.popush.triela.common.DB.FileSelectCondition;
+import com.popush.triela.common.Exception.NotModifiedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -28,7 +29,7 @@ public class DistributionApiController extends TrielaApiV1Controller {
     @GetMapping("/distribution/{gitHubRepoId}/{exe_md5}")
     public HttpEntity<byte[]> fileGet(@PathVariable(value = "gitHubRepoId") int gitHubRepoId,
                                       @PathVariable(value = "exe_md5") String exeMd5,
-                                      @RequestParam(value = "dll_md5", required = false) String dllMd5) {
+                                      @RequestParam(value = "dll_md5", required = false) String dllMd5) throws NotModifiedException {
 
         final Optional<byte[]> result = distributionMgrService.getDllData(FileSelectCondition.builder()
                 .distributedExeMd5(exeMd5)
@@ -37,7 +38,7 @@ public class DistributionApiController extends TrielaApiV1Controller {
                 .build());
 
         if (result.isEmpty()) {
-            throw new IllegalArgumentException("bad request");
+            throw new IllegalStateException();
         }
 
         final HttpHeaders headers = new HttpHeaders();

@@ -1,6 +1,7 @@
 package com.popush.triela.Manager.distribution;
 
 import com.popush.triela.common.DB.*;
+import com.popush.triela.common.Exception.NotModifiedException;
 import com.popush.triela.common.github.GitHubApiService;
 import com.popush.triela.common.github.GitHubReleaseResponse;
 import com.popush.triela.common.github.GitHubReposResponse;
@@ -53,11 +54,11 @@ public class DistributionService {
      * @return データ
      */
     @Cacheable("dllCache")
-    public Optional<byte[]> getDllData(@NonNull FileSelectCondition condition) {
+    public Optional<byte[]> getDllData(@NonNull FileSelectCondition condition) throws NotModifiedException {
         final List<FileDao> fileDaoList = fileDaoMapper.list(condition);
 
         if (fileDaoList.size() != 1) {
-            throw new IllegalStateException("1");
+            throw new NotModifiedException();
         }
 
         return Optional.of(fileDaoList.get(0).getData());
