@@ -54,8 +54,13 @@ public class DistributionService {
      */
     @Cacheable("dllCache")
     public Optional<byte[]> getDllData(@NonNull FileSelectCondition condition) {
-        final FileDao dao = fileDaoMapper.selectByExeMd5(condition);
-        return dao == null ? Optional.empty() : Optional.of(dao.getData());
+        final List<FileDao> fileDaoList = fileDaoMapper.list(condition);
+
+        if (fileDaoList.size() != 1) {
+            throw new IllegalStateException("1");
+        }
+
+        return Optional.of(fileDaoList.get(0).getData());
     }
 
     List<AssetForm> list(@NonNull GitHubReposResponse gitHubReposResponse) {

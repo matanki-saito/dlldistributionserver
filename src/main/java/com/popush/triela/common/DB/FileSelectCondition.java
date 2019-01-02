@@ -7,6 +7,7 @@ import lombok.Data;
 @Data
 public class FileSelectCondition {
     private String md5;
-    private String assetId;
+    private int assetId;
     private String distributedExeMd5;
+    private int gitHubRepoId;
 }
