@@ -20,7 +20,10 @@ public interface ExeDaoMapper {
             "SELECT * FROM exe" +
             "<where>" +
             "<if test=\"gitHubRepoId != null\">" +
-            "AND github_repo_id = #{gitHubRepoId}" +
+            "AND github_repo_id = #{gitHubRepoId} " +
+            "</if>" +
+            "<if test=\"md5 != null\">" +
+            "AND md5 = #{md5} " +
             "</if>" +
             "</where>" +
             "</script>")
