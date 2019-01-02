@@ -25,13 +25,14 @@ public class DistributionApiController extends TrielaApiV1Controller {
         return "abc";
     }
 
-    @GetMapping("/distribution/{product}/{exe_md5}")
-    public HttpEntity<byte[]> fileGet(@PathVariable(value = "product") String product,
+    @GetMapping("/distribution/{gitHubRepoId}/{exe_md5}")
+    public HttpEntity<byte[]> fileGet(@PathVariable(value = "gitHubRepoId") int gitHubRepoId,
                                       @PathVariable(value = "exe_md5") String exeMd5,
                                       @RequestParam(value = "dll_md5", required = false) String dllMd5) {
 
         final Optional<byte[]> result = distributionMgrService.getDllData(FileSelectCondition.builder()
                 .distributedExeMd5(exeMd5)
+                .gitHubRepoId(gitHubRepoId)
                 .md5(dllMd5)
                 .build());
 
