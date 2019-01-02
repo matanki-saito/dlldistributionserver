@@ -8,11 +8,13 @@ import java.util.List;
 
 public interface GitHubApiMapper {
     @GET("repos/{owner}/{repo_name}/releases")
-    Call<List<GitHubReleaseResponse>> releases(@Path("owner") String owner,
+    Call<List<GitHubReleaseResponse>> releases(@Header("Authorization") String token,
+                                               @Path("owner") String owner,
                                                @Path("repo_name") String repoName);
 
     @GET("repos/{owner}/{repo_name}/releases/assets/{asset_id}")
-    Call<GitHubAssetResponse> asset(@Path("owner") String owner,
+    Call<GitHubAssetResponse> asset(@Header("Authorization") String token,
+                                    @Path("owner") String owner,
                                     @Path("repo_name") String repoName,
                                     @Path("asset_id") int asset_id);
 

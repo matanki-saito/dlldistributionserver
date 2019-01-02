@@ -42,10 +42,10 @@ public class GitHubApiService {
                 throw new IllegalStateException("state error");
             }
 
-            // adminのみ
+            // push権限を持つ
             result = response.body()
                     .stream()
-                    .filter(elem -> elem.getPermissions().containsKey("admin") && elem.getPermissions().get("admin"))
+                    .filter(elem -> elem.getPermissions().containsKey("push") && elem.getPermissions().get("push"))
                     .collect(Collectors.toList());
         } catch (IOException e) {
             throw new IllegalStateException("IOError", e);
@@ -56,7 +56,11 @@ public class GitHubApiService {
 
     public List<GitHubReleaseResponse> getReleasesSync(@NonNull String owner,
                                                        @NonNull String repoName) {
-        final Call<List<GitHubReleaseResponse>> request = gitHubApiMapper.releases(owner, repoName);
+        final Call<List<GitHubReleaseResponse>> request = gitHubApiMapper.releases(
+                "token " + auth2RestTemplate.getAccessToken().getValue(),
+                owner,
+                repoName
+        );
 
         final List<GitHubReleaseResponse> result;
         try {
@@ -77,6 +81,7 @@ public class GitHubApiService {
         final String result;
 
         final Call<GitHubAssetResponse> request = gitHubApiMapper.asset(
+                "token " + auth2RestTemplate.getAccessToken().getValue(),
                 owner,
                 repoName,
                 assetId
