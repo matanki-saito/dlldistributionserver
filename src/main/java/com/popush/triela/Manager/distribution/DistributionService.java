@@ -6,6 +6,7 @@ import com.popush.triela.common.github.GitHubReleaseResponse;
 import com.popush.triela.common.github.GitHubReposResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
@@ -51,6 +52,7 @@ public class DistributionService {
      * @param condition 条件
      * @return データ
      */
+    @Cacheable("dllCache")
     public Optional<byte[]> getDllData(@NonNull FileSelectCondition condition) {
         final FileDao dao = fileDaoMapper.selectByExeMd5(condition);
         return dao == null ? Optional.empty() : Optional.of(dao.getData());
