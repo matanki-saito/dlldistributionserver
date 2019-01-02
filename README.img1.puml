@@ -1,0 +1,47 @@
+@startuml
+
+User -> EU4: user click exe
+
+activate EU4
+EU4 -> d3d9.dll: dllmain
+
+activate d3d9.dll
+d3d9.dll -> autoupdate.bat : createprocess
+
+activate autoupdate.bat
+autoupdate.bat -> curl.exe : run
+
+activate curl.exe
+curl.exe -> dllserver : exe_md5,dll_md5
+
+activate dllserver
+
+curl.exe <- dllserver : download Plugin.dll
+
+deactivate dllserver
+
+curl.exe --> Plugin.dll : Plugin.dll update
+curl.exe <-- Plugin.dll : success
+
+autoupdate.bat <- curl.exe
+deactivate curl.exe
+
+d3d9.dll <- autoupdate.bat
+deactivate autoupdate.bat
+
+d3d9.dll -> d3d9.dll : injection Plugin.dll
+
+EU4 <-- Plugin.dll
+
+EU4 <- d3d9.dll
+
+
+EU4 -> Plugin.dll : dll main
+activate Plugin.dll
+EU4 <- Plugin.dll
+
+User <-  EU4 : Launcher
+
+
+
+@enduml
