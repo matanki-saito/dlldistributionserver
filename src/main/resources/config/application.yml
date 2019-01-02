@@ -2,11 +2,6 @@ server:
   port: 8443
   servlet:
     context-path: /
-  ssl:
-    key-store: app/triela.pkcs12
-    key-store-password: 1qaz2wsx
-    keyStoreType: PKCS12
-    keyAlias: triela
 security:
   oauth2:
     client:

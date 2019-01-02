@@ -1,3 +1,9 @@
+server:
+  ssl:
+    key-store: src/main/resources/triela.pkcs12
+    key-store-password: 1qaz2wsx
+    keyStoreType: PKCS12
+    keyAlias: triela
 spring:
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/mydb?characterEncoding=UTF-8&serverTimezone=JST
