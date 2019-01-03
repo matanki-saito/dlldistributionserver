@@ -14,44 +14,51 @@ cloud "Microsoft Azure" {
     () "port-v:22"
 
     node "mysql-docker-container" {
-        () "port-mdc:3306"
         database "mysql8" {
-            () "port-mdcm:3306"
+            () "port-mysql:3306"
         }
+        () "mysql-data"
     }
 
     node "app-docker-container" {
+
         component "triela-application"{
             () "port-adct:13306"
             () "port-rdct:6379"
             () "port-adct:8443"
+
+            () "app-env"
         }
-        () "port-adc:8443"
     }
 
     node "redis-docker-container" {
+        () "redis-env"
         component "Redis" {
-            () "port-r:6379"
+            () "port-redis:6379"
         }
-        () "port-rdc:6379"
+    }
+
+    node "private-docker-container" {
+        file "credential and env"
+        file "data"
     }
 }
 
 [public:8443] <--> [port-vadc:8443]
-[private:13306] <-left-> [port-vmdc:13306]
+[private:13306] <----> [port-vmdc:13306]
 [private:22] <--> [port-v:22]
-[private:6379] <-left-> [port-vrdc:6379]
+[private:6379] <--> [port-vrdc:6379]
 
-[port-vrdc:6379] <--> [port-rdc:6379]
 [port-vrdc:6379] <--> [port-rdct:6379]
-[port-vadc:8443] <--> [port-adc:8443]
-[port-vmdc:13306] <-down-> [port-mdc:3306]
 
+[port-adct:13306] <--> [port-vmdc:13306]
 
-[port-adc:8443] <--> [port-adct:8443]
-[port-rdc:6379] <-> [port-r:6379]
+[port-vadc:8443] <--> [port-adct:8443]
+[port-vrdc:6379] <--> [port-redis:6379]
 
-[port-mdc:3306] <-> [port-mdcm:3306]
-[port-vmdc:13306] -up-> [port-adct:13306]
+[port-vmdc:13306] --> [port-mysql:3306]
+
+[credential and env] -up-> [app-env]
+[data] <->[mysql-data]
 
 @enduml

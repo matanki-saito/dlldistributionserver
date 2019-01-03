@@ -1,14 +1,14 @@
 server:
   ssl:
-    key-store: app/triela.pkcs12
-    key-store-password: 1qaz2wsx
+    key-store: /etc/trielaprivate/triela.pkcs12
     keyStoreType: PKCS12
+    #key-store-password: [from triela-private]
     keyAlias: triela
 spring:
   datasource:
     url: jdbc:mysql://host.docker.internal:13306/mydb?characterEncoding=UTF-8&serverTimezone=JST # test
     username: root
-    password: mysql
+    #password: [from triela-private]
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
       maximum-pool-size: 20
