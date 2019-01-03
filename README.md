@@ -1,6 +1,11 @@
 # Dll Distribution server
  
+ # sequence
+ 
  ![img1](./README.img1.png)
+ 
+ # component
+ ![img2](./README.img2.png)
  
  ## component
   - Microsoft Azure: https://azure.microsoft.com/ja-jp/
@@ -26,3 +31,4 @@
   - swagger: https://swagger.io
   - markdown
   - PlantUML: http://plantuml.com/
+
