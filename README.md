@@ -2,15 +2,18 @@
  
  # sequence
  
- ![img1](./README.img1.png)
+ ![img1](Resource/README.img1.png)
  
  # component
- ![img2](./README.img2.png)
+ ![img2](Resource/README.img2.png)
  
  ## component
   - Microsoft Azure: https://azure.microsoft.com/ja-jp/
   - GitHub: https://github.com/
   - Docker: https://www.docker.com/
+  - DockerHub: https://hub.docker.com/
+    - gnagaoka/triela-app:latest (public)
+    - gnagaoka/triela-private:latest (private)
   - Java 11 later: https://openjdk.java.net/projects/jdk/11/
   - MySQL 8 later: https://www.mysql.com/jp/
   - cURL: https://curl.haxx.se/
