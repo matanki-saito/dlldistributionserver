@@ -12,7 +12,7 @@
   - GitHub: https://github.com/
   - Docker: https://www.docker.com/
   - Java 11 later: https://openjdk.java.net/projects/jdk/11/
-  - MySQL 5.7 later: https://www.mysql.com/jp/
+  - MySQL 8 later: https://www.mysql.com/jp/
   - cURL: https://curl.haxx.se/
   - Redis: https://redis.io/
   
