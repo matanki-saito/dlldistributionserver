@@ -20,3 +20,9 @@
   - MyBatis + annotation: http://blog.mybatis.org/
   - thymeleaf: https://www.thymeleaf.org/index.html
   - caffeine: https://github.com/ben-manes/caffeine
+  - swagger: https://swagger.io
+
+## doc
+  - swagger: https://swagger.io
+  - markdown
+  - PlantUML: http://plantuml.com/
