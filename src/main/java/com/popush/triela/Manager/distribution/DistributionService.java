@@ -9,6 +9,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -22,7 +23,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class DistributionService {
-    private static final String DLL_OWNER = "matanki-saito";
+
     private final ExeDaoMapper exeDaoMapper;
     private final FileDaoMapper fileDaoMapper;
     private final GitHubApiService gitHubApiService;
@@ -54,6 +55,7 @@ public class DistributionService {
      * @return データ
      */
     @Cacheable("dllCache")
+    @Transactional(readOnly = true)
     public Optional<byte[]> getDllData(@NonNull FileSelectCondition condition) throws NotModifiedException {
         final List<FileDao> fileDaoList = fileDaoMapper.list(condition);
 
@@ -80,6 +82,7 @@ public class DistributionService {
                 ).collect(Collectors.toList());
     }
 
+    @Transactional
     void update(
             @NonNull Map<String, Integer> exeHash2assetId,
             @NonNull GitHubReposResponse gitHubReposResponse) {

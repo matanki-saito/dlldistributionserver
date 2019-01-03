@@ -1,6 +1,6 @@
 server:
   ssl:
-    key-store: src/main/resources/triela.pkcs12
+    key-store: C:/repo/triela/triela.pkcs12
     key-store-password: 1qaz2wsx
     keyStoreType: PKCS12
     keyAlias: triela
