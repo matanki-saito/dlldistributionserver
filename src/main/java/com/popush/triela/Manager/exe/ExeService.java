@@ -7,6 +7,7 @@ import com.popush.triela.common.github.GitHubApiService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,6 +19,7 @@ public class ExeService {
     final ExeDaoMapper exeDaoMapper;
     final GitHubApiService apiService;
 
+    @Transactional
     void save(@NonNull ExeForm form, int gitHubRepoId) {
         exeDaoMapper.upsert(ExeDao.builder()
                 .gitHubRepoId(gitHubRepoId)
@@ -28,6 +30,7 @@ public class ExeService {
         );
     }
 
+    @Transactional(readOnly = true)
     public List<ExeForm> list(int gitHubRepoId) {
         return exeDaoMapper.list(ExeSelectCondition.builder().gitHubRepoId(gitHubRepoId).build()).stream().map(
                 elem -> ExeForm
