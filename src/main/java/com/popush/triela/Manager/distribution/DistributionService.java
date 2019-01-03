@@ -102,6 +102,7 @@ public class DistributionService {
 
             final List<ExeDao> exeDaoList = exeDaoMapper.list(ExeSelectCondition
                     .builder()
+                    .md5(exeMd5)
                     .gitHubRepoId(gitHubReposResponse.getId())
                     .build()
             );

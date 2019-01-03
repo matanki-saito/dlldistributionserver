@@ -7,4 +7,5 @@ import lombok.Data;
 @Data
 public class ExeSelectCondition {
     private int gitHubRepoId;
+    private String md5;
 }
