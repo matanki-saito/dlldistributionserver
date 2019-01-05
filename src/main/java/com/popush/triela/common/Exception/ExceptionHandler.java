@@ -12,13 +12,11 @@ import java.util.Map;
 
 @ControllerAdvice
 public class ExceptionHandler {
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.GONE)
     @org.springframework.web.bind.annotation.ExceptionHandler({NotModifiedException.class})
     @ResponseBody
     public Map<String, Object> handleErrorNotModifiedException() {
         Map<String, Object> errorMap = new HashMap<>();
-        errorMap.put("message", "-");
-        errorMap.put("status", HttpStatus.BAD_REQUEST);
         return errorMap;
     }
 
