@@ -1,64 +1,52 @@
 @startuml
 
-() "public:8443"
+() "triela.tk:8443"
+() "d3mq2c18xv0s3o.cloudfront.net:443"
 () "private:22"
-() "private:13306"
-() "private:6379"
+() "private:3306"
 
-cloud "Microsoft Azure" {
-    package "VM-No1" {
 
-    () "port-vmdc:13306"
-    () "port-vadc:8443"
-    () "port-vrdc:6379"
-    () "port-v:22"
+cloud "AWS" {
 
-    node "mysql-docker-container" {
+    package "CloudFront"{
+        component "distribution"
+    }
+
+    package "RDS"{
         database "mysql8" {
             () "port-mysql:3306"
         }
-        () "mysql-data"
     }
+
+    package "VM-No1" {
+    () "EIP:8443"
+    () "port-v:22"
 
     node "app-docker-container" {
 
         component "triela-application"{
-            () "port-adct:13306"
-            () "port-rdct:6379"
+            () "port-adct:3306"
             () "port-adct:8443"
 
             () "app-env"
         }
     }
 
-    node "redis-docker-container" {
-        () "redis-env"
-        component "Redis" {
-            () "port-redis:6379"
-        }
-    }
-
     node "private-docker-container" {
         file "credential and env"
-        file "data"
     }
 }
 
-[public:8443] <--> [port-vadc:8443]
-[private:13306] <----> [port-vmdc:13306]
-[private:22] <--> [port-v:22]
-[private:6379] <--> [port-vrdc:6379]
+[d3mq2c18xv0s3o.cloudfront.net:443] --> [distribution]
+[distribution] --> [EIP:8443]
+[triela.tk:8443] ---> [EIP:8443]
+[private:22] ---> [port-v:22]
 
-[port-vrdc:6379] <--> [port-rdct:6379]
+[EIP:8443] --> [port-adct:8443]
 
-[port-adct:13306] <--> [port-vmdc:13306]
-
-[port-vadc:8443] <--> [port-adct:8443]
-[port-vrdc:6379] <--> [port-redis:6379]
-
-[port-vmdc:13306] --> [port-mysql:3306]
+[port-adct:3306] --> [port-mysql:3306]
+[private:3306] -----> [port-mysql:3306]
 
 [credential and env] -up-> [app-env]
-[data] <->[mysql-data]
 
 @enduml

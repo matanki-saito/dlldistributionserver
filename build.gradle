@@ -44,7 +44,7 @@ task unpack(type: Copy) {
 }
 
 docker {
-    name "${project.group}/${bootJar.baseName}:latest"
+    name "gnagaoka/triela-app:latest"
     copySpec.from(tasks.unpack.outputs).into("dependency")
     buildArgs(['DEPENDENCY': "dependency"])
 }
