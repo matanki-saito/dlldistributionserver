@@ -7,21 +7,25 @@
  # component
  ![img2](Resource/README.img2.png)
  
- ## component
-  - Microsoft Azure: https://azure.microsoft.com/ja-jp/
+ ## infra
+  - AWS: https://aws.amazon.com/jp/
+    - CloudFront
+    - EC2
+    - RDS
   - GitHub: https://github.com/
-  - Docker: https://www.docker.com/
+    - this repository
   - DockerHub: https://hub.docker.com/
     - gnagaoka/triela-app:latest (public)
     - gnagaoka/triela-private:latest (private)
+## component 
   - Java 11 later: https://openjdk.java.net/projects/jdk/11/
   - MySQL 8 later: https://www.mysql.com/jp/
   - cURL: https://curl.haxx.se/
-  - Redis: https://redis.io/
+  - Docker: https://www.docker.com/
   
 ## app
   - gradle: https://gradle.org/
-  - Spring boot 2.3 later: http://spring.io/projects/spring-boot
+  - Spring boot 2 later: http://spring.io/projects/spring-boot
   - Spring security oauth2 autoconfig: https://docs.spring.io/spring-security-oauth2-boot/docs/current/reference/htmlsingle/
   - OkHttp3: http://square.github.io/okhttp/
   - retrofit: https://square.github.io/retrofit/
