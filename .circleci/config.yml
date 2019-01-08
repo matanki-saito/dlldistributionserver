@@ -28,4 +28,4 @@ jobs:
       - deploy:
           name: deploy
           command: |
-            ssh -o "StrictHostKeyChecking=no" -l ${USER_NAME} ${HOST_IP} docker-compose down && docker-compose up -d
+            ssh -o "StrictHostKeyChecking=no" -l ${USER_NAME} ${HOST_IP} cd ~ \&\& docker-compose down \&\& docker-compose up -d
