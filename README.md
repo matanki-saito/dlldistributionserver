@@ -73,5 +73,8 @@ $ exit
 download docker-compose.yml
 
 ```
-$ wget https://gist.githubusercontent.com/matanki-saito/2aff62cbdd20b921ccc8dffcf5f33ae0/raw/1c38a842f4aff0fa06a6a9c40bae4944f7879d09/docker-compose.yml
+$ wget https://gist.githubusercontent.com/matanki-saito/2aff62cbdd20b921ccc8dffcf5f33ae0/raw/992323cdfc3f8a58a8847f9d0f122aea8fb4a419/docker-compose.yml
+```
+```
+$ docker-compose down && docker-compose up -d
 ```
