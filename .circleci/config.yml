@@ -62,4 +62,4 @@ jobs:
       - deploy:
           name: deploy
           command: |
-            ssh ${USER_NAME}@${HOST_NAME}:~ docker-compose down && docker-compose up -d
+            ssh -l ${USER_NAME} ${HOST_IP} docker-compose down && docker-compose up -d
