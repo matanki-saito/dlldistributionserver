@@ -1,0 +1,90 @@
+buildscript {
+    ext {
+        springBootVersion = '2.1.1.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath("gradle.plugin.com.palantir.gradle.docker:gradle-docker:0.20.1")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'com.palantir.docker'
+
+group = 'com.popush'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = 11
+
+repositories {
+    mavenCentral()
+}
+
+ext['azureVersion'] = '2.0.5'
+
+bootJar {
+    baseName = 'triela-docker'
+    version = '1.0.0'
+}
+
+sourceCompatibility = 11
+targetCompatibility = 11
+
+task unpack(type: Copy) {
+    dependsOn bootJar
+    from(zipTree(tasks.bootJar.outputs.files.singleFile))
+    into("build/dependency")
+}
+
+docker {
+    name "gnagaoka/triela-app:latest"
+    copySpec.from(tasks.unpack.outputs).into("dependency")
+    buildArgs(['DEPENDENCY': "dependency"])
+}
+
+dependencies {
+    implementation('org.springframework.boot:spring-boot-starter-aop')
+    implementation('org.springframework.boot:spring-boot-starter-cache')
+    //implementation('org.springframework.boot:spring-boot-starter-data-elasticsearch')
+    //implementation('org.springframework.boot:spring-boot-starter-data-redis')
+    implementation('org.springframework.boot:spring-boot-starter-security')
+    implementation('org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:2.1.1.RELEASE')
+    implementation('org.springframework.boot:spring-boot-starter-thymeleaf')
+    implementation('com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.7')
+    implementation('org.springframework.boot:spring-boot-starter-validation')
+    implementation('org.springframework.boot:spring-boot-starter-web')
+    implementation('org.mybatis.spring.boot:mybatis-spring-boot-starter:1.3.2')
+    implementation('org.springframework.boot:spring-boot-starter-jdbc')
+    implementation('org.springframework.retry:spring-retry')
+    implementation('com.squareup.okhttp3:okhttp:3.11.0')
+    implementation('com.squareup.retrofit2:retrofit:2.5.0')
+    implementation('com.squareup.retrofit2:converter-jackson:2.5.0')
+    implementation('com.github.ben-manes.caffeine:caffeine')
+    //implementation('org.springframework.session:spring-session-data-redis')
+    runtimeOnly('org.springframework.boot:spring-boot-devtools')
+    compileOnly('org.springframework.boot:spring-boot-starter-actuator')
+    runtimeOnly('mysql:mysql-connector-java')
+    compileOnly('org.springframework.boot:spring-boot-configuration-processor')
+    compileOnly('org.projectlombok:lombok')
+    testImplementation('org.springframework.boot:spring-boot-starter-test')
+    testImplementation('org.springframework.security:spring-security-test')
+
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+    compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.8.0'
+    compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.8.0'
+
+
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "com.microsoft.azure:azure-spring-boot-bom:${azureVersion}"
+    }
+}

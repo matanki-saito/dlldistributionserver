@@ -1,0 +1,12 @@
+version: '2'
+services:
+  triela-private:
+    image: gnagaoka/triela-private:latest
+  triela-app:
+    image: gnagaoka/triela-app:latest
+    depends_on:
+      - triela-private
+    ports:
+      - "8443:8443"
+    volumes_from:
+      - triela-private
