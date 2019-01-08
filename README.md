@@ -42,6 +42,8 @@
   - thymeleaf: https://www.thymeleaf.org/index.html
   - caffeine: https://github.com/ben-manes/caffeine
   - swagger: https://swagger.io
+  - logback
+  - Slf4j
 
 ## IDE and doc
   - IntelliJ IDEA: https://www.jetbrains.com/idea/
