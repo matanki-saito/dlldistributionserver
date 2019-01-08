@@ -55,8 +55,7 @@ jobs:
       - run: |
           docker login -u $DOCKER_USER -p $DOCKER_PASS
           ./gradlew docker dockerPush
-  deploy-job:
-    steps:
+
       - add_ssh_keys:
           fingerprints:
             - "59:93:b3:df:c2:ba:eb:53:da:21:7c:7a:81:69:c0:5c"
