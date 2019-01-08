@@ -22,6 +22,40 @@ jobs:
       TERM: dumb
 
     steps:
+      - checkout
+
+      - run: chmod +x gradlew
+
+      - setup_remote_docker:   # (2)
+          docker_layer_caching: true # (3)
+
+      - run:
+          name: Install Docker client
+          command: |
+            set -x
+            VER="17.03.0-ce"
+            curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
+            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+            sudo mv -f /tmp/docker/* /usr/bin
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "build.gradle" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+
+      - run: ./gradlew dependencies
+
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: v1-dependencies-{{ checksum "build.gradle" }}
+
+      - run: |
+          docker login -u $DOCKER_USER -p $DOCKER_PASS
+          ./gradlew docker dockerPush
+
       - add_ssh_keys:
           fingerprints:
             - "59:93:b3:df:c2:ba:eb:53:da:21:7c:7a:81:69:c0:5c"
