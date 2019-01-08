@@ -5,6 +5,51 @@
 () "private:22"
 () "private:3306"
 
+cloud "GitHub" {
+    component "EU4DLL repo"{
+        file "EU4dll source"
+        file "EU4dll asset"
+    }
+    component "CK2DLL repo" {
+        file "CK2dll source"
+        file "CK2dll asset"
+    }
+    component "dlldist repo" {
+        file "dlldist source"
+    }
+}
+
+cloud "azure-pipeline" {
+    component "EU4DLL-builder"
+    component "CK2DLL-builder"
+}
+
+cloud "discord" {
+    component "EU4更新情報板"
+    component "CK2更新情報板"
+}
+
+cloud "dockerHub" {
+    component "triela-app"
+}
+
+[EU4dll source] --> [EU4DLL-builder] : master,develop
+[EU4dll asset] <-- [EU4DLL-builder] : dll(master)
+[EU4DLL-builder] --> [EU4更新情報板] : dll(develop)
+[CK2dll source] --> [CK2DLL-builder] : master,develop
+[CK2dll asset] <-- [CK2DLL-builder] : dll(master)
+[CK2DLL-builder] --> [CK2更新情報板] : dll(develop)
+
+cloud "circleci" {
+    component "gradle-builder"
+    component "deployer"
+}
+
+[dlldist source] --> [gradle-builder]
+[gradle-builder] --> [triela-app]
+[gradle-builder] --> [deployer]
+
+
 
 cloud "AWS" {
 
@@ -21,14 +66,18 @@ cloud "AWS" {
     package "VM-No1" {
     () "EIP:8443"
     () "port-v:22"
+    component "docker-compose"
 
     node "app-docker-container" {
-
         component "triela-application"{
             () "port-adct:3306"
             () "port-adct:8443"
 
             () "app-env"
+
+            component "asset-getter"
+
+            [asset-getter] --> [port-adct:3306]
         }
     }
 
@@ -37,16 +86,25 @@ cloud "AWS" {
     }
 }
 
-[d3mq2c18xv0s3o.cloudfront.net:443] --> [distribution]
+[triela-app] <-- [docker-compose] : get
+
+[deployer] --> [port-v:22]
+
+[docker-compose] <-- [port-v:22]
+
+[EU4dll asset] --> [asset-getter]
+[CK2dll asset] --> [asset-getter]
+
+[d3mq2c18xv0s3o.cloudfront.net:443] ---> [distribution]
 [distribution] --> [EIP:8443]
-[triela.tk:8443] ---> [EIP:8443]
-[private:22] ---> [port-v:22]
+[triela.tk:8443] ----> [EIP:8443]
+[private:22] -up---> [port-v:22]
 
 [EIP:8443] --> [port-adct:8443]
 
 [port-adct:3306] --> [port-mysql:3306]
-[private:3306] -----> [port-mysql:3306]
+[port-mysql:3306] <-- [private:3306]
 
-[credential and env] -up-> [app-env]
+[credential and env] --> [app-env]
 
 @enduml
