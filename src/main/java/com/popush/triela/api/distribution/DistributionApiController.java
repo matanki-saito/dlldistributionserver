@@ -5,6 +5,7 @@ import com.popush.triela.api.TrielaApiV1Controller;
 import com.popush.triela.common.DB.FileSelectCondition;
 import com.popush.triela.common.Exception.NotModifiedException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -19,9 +20,16 @@ import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class DistributionApiController extends TrielaApiV1Controller {
 
     private final DistributionService distributionMgrService;
+
+    @GetMapping("/distribution/error")
+    public String error() {
+        log.error("error dayo");
+        return "error";
+    }
 
     @GetMapping("/distribution/test")
     public ResponseEntity<String> test() {
