@@ -7,7 +7,6 @@ import com.popush.triela.common.github.GitHubReleaseResponse;
 import com.popush.triela.common.github.GitHubReposResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,7 +53,7 @@ public class DistributionService {
      * @param condition 条件
      * @return データ
      */
-    @Cacheable("dllCache")
+    //@Cacheable("dllCache")
     @Transactional(readOnly = true)
     public Optional<byte[]> getDllData(@NonNull FileSelectCondition condition) throws NotModifiedException {
         final List<FileDao> fileDaoList = fileDaoMapper.list(condition);
