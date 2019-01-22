@@ -5,16 +5,16 @@ server:
 security:
   oauth2:
     client:
-      client-id: b812ba0e80fcaaea1899
-      client-secret: ed5ef05f3482c8e1d4404cd28d5fc0187dd8cad1
-      access-token-uri: https://github.com/login/oauth/access_token
-      user-authorization-uri: https://github.com/login/oauth/authorize
+      client-id: xxxxxxxxxxx
+      client-secret: xxxxxxxxxxxxxxxxxxxxxx
+      access-token-uri: https://oauth2.googleapis.com/token
+      user-authorization-uri: https://accounts.google.com/o/oauth2/auth
       client-authentication-scheme: form
+      scope: email
     resource:
-      user-info-uri: https://api.github.com/user
+      user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
       prefer-token-info: false
-    sso:
-      login-path: /login
+
 spring:
   profiles:
     active: dev
@@ -23,3 +23,13 @@ spring:
     caffeine:
       spec: maximumSize=1000000, expireAfterWrite=3600s
 
+github:
+  client:
+    client-id: xxxxxxxxxxxxxx
+    client-secret: xxxxxxxxxxxxxxxxxxxxxxxx
+    access-token-uri: https://github.com/login/oauth/access_token
+    user-authorization-uri: https://github.com/login/oauth/authorize
+    client-authentication-scheme: form
+  resource:
+    user-info-uri: https://api.github.com/user
+    prefer-token-info: false
