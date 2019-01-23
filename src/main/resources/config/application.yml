@@ -5,8 +5,8 @@ server:
 security:
   oauth2:
     client:
-      client-id: b812ba0e80fcaaea1899
-      client-secret: ed5ef05f3482c8e1d4404cd28d5fc0187dd8cad1
+      # client-id: [from triela-private]
+      # client-secret: [from triela-private]
       access-token-uri: https://github.com/login/oauth/access_token
       user-authorization-uri: https://github.com/login/oauth/authorize
       client-authentication-scheme: form
