@@ -5,10 +5,10 @@ server:
 security:
   oauth2:
     client:
-      client-id: xxxxxxxxxxx
-      client-secret: xxxxxxxxxxxxxxxxxxxxxx
-      access-token-uri: https://oauth2.googleapis.com/token
-      user-authorization-uri: https://accounts.google.com/o/oauth2/auth
+      # client-id: [from triela-private]
+      # client-secret: [from triela-private]
+      access-token-uri: https://github.com/login/oauth/access_token
+      user-authorization-uri: https://github.com/login/oauth/authorize
       client-authentication-scheme: form
       scope: email
     resource:
