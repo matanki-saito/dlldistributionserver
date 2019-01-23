@@ -7,9 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ExeDao {
-    @NonNull
     private int id;
-    @NonNull
     private int gitHubRepoId;
     @NonNull
     private String md5;
