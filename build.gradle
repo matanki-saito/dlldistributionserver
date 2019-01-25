@@ -39,6 +39,7 @@ bootJar {
 sourceCompatibility = 11
 targetCompatibility = 11
 
+
 task unpack(type: Copy) {
     dependsOn bootJar
     from(zipTree(tasks.bootJar.outputs.files.singleFile))
@@ -85,4 +86,13 @@ dependencies {
     compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.8.0'
     compile 'com.github.napstr:logback-discord-appender:1.0.0'
 
+    // https://mvnrepository.com/artifact/software.amazon.awssdk/s3
+    implementation('software.amazon.awssdk:s3:2.3.7')
+    
+}
+
+dependencyManagement {
+    imports {
+        mavenBom 'software.amazon.awssdk:bom:2.0.0'
+    }
 }

@@ -5,8 +5,10 @@ import com.popush.triela.common.Exception.NotModifiedException;
 import com.popush.triela.common.github.GitHubApiService;
 import com.popush.triela.common.github.GitHubReleaseResponse;
 import com.popush.triela.common.github.GitHubReposResponse;
+
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,16 +37,16 @@ public class DistributionService {
      */
     private static String calMd5(byte[] source) {
 
-        MessageDigest md;
+        final MessageDigest md;
         try {
             md = MessageDigest.getInstance("MD5");
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("message digest", e);
         }
-        byte[] md5_bytes = md.digest(source);
-        BigInteger big_int = new BigInteger(1, md5_bytes);
+        final byte[] md5Bytes = md.digest(source);
+        final BigInteger bigInt = new BigInteger(1, md5Bytes);
 
-        return String.format("%032x", big_int);
+        return String.format("%032x", bigInt);
     }
 
     /**
@@ -53,7 +55,7 @@ public class DistributionService {
      * @param condition 条件
      * @return データ
      */
-    //@Cacheable("dllCache")
+    //@Cacheable("dllCache") うまく動作してるか心配だったのでコメントアウトしてる
     @Transactional(readOnly = true)
     public Optional<byte[]> getDllData(@NonNull FileSelectCondition condition) throws NotModifiedException {
         final List<FileDao> fileDaoList = fileDaoMapper.list(condition);
@@ -72,13 +74,13 @@ public class DistributionService {
         );
 
         return response.stream()
-                .filter(elem -> !elem.getAssets().isEmpty())
-                .map(elem -> AssetForm.builder()
-                        .name(elem.getName())
-                        .url(elem.getHtmlUrl())
-                        .assetId(Integer.toString(elem.getAssets().get(0).getId()))
-                        .build()
-                ).collect(Collectors.toList());
+                       .filter(elem -> !elem.getAssets().isEmpty())
+                       .map(elem -> AssetForm.builder()
+                                             .name(elem.getName())
+                                             .url(elem.getHtmlUrl())
+                                             .assetId(Integer.toString(elem.getAssets().get(0).getId()))
+                                             .build()
+                       ).collect(Collectors.toList());
     }
 
     @Transactional
@@ -91,22 +93,29 @@ public class DistributionService {
 
             final FileDao fileDao = fileDaoMapper.selectByAssetId(assetId);
             if (Objects.isNull(fileDao)) {
+                // byteでやり取りするのは色々問題あるのでファイルに落とし込むようにする。
                 final byte[] data = gitHubApiService.getDllFromAsset(
                         gitHubReposResponse.getOwner().getLogin(),
                         gitHubReposResponse.getName(),
                         assetId,
                         "Plugin.dll"
                 );
+
+                // 1MB超えていたらS3に保存
+                if (data.length > 1_000_000) {
+                    fileSaveOnAwsS3(data);
+                }
+
                 fileDaoMapper.upsert(
                         FileDao.builder().assetId(assetId).data(data).md5(calMd5(data)).build()
                 );
             }
 
             final List<ExeDao> exeDaoList = exeDaoMapper.list(ExeSelectCondition
-                    .builder()
-                    .md5(exeMd5)
-                    .gitHubRepoId(gitHubReposResponse.getId())
-                    .build()
+                                                                      .builder()
+                                                                      .md5(exeMd5)
+                                                                      .gitHubRepoId(gitHubReposResponse.getId())
+                                                                      .build()
             );
 
             if (exeDaoList.size() != 1) {
@@ -116,5 +125,10 @@ public class DistributionService {
             exeDaoList.get(0).setDistributionAssetId(assetId);
             exeDaoMapper.upsert(exeDaoList.get(0));
         }
+    }
+
+    private void fileSaveOnAwsS3(byte[] data) {
+        // 適当に
+        //https://github.com/awsdocs/aws-doc-sdk-examples/blob/master/javav2/example_code/s3/src/main/java/com/example/s3/S3ObjectOperations.java
     }
 }

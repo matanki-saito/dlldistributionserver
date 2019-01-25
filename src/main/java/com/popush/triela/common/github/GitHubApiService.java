@@ -1,13 +1,17 @@
 package com.popush.triela.common.github;
 
 import com.popush.triela.common.Exception.GitHubException;
+
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import okhttp3.ResponseBody;
+
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
+
 import retrofit2.Call;
 import retrofit2.Response;
+import software.amazon.awssdk.services.s3.S3Client;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +29,8 @@ public class GitHubApiService {
     final GitHubApiMapper gitHubApiMapper;
 
     private final OAuth2RestTemplate auth2RestTemplate;
+
+    private static S3Client s3;
 
     public List<GitHubReposResponse> getMyAdminRepos() throws GitHubException {
         final Call<List<GitHubReposResponse>> request = gitHubApiMapper.repos(
@@ -44,9 +50,10 @@ public class GitHubApiService {
 
             // push権限を持つ
             result = response.body()
-                    .stream()
-                    .filter(elem -> elem.getPermissions().containsKey("push") && elem.getPermissions().get("push"))
-                    .collect(Collectors.toList());
+                             .stream()
+                             .filter(elem -> elem.getPermissions().containsKey("push") && elem.getPermissions()
+                                                                                              .get("push"))
+                             .collect(Collectors.toList());
         } catch (IOException e) {
             throw new IllegalStateException("IOError", e);
         }
@@ -65,7 +72,7 @@ public class GitHubApiService {
         final List<GitHubReleaseResponse> result;
         try {
             final Response<List<GitHubReleaseResponse>> response = request.execute();
-            if (!response.isSuccessful()) throw new IllegalStateException("not success");
+            if (!response.isSuccessful()) { throw new IllegalStateException("not success"); }
             result = response.body();
 
         } catch (IOException e) {
@@ -75,9 +82,9 @@ public class GitHubApiService {
         return result;
     }
 
-    private String getAssetDonloadUrl(@NonNull String owner,
-                                      @NonNull String repoName,
-                                      int assetId) {
+    private String getAssetDownloadUrl(@NonNull String owner,
+                                       @NonNull String repoName,
+                                       int assetId) {
         final String result;
 
         final Call<GitHubAssetResponse> request = gitHubApiMapper.asset(
@@ -94,6 +101,12 @@ public class GitHubApiService {
             if (response.body() == null) {
                 throw new IllegalArgumentException("not success");
             }
+
+            // 100MB超えてたら無理
+            if (response.body().getFileSize() > 100_000_000) {
+                throw new IllegalArgumentException("file size over.");
+            }
+
             result = response.body().getBrowserDownloadUrl();
 
         } catch (IOException e) {
@@ -106,7 +119,8 @@ public class GitHubApiService {
     private InputStream getZipInputStream(@NonNull String downloadUrl) {
         final InputStream result;
         try {
-            Response<ResponseBody> response = gitHubApiMapper.downloadFileWithDynamicUrlSync(downloadUrl).execute();
+            Response<ResponseBody> response = gitHubApiMapper.downloadFileWithDynamicUrlSync(downloadUrl)
+                                                             .execute();
             if (!response.isSuccessful()) {
                 throw new IllegalArgumentException("ER");
             }
@@ -135,7 +149,8 @@ public class GitHubApiService {
 
                 byte[] buffer = new byte[2048];
 
-                if (!entry.isDirectory() && Paths.get(entry.getName()).getFileName().toString().equals(targetFileName)) {
+                if (!entry.isDirectory() && Paths.get(entry.getName()).getFileName().toString().equals(
+                        targetFileName)) {
                     int size;
                     while (0 < (size = zis.read(buffer))) {
                         out.write(buffer, 0, size);
@@ -158,7 +173,7 @@ public class GitHubApiService {
                                   @NonNull String targetFileName) {
 
         return salvageFileFromZipInputStream(
-                getAssetDonloadUrl(owner, repoName, assetId),
+                getAssetDownloadUrl(owner, repoName, assetId),
                 targetFileName
         );
     }

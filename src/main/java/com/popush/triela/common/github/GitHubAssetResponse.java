@@ -11,4 +11,7 @@ import lombok.NoArgsConstructor;
 class GitHubAssetResponse {
     @JsonProperty("browser_download_url")
     private String browserDownloadUrl;
+
+    @JsonProperty("size")
+    private int fileSize;
 }

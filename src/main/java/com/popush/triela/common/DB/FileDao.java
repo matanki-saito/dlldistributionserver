@@ -13,4 +13,7 @@ public class FileDao {
     private String md5;
     private byte[] data;
     private int assetId;
+    private String s3Url;
+    private String cFUrl;
+    private int fileSize; // byte
 }
