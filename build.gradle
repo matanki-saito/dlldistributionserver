@@ -12,6 +12,7 @@ buildscript {
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
         classpath("gradle.plugin.com.palantir.gradle.docker:gradle-docker:0.20.1")
+        classpath "io.spring.gradle:dependency-management-plugin:1.0.3.RELEASE"
     }
 }
 
@@ -87,12 +88,12 @@ dependencies {
     compile 'com.github.napstr:logback-discord-appender:1.0.0'
 
     // https://mvnrepository.com/artifact/software.amazon.awssdk/s3
-    implementation('software.amazon.awssdk:s3:2.3.7')
-    
+    implementation('software.amazon.awssdk:s3')
+
 }
 
 dependencyManagement {
     imports {
-        mavenBom 'software.amazon.awssdk:bom:2.0.0'
+        mavenBom 'software.amazon.awssdk:bom:2.3.7'
     }
 }

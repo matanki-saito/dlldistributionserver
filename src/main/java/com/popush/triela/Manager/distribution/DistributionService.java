@@ -1,24 +1,20 @@
 package com.popush.triela.Manager.distribution;
 
+import com.popush.triela.common.AWS.S3Service;
 import com.popush.triela.common.DB.*;
 import com.popush.triela.common.Exception.NotModifiedException;
 import com.popush.triela.common.github.GitHubApiService;
 import com.popush.triela.common.github.GitHubReleaseResponse;
 import com.popush.triela.common.github.GitHubReposResponse;
-
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,6 +24,8 @@ public class DistributionService {
     private final ExeDaoMapper exeDaoMapper;
     private final FileDaoMapper fileDaoMapper;
     private final GitHubApiService gitHubApiService;
+    private final S3Service s3Service;
+    private final DistributionProperties properties;
 
     /**
      * MD5ハッシュの作成
@@ -57,14 +55,14 @@ public class DistributionService {
      */
     //@Cacheable("dllCache") うまく動作してるか心配だったのでコメントアウトしてる
     @Transactional(readOnly = true)
-    public Optional<byte[]> getDllData(@NonNull FileSelectCondition condition) throws NotModifiedException {
+    public Optional<FileDao> getDllData(@NonNull FileSelectCondition condition) throws NotModifiedException {
         final List<FileDao> fileDaoList = fileDaoMapper.list(condition);
 
         if (fileDaoList.size() != 1) {
             throw new NotModifiedException();
         }
 
-        return Optional.of(fileDaoList.get(0).getData());
+        return Optional.of(fileDaoList.get(0));
     }
 
     List<AssetForm> list(@NonNull GitHubReposResponse gitHubReposResponse) {
@@ -74,13 +72,13 @@ public class DistributionService {
         );
 
         return response.stream()
-                       .filter(elem -> !elem.getAssets().isEmpty())
-                       .map(elem -> AssetForm.builder()
-                                             .name(elem.getName())
-                                             .url(elem.getHtmlUrl())
-                                             .assetId(Integer.toString(elem.getAssets().get(0).getId()))
-                                             .build()
-                       ).collect(Collectors.toList());
+                .filter(elem -> !elem.getAssets().isEmpty())
+                .map(elem -> AssetForm.builder()
+                        .name(elem.getName())
+                        .url(elem.getHtmlUrl())
+                        .assetId(Integer.toString(elem.getAssets().get(0).getId()))
+                        .build()
+                ).collect(Collectors.toList());
     }
 
     @Transactional
@@ -97,25 +95,37 @@ public class DistributionService {
                 final byte[] data = gitHubApiService.getDllFromAsset(
                         gitHubReposResponse.getOwner().getLogin(),
                         gitHubReposResponse.getName(),
-                        assetId,
-                        "Plugin.dll"
+                        assetId
                 );
 
                 // 1MB超えていたらS3に保存
-                if (data.length > 1_000_000) {
-                    fileSaveOnAwsS3(data);
-                }
+                //if (data.length > 1_000_000) {
+                final String key = UUID.randomUUID().toString();
+                s3Service.upload(data, properties.getS3BucketName(), key);
+
+                String dataUrl = String.format("%s://%s/%s",
+                        "https",
+                        properties.getCloudFrontDomainName(),
+                        key
+                );
+                //}
 
                 fileDaoMapper.upsert(
-                        FileDao.builder().assetId(assetId).data(data).md5(calMd5(data)).build()
+                        FileDao.builder()
+                                .assetId(assetId)
+                                .data(data)
+                                .md5(calMd5(data))
+                                .dataSize(data.length)
+                                .dataUrl(dataUrl)
+                                .build()
                 );
             }
 
             final List<ExeDao> exeDaoList = exeDaoMapper.list(ExeSelectCondition
-                                                                      .builder()
-                                                                      .md5(exeMd5)
-                                                                      .gitHubRepoId(gitHubReposResponse.getId())
-                                                                      .build()
+                    .builder()
+                    .md5(exeMd5)
+                    .gitHubRepoId(gitHubReposResponse.getId())
+                    .build()
             );
 
             if (exeDaoList.size() != 1) {
@@ -127,8 +137,4 @@ public class DistributionService {
         }
     }
 
-    private void fileSaveOnAwsS3(byte[] data) {
-        // 適当に
-        //https://github.com/awsdocs/aws-doc-sdk-examples/blob/master/javav2/example_code/s3/src/main/java/com/example/s3/S3ObjectOperations.java
-    }
 }

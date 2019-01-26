@@ -12,8 +12,7 @@ import lombok.NoArgsConstructor;
 public class FileDao {
     private String md5;
     private byte[] data;
+    private String dataUrl;
     private int assetId;
-    private String s3Url;
-    private String cFUrl;
-    private int fileSize; // byte
+    private int dataSize; // byte
 }
