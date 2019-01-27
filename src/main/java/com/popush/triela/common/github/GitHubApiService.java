@@ -1,9 +1,8 @@
 package com.popush.triela.common.github;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
-import com.popush.triela.Manager.distribution.DistFileFormatV1;
 import com.popush.triela.common.Exception.GitHubException;
+import com.popush.triela.common.Exception.MachineException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,90 +11,116 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
 import retrofit2.Call;
 import retrofit2.Response;
-import software.amazon.awssdk.services.s3.S3Client;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.regex.Pattern;
+import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class GitHubApiService {
-    private static S3Client s3;
     final GitHubApiMapper gitHubApiMapper;
     private final OAuth2RestTemplate auth2RestTemplate;
 
+    /**
+     * レスポンスチェック
+     *
+     * @param response レスポンス
+     * @param <T>      レスポンスボディ型
+     * @return レスポンスボディ
+     * @throws GitHubException exp
+     */
+    private <T> T responseCheck(Response<T> response) throws GitHubException {
+        if (!response.isSuccessful()) {
+            throw new IllegalArgumentException("Response is not 2xx,3xx.");
+        }
+
+        if (response.code() >= 500 && response.code() < 600) {
+            throw new GitHubException("Server error ?" + response.errorBody());
+        }
+
+        if (response.body() == null) {
+            throw new IllegalArgumentException("Is Data empty ?");
+        }
+
+        return response.body();
+    }
+
+    /**
+     * レポジトリ情報の一覧を取得
+     *
+     * @return レポジトリ情報の一覧
+     * @throws GitHubException exp
+     */
     public List<GitHubReposResponse> getMyAdminRepos() throws GitHubException {
         final Call<List<GitHubReposResponse>> request = gitHubApiMapper.repos(
                 "token " + auth2RestTemplate.getAccessToken().getValue()
         );
 
         final List<GitHubReposResponse> result;
+
+        final Response<List<GitHubReposResponse>> response;
         try {
-            final Response<List<GitHubReposResponse>> response = request.execute();
-            if (!response.isSuccessful()) {
-                throw new GitHubException("github api error:" + response.message());
-            }
-
-            if (response.body() == null) {
-                throw new IllegalStateException("state error");
-            }
-
-            // push権限を持つ
-            result = response.body()
-                    .stream()
-                    .filter(elem -> elem.getPermissions().containsKey("push") && elem.getPermissions()
-                            .get("push"))
-                    .collect(Collectors.toList());
+            response = request.execute();
         } catch (IOException e) {
-            throw new IllegalStateException("IOError", e);
+            throw new GitHubException("Cannot get repository info.", e);
         }
+
+        final List<GitHubReposResponse> responseBody = responseCheck(response);
+
+        // push権限を持つ
+        result = responseBody
+                .stream()
+                .filter(elem -> elem.getPermissions().containsKey("push") && elem.getPermissions()
+                        .get("push"))
+                .collect(Collectors.toList());
 
         return result;
     }
 
+    /**
+     * リリース一覧を取得する
+     *
+     * @param owner    レポジトリのオーナー
+     * @param repoName レポジトリ名
+     * @return リリース一覧
+     */
     public List<GitHubReleaseResponse> getReleasesSync(@NonNull String owner,
-                                                       @NonNull String repoName) {
+                                                       @NonNull String repoName) throws GitHubException {
         final Call<List<GitHubReleaseResponse>> request = gitHubApiMapper.releases(
                 "token " + auth2RestTemplate.getAccessToken().getValue(),
                 owner,
                 repoName
         );
 
-        final List<GitHubReleaseResponse> result;
+        final Response<List<GitHubReleaseResponse>> response;
         try {
-            final Response<List<GitHubReleaseResponse>> response = request.execute();
-            if (!response.isSuccessful()) {
-                throw new IllegalStateException("not success");
-            }
-            result = response.body();
-
+            response = request.execute();
         } catch (IOException e) {
-            throw new IllegalStateException("ER", e);
+            throw new GitHubException("Connection error.", e);
         }
 
-        return result;
+        return responseCheck(response);
     }
 
     /**
-     * @param owner
-     * @param repoName
-     * @param assetId
-     * @return
+     * アセットのURIを取得する
+     *
+     * @param owner    レポジトリのオーナー
+     * @param repoName レポジトリ名
+     * @param assetId  アセットID
+     * @return アセットのURI
+     * @throws GitHubException exp
      */
-    private String getAssetDownloadUrl(@NonNull String owner,
-                                       @NonNull String repoName,
-                                       int assetId) {
+    private URI getAssetDownloadUrl(@NonNull String owner,
+                                    @NonNull String repoName,
+                                    int assetId) throws GitHubException {
         final String result;
 
         final Call<GitHubAssetResponse> request = gitHubApiMapper.asset(
@@ -104,188 +129,93 @@ public class GitHubApiService {
                 repoName,
                 assetId
         );
+
+        // 取得！
+        Response<GitHubAssetResponse> response;
         try {
-            Response<GitHubAssetResponse> response = request.execute();
-            if (!response.isSuccessful()) {
-                throw new IllegalStateException("not success");
-            }
-            if (response.body() == null) {
-                throw new IllegalArgumentException("not success");
-            }
-
-            // 100MB超えてたら無理
-            if (response.body().getFileSize() > 100_000_000) {
-                throw new IllegalArgumentException("file size over.");
-            }
-
-            result = response.body().getBrowserDownloadUrl();
-
+            response = request.execute();
         } catch (IOException e) {
-            throw new IllegalStateException("ER", e);
+            throw new GitHubException("Connection error.", e);
         }
 
-        return result;
+        // チェック
+        final GitHubAssetResponse gitHubAssetResponse = responseCheck(response);
+
+        // 100MB超えてたら無理とする
+        if (gitHubAssetResponse.getFileSize() > 100_000_000) {
+            throw new IllegalArgumentException("File size over.");
+        }
+
+        result = gitHubAssetResponse.getBrowserDownloadUrl();
+
+        return URI.create(result);
     }
 
-    private InputStream getZipInputStream(@NonNull String downloadUrl) {
-        final InputStream result;
+    /**
+     * URLからアセット（zipファイル）を取ってくる
+     *
+     * @param downloadUrl アセットのURL
+     * @return 一時ファイルになったzipファイルのパス
+     * @throws GitHubException  exp
+     * @throws MachineException exp
+     */
+    @VisibleForTesting
+    Path getAssetFile(@NonNull URI downloadUrl) throws GitHubException, MachineException {
+
+        final Response<ResponseBody> response;
         try {
-            Response<ResponseBody> response = gitHubApiMapper.downloadFileWithDynamicUrlSync(downloadUrl)
-                    .execute();
-            if (!response.isSuccessful()) {
-                throw new IllegalArgumentException("ER");
-            }
-
-            if (response.body() == null) {
-                throw new IllegalArgumentException("ER");
-            }
-
-            result = response.body().byteStream();
+            response = gitHubApiMapper.downloadFileWithDynamicUrlSync(downloadUrl).execute();
         } catch (IOException e) {
-            throw new IllegalStateException("ER", e);
+            throw new GitHubException("Connection failed.", e);
         }
 
-        return result;
-    }
+        final ResponseBody responseBody = responseCheck(response);
 
-    /**
-     * @param is
-     * @return
-     * @throws IOException
-     */
-    @VisibleForTesting
-    Optional<DistFileFormatV1> salvageDistFileV1FromInputStream(@NonNull InputStream is) throws IOException {
-
-        DistFileFormatV1 result = null;
-
-        try (ZipInputStream zis = new ZipInputStream(is)) {
-            ZipEntry entry;
-            while (null != (entry = zis.getNextEntry())) {
-                if (entry.isDirectory()) {
-                    zis.closeEntry();
-                    continue;
-                }
-
-                if (Paths.get(entry.getName()).compareTo(Path.of(".dist.v1.json")) == 0) {
-                    result = new ObjectMapper().readValue(zis.readAllBytes(), DistFileFormatV1.class);
-                    zis.closeEntry();
-                    break;
-                }
-
-                zis.closeEntry();
-            }
-        }
-
-        return Optional.ofNullable(result);
-    }
-
-    /**
-     * @param is
-     * @param distFileFormatV1
-     * @return
-     * @throws IOException
-     */
-    @VisibleForTesting
-    Map<Path, byte[]> salvageFilesFromInputStream(@NonNull InputStream is, DistFileFormatV1 distFileFormatV1) throws IOException {
-        final Map<Path, byte[]> result = new HashMap<>();
-
-        final Pattern pattern = Pattern.compile(String.join("|", distFileFormatV1.getFilter()));
-
-        try (ZipInputStream zis = new ZipInputStream(is)) {
-            ZipEntry entry;
-            while (null != (entry = zis.getNextEntry())) {
-                if (entry.isDirectory()) {
-                    zis.closeEntry();
-                    continue;
-                }
-
-                if (pattern.matcher(entry.getName()).find()) {
-                    result.put(Path.of(entry.getName()), zis.readAllBytes());
-                    zis.closeEntry();
-                }
-
-                zis.closeEntry();
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * @param resources
-     * @return 固めたzipファイル
-     * @throws IOException
-     */
-    @VisibleForTesting
-    byte[] concreteZip(@NonNull Map<Path, byte[]> resources) throws IOException {
-        final byte[] result;
-
-        try (ByteArrayOutputStream bout = new ByteArrayOutputStream(20_000_000); // 20MB
-             BufferedOutputStream bos = new BufferedOutputStream(bout);
-             ZipOutputStream zos = new ZipOutputStream(bos)
-        ) {
-            for (Map.Entry<Path, byte[]> item : resources.entrySet()) {
-                ZipEntry entry = new ZipEntry(item.getKey().toString());
-                zos.putNextEntry(entry);
-                zos.write(item.getValue());
-                zos.closeEntry();
-            }
-            zos.finish();
-            bos.flush();
-            result = bout.toByteArray();
-        }
-
-        return result;
-    }
-
-    private byte[] salvageFileFromDownloadUrl(@NonNull String downloadUrl) {
-        final byte[] result;
-        try (InputStream inputStream = getZipInputStream(downloadUrl);
-             ZipInputStream zis = new ZipInputStream(inputStream);
-             ByteArrayOutputStream bout = new ByteArrayOutputStream(300_000); // 200～300kb
-             BufferedOutputStream out = new BufferedOutputStream(bout)) {
-
-            Map<Path, byte[]> resources = salvageFilesFromInputStream(
-                    inputStream,
-                    salvageDistFileV1FromInputStream(inputStream).orElseGet(() ->
-                            DistFileFormatV1
-                                    .builder()
-                                    .filter(Arrays.asList("Plugin.dll"))
-                                    .isArchive(Boolean.TRUE)
-                                    .build()
-                    )
-            );
-
-
-//            while (null != (entry = zis.getNextEntry())) {
-//                byte[] buffer = new byte[2048];
-//
-//                if (!entry.isDirectory() && Paths.get(entry.getName()).getFileName().toString().equals(
-//                        targetFileName
-//                )) {
-//                    int size;
-//                    while (0 < (size = zis.read(buffer))) {
-//                        out.write(buffer, 0, size);
-//                    }
-//                    zis.closeEntry();
-//                    break;
-//                }
-//            }
-//            out.flush();
-//            result = bout.toByteArray();
+        final Path tmpFile;
+        try {
+            tmpFile = Files.createTempFile("triela_asset", ".tmp");
         } catch (IOException e) {
-            throw new IllegalStateException(e);
+            throw new MachineException("Cannot create a temp file", e);
         }
 
-        return null;
+        try (InputStream is = responseBody.byteStream()) {
+            Files.copy(is, tmpFile, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new MachineException("Cannot write buffer to temp file.", e);
+        }
+
+        return tmpFile;
     }
 
-    public byte[] getDllFromAsset(@NonNull String owner,
-                                  @NonNull String repoName,
-                                  int assetId) {
 
-        return salvageFileFromDownloadUrl(
-                getAssetDownloadUrl(owner, repoName, assetId)
-        );
+    /**
+     * アセットを取得
+     *
+     * @param owner    アセットのオーナー
+     * @param repoName レポジトリ名
+     * @param assetId  アセットID
+     * @return アセットファイル
+     */
+    public Path getDllFromAsset(@NonNull String owner,
+                                @NonNull String repoName,
+                                int assetId) {
+
+        // アセットのURLを取得
+        final URI assetUri;
+        try {
+            assetUri = getAssetDownloadUrl(owner, repoName, assetId);
+        } catch (GitHubException e) {
+            throw new IllegalStateException("Cannot asset download URI.", e);
+        }
+
+        // アセットを取得
+        final Path assetFile;
+        try {
+            assetFile = getAssetFile(assetUri);
+        } catch (GitHubException | MachineException e) {
+            throw new IllegalStateException("Get asset file exception.", e);
+        }
+
+        return assetFile;
     }
 }

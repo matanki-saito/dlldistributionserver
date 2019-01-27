@@ -1,20 +1,28 @@
 package com.popush.triela.common.github;
 
 import com.popush.triela.Manager.distribution.DistFileFormatV1;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
+import retrofit2.Retrofit;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
+import java.util.zip.ZipFile;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -25,52 +33,75 @@ public class GitHubApiServiceTest {
     @InjectMocks
     GitHubApiService gitHubApiService;
 
+    @Mock
+    GitHubApiMapper gitHubApiMapper;
+
     @Test
-    public void testSalvageDistFileFromZipInputStream() throws Exception {
+    public void salvageDistFileFromAssetFile() throws Exception {
+        Optional<DistFileFormatV1> result = gitHubApiService.salvageDistFileV1FromAsset(
+                Paths.get(new ClassPathResource("test.zip").getURI())
+        );
 
-        try (InputStream inputStream = new ClassPathResource("test.zip").getInputStream()) {
-
-            Optional<DistFileFormatV1> result = gitHubApiService.salvageDistFileV1FromInputStream(inputStream);
-
-            assertThat(result).isEqualTo(
-                    Optional.of(
-                            DistFileFormatV1
-                                    .builder()
-                                    .filter(Arrays.asList("*.png"))
-                                    .isArchive(Boolean.TRUE)
-                                    .build()
-                    )
-            );
-        }
+        assertThat(result).isEqualTo(
+                Optional.of(
+                        DistFileFormatV1
+                                .builder()
+                                .filter(Arrays.asList("\\.png$"))
+                                .isArchive(Boolean.TRUE)
+                                .build()
+                )
+        );
     }
 
     @Test
-    public void testSalvageFilesFromInputStream() throws Exception {
+    public void salvageFilesFromAssetFile() throws Exception {
 
-        try (InputStream inputStream = new ClassPathResource("test.zip").getInputStream()) {
-            Map<Path, byte[]> result = gitHubApiService.salvageFilesFromInputStream(
-                    inputStream,
-                    DistFileFormatV1.builder().filter(Arrays.asList("\\.png$", "\\.jpg$", "reimu.dat$")).isArchive(true).build()
-            );
+        Map<Path, Path> result = gitHubApiService.salvageFilesFromAssetFile(
+                Paths.get(new ClassPathResource("test.zip").getURI()),
+                DistFileFormatV1.builder().filter(Arrays.asList("\\.png$", "\\.jpg$", "reimu.dat$")).isArchive(true).build()
+        );
 
-            assertThat(result).containsEntry(Path.of("test/tiruno.png"), new byte[]{1, 2, 3, 4, 5});
-            assertThat(result).containsEntry(Path.of("test/homugeso/misuzu.jpg"), new byte[]{1, 2, 3, 4, 5});
-            assertThat(result).containsEntry(Path.of("test/homugeso/reimu.dat"), new byte[]{1, 2, 3, 4, 5});
-        }
+        assertThat(result).containsKeys(
+                Path.of("tiruno.png"),
+                Path.of("homugeso/misuzu.jpg"),
+                Path.of("homugeso/reimu.dat")
+        );
     }
 
     @Test
     public void testConcreteZip() throws Exception {
-        byte[] result = gitHubApiService.concreteZip(Map.of(
-                Path.of("test/tiruno.png"), new byte[]{1, 2, 3, 4, 5},
-                Path.of("test/homugeso/misuzu.jpg"), new byte[]{1, 2, 3, 4, 5},
-                Path.of("test/homugeso/reimu.dat"), new byte[]{1, 2, 3, 4, 5}
+
+        Path f1 = Files.createTempFile("triela_test",".tmp");
+        Path f2 = Files.createTempFile("triela_test",".tmp");
+        Path f3 = Files.createTempFile("triela_test",".tmp");
+
+        final Path result = gitHubApiService.concreteZip(Map.of(
+                Path.of("test/tiruno.png"),f1,
+                Path.of("test/homugeso/misuzu.jpg"), f2,
+                Path.of("test/homugeso/reimu.dat"), f3
         ));
 
-        try (FileOutputStream fio = new FileOutputStream(new File("result.zip"))) {
-            fio.write(result);
-        }
+        assertThat(result).isNotNull();
+    }
 
-        assertThat(result).isNotEmpty();
+    @Test
+    public void getAsset() throws Exception {
+
+        final MockWebServer mockWebServer = new MockWebServer();
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse.setResponseCode(200).setBody("123");
+        mockWebServer.enqueue(mockResponse);
+        mockWebServer.start();
+
+        final Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(mockWebServer.url("/").toString())
+                .build();
+        GitHubApiMapper baseGitHubApiMapper = retrofit.create(GitHubApiMapper.class);
+
+        Mockito.when(gitHubApiMapper.downloadFileWithDynamicUrlSync(Mockito.any())).thenReturn(
+                baseGitHubApiMapper.downloadFileWithDynamicUrlSync(URI.create("dummy"))
+        );
+
+        gitHubApiService.getAssetFile(URI.create("https://github.com/testuser1200/test/releases/download/v4/homugeso.zip"));
     }
 }

@@ -45,7 +45,7 @@ public class DistributionApiController extends TrielaApiV1Controller {
         HttpStatus status;
         final HttpHeaders headers = new HttpHeaders();
 
-        if (fileDao.getDataUrl().isBlank()) {
+        if (fileDao.getDataUrl() == null) {
             if (fileDao.getData().length <= 0) {
                 // 不明
                 throw new IllegalStateException("???");

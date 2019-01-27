@@ -14,5 +14,5 @@ public class FileDao {
     private byte[] data;
     private String dataUrl;
     private int assetId;
-    private int dataSize; // byte
+    private long dataSize; // byte
 }
