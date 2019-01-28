@@ -51,6 +51,7 @@ public class DistributionController extends TrielaManagerV1Controller {
                         e -> Integer.parseInt(e.getValue().get(0))
                 ));
 
+
         distributionMgrService.update(
                 exeHash2assetIdMap,
                 gitHubReposResponse

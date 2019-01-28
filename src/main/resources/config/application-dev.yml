@@ -1,14 +1,14 @@
 server:
   ssl:
     key-store: ../triela-private/triela.tk/triela.pkcs12
-    key-store-password: 1qaz2wsx
+    #key-store-password: [from triela-private]
     keyStoreType: PKCS12
     keyAlias: triela
 spring:
   datasource:
-    url: jdbc:mysql://127.0.0.1:13306/mydb?characterEncoding=UTF-8&serverTimezone=JST
+    url: jdbc:mysql://127.0.0.1:3306/mydb?characterEncoding=UTF-8&serverTimezone=JST
     username: root
-    password: mysql
+    #password: [from triela-private]
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
       maximum-pool-size: 20

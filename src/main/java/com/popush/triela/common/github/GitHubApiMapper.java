@@ -4,6 +4,7 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.*;
 
+import java.net.URI;
 import java.util.List;
 
 public interface GitHubApiMapper {
@@ -23,5 +24,5 @@ public interface GitHubApiMapper {
 
     @GET
     @Streaming
-    Call<ResponseBody> downloadFileWithDynamicUrlSync(@Url String fileUrl);
+    Call<ResponseBody> downloadFileWithDynamicUrlSync(@Url URI fileUrl);
 }
