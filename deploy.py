@@ -12,6 +12,7 @@
 
 import subprocess
 import sys
+import os
 
 #
 # ENV
@@ -21,18 +22,30 @@ AWS_REGION = "ap-northeast-1"
 INSTANCE_INDEX_TAG_NAME = "index"
 ALL_INSTANCE_NUMBER = 2
 TARGET_EIP = "52.198.32.156"
+WIN = os.name == 'nt'
+PRIVATE_KEY = "../triela-private/aws/triela.pem"
+USER = "ec2-user"
 
 
 #
 # COMMAND
 #
 
+def _(ss):
+    if WIN:
+        # Windowsはダブルクオーテーションで囲む必要あり
+        return '"' + ss + '"'
+    else:
+        # Mac.Unixなどはシングルクォーテーションで囲む必要あり
+        return "'" + ss + "'"
+
+
 def cmd_get_instance_id_from_eip(eip):
     return " ".join([
         "aws", "ec2",
         "describe-addresses",
         "--region", AWS_REGION,
-        "--query", '"Addresses[?PublicIp==`{eip}`].InstanceId"'.format(eip=eip),
+        "--query", _("Addresses[?PublicIp==`{eip}`].InstanceId".format(eip=eip)),
         "--output", "text"
     ])
 
@@ -43,7 +56,8 @@ def cmd_get_own_index_from_instance_id(instance_id):
         "describe-instances",
         "--region", AWS_REGION,
         "--instance-id", instance_id,
-        "--query", '"Reservations[].Instances[].Tags[?Key==`{tag}`].Value[]"'.format(tag=INSTANCE_INDEX_TAG_NAME),
+        "--query",
+        _('Reservations[].Instances[].Tags[?Key==`{tag}`].Value[]'.format(tag=INSTANCE_INDEX_TAG_NAME)),
         "--output", "text"
     ])
 
@@ -54,14 +68,14 @@ def cmd_get_instance_id_from_instance_index(instance_index):
         "describe-instances",
         "--region", AWS_REGION,
         "--filter",
-        '"Name=tag-key,Values={tag}"'.format(tag=INSTANCE_INDEX_TAG_NAME),
-        '"Name=tag-value,Values={instance_index}"'.format(instance_index=instance_index),
-        "--query", '"Reservations[].Instances[].InstanceId[]"',
+        _("Name=tag-key,Values={tag}".format(tag=INSTANCE_INDEX_TAG_NAME)),
+        _("Name=tag-value,Values={instance_index}".format(instance_index=instance_index)),
+        "--query", _("Reservations[].Instances[].InstanceId[]"),
         "--output", "text"
     ])
 
 
-def cmd_wakeup_next_instance(instance_id):
+def cmd_wakeup_instance(instance_id):
     return " ".join([
         "aws", "ec2",
         "start-instances",
@@ -85,9 +99,36 @@ def cmd_get_instance_ip_from_instance_id(instance_id):
         "describe-instances",
         "--region", AWS_REGION,
         "--instance-id", instance_id,
-        "--query", '"Reservations[].Instances[].NetworkInterfaces[].Association[].PublicIp"',
+        "--query", _("Reservations[].Instances[].NetworkInterfaces[].Association[].PublicIp"),
         "--output", "text"
     ])
+
+
+def cmd_sleep_instance(instance_id):
+    return " ".join([
+        "aws", "ec2",
+        "stop-instances",
+        "--region", AWS_REGION,
+        "--instance-id", instance_id
+    ])
+
+
+def cmd_ssh_docker_compose_up_down(instance_ip):
+    return " ".join([
+        "ssh",
+        "-i", _(PRIVATE_KEY),
+        "-l", USER, instance_ip
+    ])
+
+
+#
+# Test
+#
+def test():
+    cmd = cmd_ssh_docker_compose_up_down("3.112.29.151")
+    print(cmd)
+    result = subprocess.getoutput(cmd)
+    print(result)
 
 
 #
@@ -117,7 +158,7 @@ def main():
 
     # wake up next instance
     print("Wakeup next instance")
-    subprocess.getoutput(cmd_wakeup_next_instance(next_instance_id))
+    subprocess.getoutput(cmd_wakeup_instance(next_instance_id))
     subprocess.getoutput(cmd_check_running_instance(next_instance_id))
     print("Next instance is ready!")
 
@@ -129,11 +170,13 @@ def main():
 
     # TODO: EIPを付け替える
 
-    # TODO: 古いインスタンスをシャットダウンする
+    # sleep old instance
+    # cmd_sleep_instance(instance_id)
 
     print("##########[end  ]##########")
 
 
 # RUN
 if __name__ == '__main__':
-    main()
+    # main()
+    test()
