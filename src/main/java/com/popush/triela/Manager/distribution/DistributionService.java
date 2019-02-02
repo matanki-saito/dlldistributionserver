@@ -185,7 +185,7 @@ public class DistributionService {
      * @throws MachineException exp
      */
     @VisibleForTesting
-    Optional<DistFileFormatV1> salvageDistFileV1FromAsset(@NonNull Path assetFile) throws MachineException {
+    public Optional<DistFileFormatV1> salvageDistFileV1FromAsset(@NonNull Path assetFile) throws MachineException {
         DistFileFormatV1 result = null;
 
         try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(assetFile))) {
@@ -253,8 +253,8 @@ public class DistributionService {
      * @throws MachineException exp
      */
     @VisibleForTesting
-    Map<Path, Path> salvageFilesFromAssetFile(@NonNull Path assetFile,
-                                              @NonNull DistFileFormatV1 distFileFormatV1) throws MachineException {
+    public Map<Path, Path> salvageFilesFromAssetFile(@NonNull Path assetFile,
+                                                     @NonNull DistFileFormatV1 distFileFormatV1) throws MachineException {
         final Map<Path, Path> result = new HashMap<>();
 
         final Pattern pattern = Pattern.compile(String.join("|", distFileFormatV1.getFilter()));
@@ -291,7 +291,7 @@ public class DistributionService {
      * @throws MachineException exp
      */
     @VisibleForTesting
-    Path concreteZip(@NonNull Map<Path, Path> files) throws MachineException {
+    public Path concreteZip(@NonNull Map<Path, Path> files) throws MachineException {
 
         // 一時ファイルの場所
         final Path result;
