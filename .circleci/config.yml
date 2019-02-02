@@ -27,8 +27,6 @@ jobs:
     steps:
       - checkout
 
-      - run: chmod +x gradlew
-
       - setup_remote_docker:   # (2)
           docker_layer_caching: true # (3)
 
@@ -58,3 +56,12 @@ jobs:
       - run: |
           docker login -u $DOCKER_USER -p $DOCKER_PASS
           ./gradlew docker dockerPush
+
+      - add_ssh_keys:
+          fingerprints:
+            - "27:9e:e8:82:c9:46:d9:b1:f0:0f:97:cd:1f:ab:fc:fd"
+
+      - run: git config --global user.email "matanki.saito@gmail.com"
+      - run: git config --global user.name "circleci"
+      - run: |
+          ./gradlew release -Prelease.useAutomaticVersion=true
