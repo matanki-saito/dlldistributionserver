@@ -1,6 +1,7 @@
 package com.popush.triela.common.github;
 
 import com.popush.triela.Manager.distribution.DistFileFormatV1;
+import com.popush.triela.Manager.distribution.DistributionService;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.Test;
@@ -13,8 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import retrofit2.Retrofit;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,13 +21,15 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
-import java.util.zip.ZipFile;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @RunWith(MockitoJUnitRunner.class)
 public class GitHubApiServiceTest {
+
+    @InjectMocks
+    DistributionService distributionService;
 
     @InjectMocks
     GitHubApiService gitHubApiService;
@@ -38,7 +39,7 @@ public class GitHubApiServiceTest {
 
     @Test
     public void salvageDistFileFromAssetFile() throws Exception {
-        Optional<DistFileFormatV1> result = gitHubApiService.salvageDistFileV1FromAsset(
+        Optional<DistFileFormatV1> result = distributionService.salvageDistFileV1FromAsset(
                 Paths.get(new ClassPathResource("test.zip").getURI())
         );
 
@@ -56,7 +57,7 @@ public class GitHubApiServiceTest {
     @Test
     public void salvageFilesFromAssetFile() throws Exception {
 
-        Map<Path, Path> result = gitHubApiService.salvageFilesFromAssetFile(
+        Map<Path, Path> result = distributionService.salvageFilesFromAssetFile(
                 Paths.get(new ClassPathResource("test.zip").getURI()),
                 DistFileFormatV1.builder().filter(Arrays.asList("\\.png$", "\\.jpg$", "reimu.dat$")).isArchive(true).build()
         );
@@ -71,12 +72,12 @@ public class GitHubApiServiceTest {
     @Test
     public void testConcreteZip() throws Exception {
 
-        Path f1 = Files.createTempFile("triela_test",".tmp");
-        Path f2 = Files.createTempFile("triela_test",".tmp");
-        Path f3 = Files.createTempFile("triela_test",".tmp");
+        Path f1 = Files.createTempFile("triela_test", ".tmp");
+        Path f2 = Files.createTempFile("triela_test", ".tmp");
+        Path f3 = Files.createTempFile("triela_test", ".tmp");
 
-        final Path result = gitHubApiService.concreteZip(Map.of(
-                Path.of("test/tiruno.png"),f1,
+        final Path result = distributionService.concreteZip(Map.of(
+                Path.of("test/tiruno.png"), f1,
                 Path.of("test/homugeso/misuzu.jpg"), f2,
                 Path.of("test/homugeso/reimu.dat"), f3
         ));
