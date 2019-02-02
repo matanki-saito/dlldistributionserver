@@ -7,15 +7,30 @@ import java.util.List;
 
 @Mapper
 public interface FileDaoMapper {
-    @Insert("INSERT INTO file (md5, data,asset_id) VALUES (#{md5}, #{data}, #{assetId}) ON DUPLICATE KEY UPDATE asset_id = asset_id")
+    @Results({
+            @Result(property = "assetId", column = "asset_id"),
+            @Result(property = "dataSize", column = "data_size"),
+            @Result(property = "dataUrl", column = "data_url")
+    })
+    @Insert("INSERT INTO file (md5, data, data_url, data_size, asset_id)" +
+            "VALUES (#{md5}, #{data}, #{dataUrl}, #{dataSize}, #{assetId}) " +
+            "ON DUPLICATE KEY UPDATE asset_id = asset_id"
+    )
     void upsert(@NonNull FileDao fileDao);
 
     @Results({
-            @Result(property = "assetId", column = "asset_id")
+            @Result(property = "assetId", column = "asset_id"),
+            @Result(property = "dataSize", column = "data_size"),
+            @Result(property = "dataUrl", column = "data_url")
     })
     @Select("SELECT * FROM file WHERE asset_id = #{assetId}")
     FileDao selectByAssetId(int asset_id);
 
+    @Results({
+            @Result(property = "assetId", column = "asset_id"),
+            @Result(property = "dataSize", column = "data_size"),
+            @Result(property = "dataUrl", column = "data_url")
+    })
     @Select("<script>" +
             "SELECT b.* FROM exe a " +
             "LEFT JOIN file b ON a.distribution_asset_id = b.asset_id " +

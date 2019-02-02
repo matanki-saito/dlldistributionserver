@@ -27,8 +27,6 @@ jobs:
     steps:
       - checkout
 
-      - run: chmod +x gradlew
-
       - setup_remote_docker:   # (2)
           docker_layer_caching: true # (3)
 
@@ -61,8 +59,9 @@ jobs:
 
       - add_ssh_keys:
           fingerprints:
-            - "59:93:b3:df:c2:ba:eb:53:da:21:7c:7a:81:69:c0:5c"
-      - deploy:
-          name: deploy
-          command: |
-            ssh -o "StrictHostKeyChecking=no" -l ${USER_NAME} ${HOST_IP} cd /home/${USER_NAME} \&\& docker-compose down \&\& docker-compose up -d
+            - "27:9e:e8:82:c9:46:d9:b1:f0:0f:97:cd:1f:ab:fc:fd"
+
+      - run: git config --global user.email "matanki.saito@gmail.com"
+      - run: git config --global user.name "circleci"
+      - run: |
+          ./gradlew release -Prelease.useAutomaticVersion=true

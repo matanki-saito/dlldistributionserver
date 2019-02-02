@@ -20,4 +20,7 @@ class AssetForm {
 
     @NotNull
     private String assetId;
+
+    @NotNull
+    private String distributionAssetId;
 }

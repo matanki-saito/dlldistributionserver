@@ -10,8 +10,10 @@ buildscript {
 
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
         classpath("gradle.plugin.com.palantir.gradle.docker:gradle-docker:0.20.1")
+        classpath "io.spring.gradle:dependency-management-plugin:1.0.3.RELEASE"
+        classpath "net.researchgate:gradle-release:2.6.0"
     }
 }
 
@@ -19,9 +21,9 @@ apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'com.palantir.docker'
+apply plugin: 'net.researchgate.release'
 
 group = 'com.popush'
-version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 11
 
 repositories {
@@ -39,6 +41,7 @@ bootJar {
 sourceCompatibility = 11
 targetCompatibility = 11
 
+
 task unpack(type: Copy) {
     dependsOn bootJar
     from(zipTree(tasks.bootJar.outputs.files.singleFile))
@@ -46,9 +49,16 @@ task unpack(type: Copy) {
 }
 
 docker {
-    name "gnagaoka/triela-app:latest"
+    name "gnagaoka/triela-app:" + version
     copySpec.from(tasks.unpack.outputs).into("dependency")
     buildArgs(['DEPENDENCY': "dependency"])
+}
+
+release {
+    // [skip ci]をコメントに入れないと、無限ループする
+    preTagCommitMessage = '[skip ci] [Gradle Release Plugin] - pre tag commit: '
+    tagCommitMessage = '[skip ci] [Gradle Release Plugin] - creating tag: '
+    newVersionCommitMessage = '[skip ci] [Gradle Release Plugin] - new version commit: '
 }
 
 dependencies {
@@ -85,4 +95,16 @@ dependencies {
     compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.8.0'
     compile 'com.github.napstr:logback-discord-appender:1.0.0'
 
+    // https://mvnrepository.com/artifact/software.amazon.awssdk/s3
+    implementation('software.amazon.awssdk:s3')
+
+    testImplementation 'com.squareup.okhttp3:mockwebserver:3.11.0'
+
+
+}
+
+dependencyManagement {
+    imports {
+        mavenBom 'software.amazon.awssdk:bom:2.3.7'
+    }
 }

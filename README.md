@@ -5,7 +5,7 @@
  ![img1](Resource/README.img1.png)
  
 # component
- ![img2](Resource/README.img2.png)
+ ![img2](Resource/system.png)
  
 ## infra
   - AWS: https://aws.amazon.com/jp/
@@ -14,6 +14,7 @@
     - RDS
     - Route53
     - S3
+    - ECS+Secrets Manager+IAM
   - GitHub: https://github.com/
     - this repository
     - private repository
@@ -50,33 +51,9 @@
   - swagger: https://swagger.io
   - markdown
   - PlantUML: http://plantuml.com/
+ 
+## local dev
 
-## VM setup
-
-Prepare instance. Reboot instance from EC2 Console.
-
-```
-$ sudo yum update -y
-$ sudo amazon-linux-extras install docker -y
-$ sudo systemctl start docker 
-$ sudo usermod -a -G docker ec2-user
-$ sudo systemctl enable docker
-```
-
-Install docker-compose.
-
-```
-$ sudo -i
-$ curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-$ chmod +x /usr/local/bin/docker-compose
-$ exit
-```
-
-download docker-compose.yml
-
-```
-$ wget https://gist.githubusercontent.com/matanki-saito/2aff62cbdd20b921ccc8dffcf5f33ae0/raw/992323cdfc3f8a58a8847f9d0f122aea8fb4a419/docker-compose.yml
-```
 ```
 $ docker-compose down && docker-compose up -d
 ```
