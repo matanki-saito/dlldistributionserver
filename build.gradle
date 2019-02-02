@@ -10,9 +10,10 @@ buildscript {
 
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
         classpath("gradle.plugin.com.palantir.gradle.docker:gradle-docker:0.20.1")
         classpath "io.spring.gradle:dependency-management-plugin:1.0.3.RELEASE"
+        classpath "net.researchgate:gradle-release:2.6.0"
     }
 }
 
@@ -20,9 +21,9 @@ apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'com.palantir.docker'
+apply plugin: 'net.researchgate.release'
 
 group = 'com.popush'
-version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 11
 
 repositories {
@@ -48,9 +49,16 @@ task unpack(type: Copy) {
 }
 
 docker {
-    name "gnagaoka/triela-app:latest"
+    name "gnagaoka/triela-app:" + version
     copySpec.from(tasks.unpack.outputs).into("dependency")
     buildArgs(['DEPENDENCY': "dependency"])
+}
+
+release {
+    // [skip ci]をコメントに入れないと、無限ループする
+    preTagCommitMessage = '[skip ci] [Gradle Release Plugin] - pre tag commit: '
+    tagCommitMessage = '[skip ci] [Gradle Release Plugin] - creating tag: '
+    newVersionCommitMessage = '[skip ci] [Gradle Release Plugin] - new version commit: '
 }
 
 dependencies {
