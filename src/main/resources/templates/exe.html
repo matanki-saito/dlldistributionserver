@@ -18,6 +18,7 @@
         <tr class="thead-light">
             <th scope="col">md5</th>
             <th scope="col">version</th>
+            <th scope="col">phase</th>
             <th scope="col">description</th>
             <th scope="col">operation</th>
         </tr>
@@ -26,6 +27,7 @@
                   th:action="@{'/mgr/v1/product/' + ${gitHubRepositoryId} + '/exe'}" th:object="${form}">
                 <td><input id="md5" th:field="*{md5}" type="text"/></td>
                 <td><input th:field="*{version}" type="text"/></td>
+                <td><input id="phase" th:field="*{phase}" type="text"/></td>
                 <td><input id="description" th:field="*{description}" type="text"/></td>
                 <td>
                     <button type="submit">register</button>
@@ -35,12 +37,14 @@
         <tr class="thead-light">
             <th scope="col">md5</th>
             <th scope="col">version</th>
+            <th scope="col">phase</th>
             <th scope="col">description</th>
             <th scope="col">operation</th>
         </tr>
         <tr th:each="exe : ${list}" th:object="${exe}">
             <td th:text="*{md5}"></td>
             <td th:text="*{version}"></td>
+            <td th:text="*{phase}"></td>
             <td th:text="*{description}"></td>
             <td>
                 <button>delete</button>

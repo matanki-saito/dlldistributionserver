@@ -16,8 +16,11 @@ public class GitHubReleaseResponse {
     @JsonProperty("html_url")
     private String htmlUrl;
     private String name;
-    private boolean draft;
-    private boolean preRelease;
+
+    private Boolean draft;
+
+    @JsonProperty("prerelease")
+    private Boolean preRelease;
 
     @JsonProperty("created_at")
     private ZonedDateTime createdAt;

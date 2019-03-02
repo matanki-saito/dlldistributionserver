@@ -93,8 +93,11 @@ public class GitHubApiService {
      */
     public List<GitHubReleaseResponse> getReleasesSync(@NonNull String owner,
                                                        @NonNull String repoName) throws GitHubException {
+
+        String token = auth2RestTemplate.getAccessToken().getValue();
+
         final Call<List<GitHubReleaseResponse>> request = gitHubApiMapper.releases(
-                "token " + auth2RestTemplate.getAccessToken().getValue(),
+                "token " + token,
                 owner,
                 repoName
         );
@@ -141,8 +144,8 @@ public class GitHubApiService {
         // チェック
         final GitHubAssetResponse gitHubAssetResponse = responseCheck(response);
 
-        // 100MB超えてたら無理とする
-        if (gitHubAssetResponse.getFileSize() > 100_000_000) {
+        // 10MB超えてたら無理とする
+        if (gitHubAssetResponse.getFileSize() > 10_000_000) {
             throw new IllegalArgumentException("File size over.");
         }
 

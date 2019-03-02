@@ -34,13 +34,25 @@ public interface FileDaoMapper {
     @Select("<script>" +
             "SELECT b.* FROM exe a " +
             "LEFT JOIN file b ON a.distribution_asset_id = b.asset_id " +
-            "WHERE a.md5 = #{distributedExeMd5} " +
+            "<where>" +
+
+            "<if test=\"distributedExeMd5 != null\">" +
+            "AND a.md5 = #{distributedExeMd5} " +
+            "</if>" +
+
             "<if test=\"md5 != null\">" +
-            "AND b.md5 &lt;&gt; #{md5}" +
+            "AND b.md5 &lt;&gt; #{md5} " +
             "</if>" +
+
             "<if test=\"gitHubRepoId != null\">" +
-            "AND a.github_repo_id = #{gitHubRepoId}" +
+            "AND a.github_repo_id = #{gitHubRepoId} " +
             "</if>" +
+
+            "<if test=\"phase != null\">" +
+            "AND a.phase = #{phase} " +
+            "</if>" +
+
+            "</where>" +
             "</script>")
     List<FileDao> list(
             @NonNull FileSelectCondition condition

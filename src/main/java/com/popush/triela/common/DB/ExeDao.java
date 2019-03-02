@@ -15,4 +15,5 @@ public class ExeDao {
     private String version;
     private String description;
     private Integer distributionAssetId;
+    private String phase;
 }

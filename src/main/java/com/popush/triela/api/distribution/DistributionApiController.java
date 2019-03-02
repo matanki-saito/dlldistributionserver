@@ -27,18 +27,21 @@ public class DistributionApiController extends TrielaApiV1Controller {
     @GetMapping("/distribution/{gitHubRepoId}/{exe_md5}")
     public ResponseEntity fileGet(@PathVariable(value = "gitHubRepoId") int gitHubRepoId,
                                   @PathVariable(value = "exe_md5") String exeMd5,
-                                  @RequestParam(value = "dll_md5", required = false) String dllMd5) throws NotModifiedException {
+                                  @RequestParam(value = "dll_md5", required = false) String dllMd5,
+                                  @RequestParam(value = "phase", required = false, defaultValue = "prod") String phase) throws NotModifiedException {
 
+        // リクエストに一致するエントリの取得
         final Optional<FileDao> result = distributionMgrService.getDllData(FileSelectCondition.builder()
                 .distributedExeMd5(exeMd5)
                 .gitHubRepoId(gitHubRepoId)
                 .md5(dllMd5)
+                .phase(phase)
                 .build());
 
+        // 存在しない
         if (result.isEmpty()) {
             throw new IllegalStateException();
         }
-
         final FileDao fileDao = result.get();
 
         Object responseBody;

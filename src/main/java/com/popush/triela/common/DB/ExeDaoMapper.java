@@ -7,8 +7,8 @@ import java.util.List;
 
 @Mapper
 public interface ExeDaoMapper {
-    @Insert("INSERT INTO exe (id,md5, version,github_repo_id, description, distribution_asset_id) " +
-            "VALUES (#{id}, #{md5},#{version}, #{gitHubRepoId}, #{description}, #{distributionAssetId})" +
+    @Insert("INSERT INTO exe (id,md5, version,github_repo_id, description, distribution_asset_id, phase) " +
+            "VALUES (#{id}, #{md5},#{version}, #{gitHubRepoId}, #{description}, #{distributionAssetId}, #{phase})" +
             "ON DUPLICATE KEY UPDATE distribution_asset_id = #{distributionAssetId} ")
     void upsert(@NonNull ExeDao exeDao);
 
@@ -24,6 +24,12 @@ public interface ExeDaoMapper {
             "</if>" +
             "<if test=\"md5 != null\">" +
             "AND md5 = #{md5} " +
+            "</if>" +
+            "<if test=\"phase != null\">" +
+            "AND phase = #{phase} " +
+            "</if>" +
+            "<if test=\"id != null\">" +
+            "AND id = #{id} " +
             "</if>" +
             "</where>" +
             "</script>")
