@@ -14,7 +14,12 @@ import java.io.Serializable;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-class ExeForm implements Serializable {
+class ExeForm implements Serializable, Comparable<ExeForm> {
+    /**
+     * ID
+     */
+    private int Id;
+
     /**
      * eu4.exe or ck2game.exe message digest
      */
@@ -40,4 +45,16 @@ class ExeForm implements Serializable {
      *
      */
     private Integer distributionAssetId;
+
+    /**
+     * ex) prod(default), dev, alpha, beta etc.
+     */
+    @Size(max = 32)
+    @Pattern(regexp = "[a-zA-Z0-9_]*")
+    private String phase;
+
+    @Override
+    public int compareTo(ExeForm o) {
+        return this.version.compareTo(o.version);
+    }
 }

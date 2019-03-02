@@ -22,5 +22,11 @@ class AssetForm {
     private String assetId;
 
     @NotNull
+    private Boolean draft;
+
+    @NotNull
+    private Boolean preRelease;
+
+    @NotNull
     private String distributionAssetId;
 }

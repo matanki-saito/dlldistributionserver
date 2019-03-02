@@ -10,4 +10,5 @@ public class FileSelectCondition {
     private int assetId;
     private String distributedExeMd5;
     private int gitHubRepoId;
+    private String phase;
 }

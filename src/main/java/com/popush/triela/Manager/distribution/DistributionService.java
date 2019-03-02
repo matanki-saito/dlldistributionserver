@@ -170,6 +170,8 @@ public class DistributionService {
         return response.stream()
                 .filter(elem -> !elem.getAssets().isEmpty())
                 .map(elem -> AssetForm.builder()
+                        .draft(elem.getDraft())
+                        .preRelease(elem.getPreRelease())
                         .name(elem.getName())
                         .url(elem.getHtmlUrl())
                         .assetId(Integer.toString(elem.getAssets().get(0).getId()))
@@ -360,10 +362,10 @@ public class DistributionService {
 
     @Transactional
     void update(
-            @NonNull Map<String, Integer> exeHash2assetId,
+            @NonNull Map<Integer, Integer> exeId2assetId,
             @NonNull GitHubReposResponse gitHubReposResponse) {
-        for (Map.Entry<String, Integer> entry : exeHash2assetId.entrySet()) {
-            final String exeMd5 = entry.getKey();
+        for (Map.Entry<Integer, Integer> entry : exeId2assetId.entrySet()) {
+            final int exeId = entry.getKey();
             final int assetId = entry.getValue();
 
             final FileDao fileDao = fileDaoMapper.selectByAssetId(assetId);
@@ -385,7 +387,7 @@ public class DistributionService {
 
             final List<ExeDao> exeDaoList = exeDaoMapper.list(ExeSelectCondition
                     .builder()
-                    .md5(exeMd5)
+                    .id(exeId)
                     .gitHubRepoId(gitHubReposResponse.getId())
                     .build()
             );

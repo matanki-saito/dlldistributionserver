@@ -43,17 +43,16 @@ public class DistributionController extends TrielaManagerV1Controller {
             GitHubReposResponse gitHubReposResponse
     ) {
 
-        /* exe-hash:asset-id */
-        final Map<String, Integer> exeHash2assetIdMap = params.entrySet().stream()
-                .filter(entry -> !entry.getKey().equals("_csrf"))
+        /* exe-id:asset-id */
+        final Map<Integer, Integer> exeId2assetIdMap = params.entrySet().stream()
                 .collect(Collectors.toMap(
-                        Map.Entry::getKey,
+                        e -> Integer.parseInt(e.getKey()),
                         e -> Integer.parseInt(e.getValue().get(0))
                 ));
 
 
         distributionMgrService.update(
-                exeHash2assetIdMap,
+                exeId2assetIdMap,
                 gitHubReposResponse
         );
 
