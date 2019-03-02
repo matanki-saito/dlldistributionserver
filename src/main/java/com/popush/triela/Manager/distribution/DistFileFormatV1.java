@@ -13,7 +13,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DistFileFormatV1 {
+class DistFileFormatV1 {
     private List<String> filter;
+
     private Boolean isArchive;
 }

@@ -1,8 +1,11 @@
 package com.popush.triela.common.github;
 
+import com.popush.triela.common.Exception.ArgumentException;
+import com.popush.triela.common.Exception.OtherSystemException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -21,31 +24,30 @@ public class GitHubReposResolver implements HandlerMethodArgumentResolver {
     private final GitHubApiService gitHubApiService;
 
     @Override
-    public boolean supportsParameter(MethodParameter parameter) {
+    public boolean supportsParameter(@NonNull MethodParameter parameter) {
         return parameter.getParameterType().equals(GitHubReposResponse.class);
     }
 
     @Override
     public Object resolveArgument(
-            MethodParameter parameter,
+            @NonNull MethodParameter parameter,
             ModelAndViewContainer mavContainer,
-            NativeWebRequest webRequest,
+            @NonNull NativeWebRequest webRequest,
             WebDataBinderFactory binderFactory
-    ) throws Exception {
+    ) throws OtherSystemException {
 
         HttpServletRequest httpServletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
 
         // nullチェック
         if (httpServletRequest == null) {
-            return new IllegalArgumentException();
+            return new ArgumentException("request httpservlet is null.", httpServletRequest);
         }
 
         Map pathVariables = (Map) httpServletRequest.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
 
         // 何もしない
         if (pathVariables.get("gitHubMyRepoId") == null) {
-            log.debug("パラメタなし");
-            return new IllegalArgumentException();
+            return new ArgumentException("pathVariables do not include gitHubMyRepoId", pathVariables);
         }
 
         final int gitHubRepoId = Integer.parseInt(pathVariables.get("gitHubMyRepoId").toString());
@@ -57,7 +59,7 @@ public class GitHubReposResolver implements HandlerMethodArgumentResolver {
 
         // なし
         if (repo.isEmpty()) {
-            return new IllegalArgumentException();
+            return new ArgumentException("repo is empty", httpServletRequest);
         }
 
         return repo.get();

@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 class GitHubAssetResponse {
+    private String url;
+
     @JsonProperty("browser_download_url")
     private String browserDownloadUrl;
 

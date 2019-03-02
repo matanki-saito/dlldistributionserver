@@ -1,8 +1,10 @@
 package com.popush.triela.common.github;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.popush.triela.common.Exception.GitHubException;
+import com.popush.triela.common.Exception.GitHubResourceException;
+import com.popush.triela.common.Exception.GitHubServiceException;
 import com.popush.triela.common.Exception.MachineException;
+import com.popush.triela.common.Exception.OtherSystemException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,19 +36,19 @@ public class GitHubApiService {
      * @param response レスポンス
      * @param <T>      レスポンスボディ型
      * @return レスポンスボディ
-     * @throws GitHubException exp
+     * @throws OtherSystemException exp
      */
-    private <T> T responseCheck(Response<T> response) throws GitHubException {
+    private <T> T responseCheck(Response<T> response) throws OtherSystemException {
         if (!response.isSuccessful()) {
-            throw new IllegalArgumentException("Response is not 2xx,3xx.");
+            throw new GitHubResourceException("Response is not 2xx,3xx.");
         }
 
         if (response.code() >= 500 && response.code() < 600) {
-            throw new GitHubException("Server error ?" + response.errorBody());
+            throw new GitHubServiceException("Server error ?" + response.errorBody());
         }
 
         if (response.body() == null) {
-            throw new IllegalArgumentException("Is Data empty ?");
+            throw new MachineException("Is Data empty ?");
         }
 
         return response.body();
@@ -56,9 +58,9 @@ public class GitHubApiService {
      * レポジトリ情報の一覧を取得
      *
      * @return レポジトリ情報の一覧
-     * @throws GitHubException exp
+     * @throws OtherSystemException exp
      */
-    public List<GitHubReposResponse> getMyAdminRepos() throws GitHubException {
+    public List<GitHubReposResponse> getMyAdminRepos() throws OtherSystemException {
         final Call<List<GitHubReposResponse>> request = gitHubApiMapper.repos(
                 "token " + auth2RestTemplate.getAccessToken().getValue()
         );
@@ -69,7 +71,7 @@ public class GitHubApiService {
         try {
             response = request.execute();
         } catch (IOException e) {
-            throw new GitHubException("Cannot get repository info.", e);
+            throw new GitHubServiceException("Cannot get repository info.", e);
         }
 
         final List<GitHubReposResponse> responseBody = responseCheck(response);
@@ -90,9 +92,10 @@ public class GitHubApiService {
      * @param owner    レポジトリのオーナー
      * @param repoName レポジトリ名
      * @return リリース一覧
+     * @throws OtherSystemException exp
      */
     public List<GitHubReleaseResponse> getReleasesSync(@NonNull String owner,
-                                                       @NonNull String repoName) throws GitHubException {
+                                                       @NonNull String repoName) throws OtherSystemException {
 
         String token = auth2RestTemplate.getAccessToken().getValue();
 
@@ -106,7 +109,7 @@ public class GitHubApiService {
         try {
             response = request.execute();
         } catch (IOException e) {
-            throw new GitHubException("Connection error.", e);
+            throw new GitHubServiceException("Connection error.", e);
         }
 
         return responseCheck(response);
@@ -119,11 +122,11 @@ public class GitHubApiService {
      * @param repoName レポジトリ名
      * @param assetId  アセットID
      * @return アセットのURI
-     * @throws GitHubException exp
+     * @throws OtherSystemException exp
      */
     private URI getAssetDownloadUrl(@NonNull String owner,
                                     @NonNull String repoName,
-                                    int assetId) throws GitHubException {
+                                    int assetId) throws OtherSystemException {
         final String result;
 
         final Call<GitHubAssetResponse> request = gitHubApiMapper.asset(
@@ -138,7 +141,7 @@ public class GitHubApiService {
         try {
             response = request.execute();
         } catch (IOException e) {
-            throw new GitHubException("Connection error.", e);
+            throw new GitHubServiceException("Connection error.", e);
         }
 
         // チェック
@@ -146,12 +149,10 @@ public class GitHubApiService {
 
         // 10MB超えてたら無理とする
         if (gitHubAssetResponse.getFileSize() > 10_000_000) {
-            throw new IllegalArgumentException("File size over.");
+            throw new GitHubResourceException("File size is 10MB over.");
         }
 
-        result = gitHubAssetResponse.getBrowserDownloadUrl();
-
-        return URI.create(result);
+        return URI.create(gitHubAssetResponse.getUrl());
     }
 
     /**
@@ -159,17 +160,19 @@ public class GitHubApiService {
      *
      * @param downloadUrl アセットのURL
      * @return 一時ファイルになったzipファイルのパス
-     * @throws GitHubException  exp
-     * @throws MachineException exp
+     * @throws OtherSystemException exp
      */
     @VisibleForTesting
-    Path getAssetFile(@NonNull URI downloadUrl) throws GitHubException, MachineException {
+    private Path getAssetFile(@NonNull URI downloadUrl) throws OtherSystemException {
 
         final Response<ResponseBody> response;
         try {
-            response = gitHubApiMapper.downloadFileWithDynamicUrlSync(downloadUrl).execute();
+            response = gitHubApiMapper.downloadFileWithDynamicUrlSync(
+                    "token " + auth2RestTemplate.getAccessToken().getValue(),
+                    downloadUrl
+            ).execute();
         } catch (IOException e) {
-            throw new GitHubException("Connection failed.", e);
+            throw new GitHubServiceException("Connection failed.", e);
         }
 
         final ResponseBody responseBody = responseCheck(response);
@@ -190,7 +193,6 @@ public class GitHubApiService {
         return tmpFile;
     }
 
-
     /**
      * アセットを取得
      *
@@ -198,27 +200,12 @@ public class GitHubApiService {
      * @param repoName レポジトリ名
      * @param assetId  アセットID
      * @return アセットファイル
+     * @throws OtherSystemException exp
      */
     public Path getDllFromAsset(@NonNull String owner,
                                 @NonNull String repoName,
-                                int assetId) {
+                                int assetId) throws OtherSystemException {
 
-        // アセットのURLを取得
-        final URI assetUri;
-        try {
-            assetUri = getAssetDownloadUrl(owner, repoName, assetId);
-        } catch (GitHubException e) {
-            throw new IllegalStateException("Cannot asset download URI.", e);
-        }
-
-        // アセットを取得
-        final Path assetFile;
-        try {
-            assetFile = getAssetFile(assetUri);
-        } catch (GitHubException | MachineException e) {
-            throw new IllegalStateException("Get asset file exception.", e);
-        }
-
-        return assetFile;
+        return getAssetFile(getAssetDownloadUrl(owner, repoName, assetId));
     }
 }
