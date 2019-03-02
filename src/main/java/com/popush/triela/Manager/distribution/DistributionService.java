@@ -97,6 +97,17 @@ public class DistributionService {
         return String.format("%032x", bigInt);
     }
 
+    public static Optional<String> getExt(Path fileName) {
+        if (fileName == null)
+            return Optional.empty();
+        int point = fileName.toString().lastIndexOf(".");
+        if (point != -1) {
+            return Optional.of(fileName.toString().substring(point + 1));
+        }
+
+        return Optional.empty();
+    }
+
     /**
      * @param deliverable 配布設定
      * @param assetId     アセットID
@@ -402,28 +413,25 @@ public class DistributionService {
         if (Objects.isNull(fileDao)) {
 
             // gitHubからアセットを取得
-            final Path assetFile = gitHubApiService.getDllFromAsset(
+            final GitHubApiService.NetworkResource assetFile = gitHubApiService.getDllFromAsset(
                     gitHubReposResponse.getOwner().getLogin(),
                     gitHubReposResponse.getName(),
                     assetId
             );
 
-            // アセットの拡張子からファイル形式を判別
-            final String contentType;
-            try {
-                contentType = Files.probeContentType(assetFile);
-            } catch (IOException e) {
-                throw new OtherSystemException("Error: probe contentType", e);
+            //ファイル形式に応じて処理を変更
+            Optional<String> ext = getExt(assetFile.getOriginalFileNamePath());
+            if (ext.isEmpty()) {
+                throw new GitHubResourceException("not found ext");
             }
 
-            //ファイル形式に応じて処理を変更
             try {
-                switch (contentType) {
+                switch (ext.get()) {
                     case "zip":
-                        saveDeliverable(buildDeliverableFromArchive(assetFile), assetId);
+                        saveDeliverable(buildDeliverableFromArchive(assetFile.getPath()), assetId);
                         break;
                     case "json":
-                        registerDeliverableFromJson(assetFile, assetId);
+                        registerDeliverableFromJson(assetFile.getPath(), assetId);
                         break;
                     default:
                         throw new ArgumentException("Not support file type", assetFile);

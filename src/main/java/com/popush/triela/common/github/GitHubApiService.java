@@ -5,8 +5,10 @@ import com.popush.triela.common.Exception.GitHubResourceException;
 import com.popush.triela.common.Exception.GitHubServiceException;
 import com.popush.triela.common.Exception.MachineException;
 import com.popush.triela.common.Exception.OtherSystemException;
+import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.ResponseBody;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
@@ -116,18 +118,17 @@ public class GitHubApiService {
     }
 
     /**
-     * アセットのURIを取得する
+     * アセットのURIとフォーマットを取得する
      *
      * @param owner    レポジトリのオーナー
      * @param repoName レポジトリ名
      * @param assetId  アセットID
-     * @return アセットのURI
+     * @return アセットのURIとMimeType
      * @throws OtherSystemException exp
      */
-    private URI getAssetDownloadUrl(@NonNull String owner,
-                                    @NonNull String repoName,
-                                    int assetId) throws OtherSystemException {
-        final String result;
+    private NetworkResource getAssetDownloadUrl(@NonNull String owner,
+                                                @NonNull String repoName,
+                                                int assetId) throws OtherSystemException {
 
         final Call<GitHubAssetResponse> request = gitHubApiMapper.asset(
                 "token " + auth2RestTemplate.getAccessToken().getValue(),
@@ -152,24 +153,29 @@ public class GitHubApiService {
             throw new GitHubResourceException("File size is 10MB over.");
         }
 
-        return URI.create(gitHubAssetResponse.getUrl());
+        return new NetworkResource(
+                URI.create(gitHubAssetResponse.getUrl()),
+                gitHubAssetResponse.getContentType(),
+                null,
+                Path.of(gitHubAssetResponse.getName())
+        );
     }
 
     /**
      * URLからアセット（zipファイル）を取ってくる
      *
-     * @param downloadUrl アセットのURL
+     * @param networkResource アセットのURLとタイプ
      * @return 一時ファイルになったzipファイルのパス
      * @throws OtherSystemException exp
      */
     @VisibleForTesting
-    private Path getAssetFile(@NonNull URI downloadUrl) throws OtherSystemException {
+    private NetworkResource getAssetFile(@NonNull GitHubApiService.NetworkResource networkResource) throws OtherSystemException {
 
         final Response<ResponseBody> response;
         try {
             response = gitHubApiMapper.downloadFileWithDynamicUrlSync(
                     "token " + auth2RestTemplate.getAccessToken().getValue(),
-                    downloadUrl
+                    networkResource.getUrl()
             ).execute();
         } catch (IOException e) {
             throw new GitHubServiceException("Connection failed.", e);
@@ -190,7 +196,12 @@ public class GitHubApiService {
             throw new MachineException("Cannot write buffer to temp file.", e);
         }
 
-        return tmpFile;
+        return new NetworkResource(
+                networkResource.getUrl(),
+                networkResource.getContentType(),
+                tmpFile,
+                networkResource.getOriginalFileNamePath()
+        );
     }
 
     /**
@@ -202,10 +213,21 @@ public class GitHubApiService {
      * @return アセットファイル
      * @throws OtherSystemException exp
      */
-    public Path getDllFromAsset(@NonNull String owner,
-                                @NonNull String repoName,
-                                int assetId) throws OtherSystemException {
+    public NetworkResource getDllFromAsset(@NonNull String owner,
+                                           @NonNull String repoName,
+                                           int assetId) throws OtherSystemException {
 
         return getAssetFile(getAssetDownloadUrl(owner, repoName, assetId));
     }
+
+    @Value
+    @AllArgsConstructor
+    public static class NetworkResource {
+        private URI url;
+        private String contentType;
+        private Path path;
+        private Path originalFileNamePath;
+    }
+
+
 }

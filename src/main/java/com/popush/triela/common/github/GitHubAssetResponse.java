@@ -16,4 +16,9 @@ class GitHubAssetResponse {
 
     @JsonProperty("size")
     private int fileSize;
+
+    @JsonProperty("content_type")
+    private String contentType;
+
+    private String name;
 }
