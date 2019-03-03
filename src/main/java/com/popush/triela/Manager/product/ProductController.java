@@ -1,7 +1,7 @@
 package com.popush.triela.Manager.product;
 
 import com.popush.triela.Manager.TrielaManagerV1Controller;
-import com.popush.triela.common.Exception.ServiceException;
+import com.popush.triela.common.Exception.OtherSystemException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,7 +17,7 @@ public class ProductController extends TrielaManagerV1Controller {
     public String exeRegisterGet(
             ProductForm productForm,
             Model model
-    ) throws ServiceException {
+    ) throws OtherSystemException {
 
         model.addAttribute("form", productForm);
         model.addAttribute("list", productService.list());

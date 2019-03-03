@@ -2,6 +2,7 @@ package com.popush.triela.Manager.distribution;
 
 import com.popush.triela.Manager.TrielaManagerV1Controller;
 import com.popush.triela.Manager.exe.ExeService;
+import com.popush.triela.common.Exception.OtherSystemException;
 import com.popush.triela.common.github.GitHubReposResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -27,7 +28,7 @@ public class DistributionController extends TrielaManagerV1Controller {
             Model model,
             @PathVariable("gitHubMyRepoId") int gitHubMyRepoId,
             GitHubReposResponse gitHubReposResponse
-    ) {
+    ) throws OtherSystemException {
         model.addAttribute("gitHubRepositoryId", gitHubReposResponse.getId());
         model.addAttribute("assetList", distributionMgrService.list(gitHubReposResponse));
         model.addAttribute("exeRegisterList", exeService.list(gitHubReposResponse.getId()));
@@ -41,19 +42,17 @@ public class DistributionController extends TrielaManagerV1Controller {
             @RequestParam MultiValueMap<String, String> params, Model model,
             @PathVariable("gitHubMyRepoId") int gitHubMyRepoId,
             GitHubReposResponse gitHubReposResponse
-    ) {
+    ) throws OtherSystemException {
 
-        /* exe-hash:asset-id */
-        final Map<String, Integer> exeHash2assetIdMap = params.entrySet().stream()
-                .filter(entry -> !entry.getKey().equals("_csrf"))
+        /* exe-id:asset-id */
+        final Map<Integer, Integer> exeId2assetIdMap = params.entrySet().stream()
                 .collect(Collectors.toMap(
-                        Map.Entry::getKey,
+                        e -> Integer.parseInt(e.getKey()),
                         e -> Integer.parseInt(e.getValue().get(0))
                 ));
 
-
         distributionMgrService.update(
-                exeHash2assetIdMap,
+                exeId2assetIdMap,
                 gitHubReposResponse
         );
 

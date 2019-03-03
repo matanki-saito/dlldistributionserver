@@ -9,6 +9,13 @@
           integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" rel="stylesheet">
 </head>
 
+<style>
+    .my-warning {
+        border: 3px solid darkred;
+    }
+</style>
+
+
 <body>
 <div class="container">
     <header th:include="header"></header>
@@ -18,15 +25,22 @@
             <thead class="thead-light">
             <tr>
                 <th>name</th>
-                <th scope="col" th:each="exe : ${exeRegisterList}" th:object="${exe}" th:text="*{version}"></th>
+                <th scope="col"
+                    th:classappend="|${exe.phase eq 'dev' ? 'bg-warning' : ''} ${exe.phase eq 'alpha' ? 'bg-danger' : ''}|"
+                    th:each="exe : ${exeRegisterList}" th:object="${exe}"
+                >
+                    <a th:href="'https://triela.tk:8443/api/v1/distribution/' + ${gitHubRepositoryId} + '/' + ${exe.getMd5()} + '?phase=' + ${exe.phase}"
+                       th:text="*{version}"></a>
+                </th>
             </tr>
             </thead>
             <tbody>
-            <tr th:each="asset : ${assetList}">
+            <tr th:classappend="|${asset.draft ? 'bg-warning' : ''} ${asset.preRelease ? 'my-warning' : ''}|"
+                th:each="asset : ${assetList}">
                 <td><a th:href="${asset.url}" th:text="${asset.name}"></a></td>
                 <td th:each="exe : ${exeRegisterList}">
                     <input th:checked="${exe.distributionAssetId != null and asset.assetId != null and exe.distributionAssetId.toString() == asset.assetId.toString()}"
-                           th:name="${exe.md5}" th:radiogroup="${exe.md5}" th:value="${asset.assetId}"
+                           th:name="${exe.id}" th:radiogroup="${exe.id}" th:value="${asset.assetId}"
                            type="radio"/>
                 </td>
             </tr>

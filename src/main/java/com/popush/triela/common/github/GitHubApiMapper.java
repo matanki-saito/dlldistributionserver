@@ -23,6 +23,10 @@ public interface GitHubApiMapper {
     Call<List<GitHubReposResponse>> repos(@Header("Authorization") String token);
 
     @GET
+    @Headers("Accept: application/octet-stream")
     @Streaming
-    Call<ResponseBody> downloadFileWithDynamicUrlSync(@Url URI fileUrl);
+    Call<ResponseBody> downloadFileWithDynamicUrlSync(
+            @Header("Authorization") String token,
+            @Url URI fileUrl
+    );
 }

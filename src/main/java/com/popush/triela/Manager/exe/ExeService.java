@@ -26,6 +26,7 @@ public class ExeService {
                 .md5(form.getMd5())
                 .version(form.getVersion())
                 .description(form.getDescription())
+                .phase(form.getPhase().isBlank() ? "prod" : form.getPhase())
                 .build()
         );
     }
@@ -35,11 +36,13 @@ public class ExeService {
         return exeDaoMapper.list(ExeSelectCondition.builder().gitHubRepoId(gitHubRepoId).build()).stream().map(
                 elem -> ExeForm
                         .builder()
+                        .Id(elem.getId())
                         .description(elem.getDescription())
                         .md5(elem.getMd5())
                         .version(elem.getVersion())
                         .distributionAssetId(elem.getDistributionAssetId())
+                        .phase(elem.getPhase())
                         .build()
-        ).collect(Collectors.toList());
+        ).sorted().collect(Collectors.toList());
     }
 }
