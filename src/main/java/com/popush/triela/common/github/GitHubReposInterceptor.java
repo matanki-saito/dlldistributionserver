@@ -14,10 +14,8 @@ import javax.servlet.http.HttpServletResponse;
 @RequiredArgsConstructor
 public class GitHubReposInterceptor extends HandlerInterceptorAdapter {
 
-    private final GitHubApiService gitHubApiService;
-
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         return true;
     }
 

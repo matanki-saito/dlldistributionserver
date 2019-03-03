@@ -1,21 +1,22 @@
 package com.popush.triela.Manager.distribution;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.popush.triela.common.AWS.S3Service;
 import com.popush.triela.common.DB.*;
-import com.popush.triela.common.Exception.GitHubException;
-import com.popush.triela.common.Exception.MachineException;
-import com.popush.triela.common.Exception.NotModifiedException;
+import com.popush.triela.common.Exception.*;
 import com.popush.triela.common.github.GitHubApiService;
 import com.popush.triela.common.github.GitHubReleaseResponse;
 import com.popush.triela.common.github.GitHubReposResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.codehaus.jackson.JsonParseException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.NotNull;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -50,14 +51,15 @@ public class DistributionService {
      *
      * @param source 元の文字列
      * @return ハッシュ後の文字列
+     * @throws MachineException exp
      */
-    private static String calMd5(byte[] source) {
+    private static String calMd5(byte[] source) throws MachineException {
 
         final MessageDigest md;
         try {
             md = MessageDigest.getInstance("MD5");
         } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("message digest", e);
+            throw new MachineException("Cannot get to md5 message digest instance", e);
         }
 
         final byte[] md5Bytes = md.digest(source);
@@ -66,13 +68,20 @@ public class DistributionService {
         return String.format("%032x", bigInt);
     }
 
-    private static String calMd5(@NonNull Path source) throws MachineException {
+    /**
+     * ファイルからMD5を生成
+     *
+     * @param source ファイル
+     * @return MD5
+     * @throws MachineException exp
+     */
+    private static String calMd5(@NonNull Path source) throws OtherSystemException {
 
         final MessageDigest md;
         try {
             md = MessageDigest.getInstance("MD5");
         } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("message digest", e);
+            throw new MachineException("Cannot get to md5 message digest instance", e);
         }
 
         try (DigestInputStream input = new DigestInputStream(Files.newInputStream(source), md)) {
@@ -80,7 +89,7 @@ public class DistributionService {
             while (input.read() != -1) {
             }
         } catch (IOException e) {
-            throw new MachineException("Error", e);
+            throw new MachineException("file read error", e);
         }
 
         final byte[] md5Bytes = md.digest();
@@ -88,13 +97,52 @@ public class DistributionService {
         return String.format("%032x", bigInt);
     }
 
-    private void saveDeliverable(@NonNull Path deliverable, int assetId) throws MachineException {
+    public static Optional<String> getExt(Path fileName) {
+        if (fileName == null)
+            return Optional.empty();
+        int point = fileName.toString().lastIndexOf(".");
+        if (point != -1) {
+            return Optional.of(fileName.toString().substring(point + 1));
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * @param deliverable 配布設定
+     * @param assetId     アセットID
+     * @throws ArgumentException    引数に問題あり
+     * @throws OtherSystemException マシン異常
+     */
+    private void registerDeliverableFromJson(@NotNull Path deliverable, int assetId) throws ArgumentException, OtherSystemException {
+
+        final DistFileFormatV2 jsonData;
+        try {
+            jsonData = new ObjectMapper().readValue(deliverable.toFile(), DistFileFormatV2.class);
+        } catch (JsonParseException | JsonMappingException e) {
+            throw new ArgumentException("json parse error", e, deliverable);
+        } catch (IOException e) {
+            throw new OtherSystemException("json read value error", e);
+        }
+
+        fileDaoMapper.upsert(
+                FileDao.builder()
+                        .assetId(assetId)
+                        .data(null)
+                        .md5(jsonData.getFileMd5())
+                        .dataSize(jsonData.getFileSize())
+                        .dataUrl(jsonData.getUrl())
+                        .build()
+        );
+    }
+
+    private void saveDeliverable(@NonNull Path deliverable, int assetId) throws OtherSystemException {
 
         final long fileSize;
         try {
             fileSize = Files.size(deliverable);
         } catch (IOException e) {
-            throw new MachineException("cannot get deliverable size", e);
+            throw new OtherSystemException("cannot get deliverable size", e);
         }
 
         // 1MB超えていたらS3に保存
@@ -122,7 +170,7 @@ public class DistributionService {
             try {
                 allDataBytes = Files.readAllBytes(deliverable);
             } catch (IOException e) {
-                throw new MachineException("Cannot read file", e);
+                throw new OtherSystemException("Cannot read file", e);
             }
 
             fileDaoMapper.upsert(
@@ -155,17 +203,19 @@ public class DistributionService {
         return Optional.of(fileDaoList.get(0));
     }
 
-    List<AssetForm> list(@NonNull GitHubReposResponse gitHubReposResponse) {
+    /**
+     * リリース情報からアセットの一覧を列挙して出力する
+     *
+     * @param gitHubReposResponse githubの情報
+     * @return アセットの一覧
+     * @throws OtherSystemException exp
+     */
+    List<AssetForm> list(@NonNull GitHubReposResponse gitHubReposResponse) throws OtherSystemException {
 
-        final List<GitHubReleaseResponse> response;
-        try {
-            response = gitHubApiService.getReleasesSync(
-                    gitHubReposResponse.getOwner().getLogin(),
-                    gitHubReposResponse.getName()
-            );
-        } catch (GitHubException e) {
-            throw new IllegalStateException("Cannot get release list.", e);
-        }
+        final List<GitHubReleaseResponse> response = gitHubApiService.getReleasesSync(
+                gitHubReposResponse.getOwner().getLogin(),
+                gitHubReposResponse.getName()
+        );
 
         return response.stream()
                 .filter(elem -> !elem.getAssets().isEmpty())
@@ -184,10 +234,10 @@ public class DistributionService {
      *
      * @param assetFile アセットファイルのパス
      * @return dist情報
-     * @throws MachineException exp
+     * @throws OtherSystemException exp
      */
     @VisibleForTesting
-    public Optional<DistFileFormatV1> salvageDistFileV1FromAsset(@NonNull Path assetFile) throws MachineException {
+    public Optional<DistFileFormatV1> salvageDistFileV1FromAsset(@NonNull Path assetFile) throws OtherSystemException {
         DistFileFormatV1 result = null;
 
         try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(assetFile))) {
@@ -207,40 +257,34 @@ public class DistributionService {
                 zis.closeEntry();
             }
         } catch (IOException e) {
-            throw new MachineException("OUTER ERR: cannot read asset file.", e);
+            throw new OtherSystemException("OUTER ERR: cannot read asset file.", e);
         }
 
         return Optional.ofNullable(result);
     }
 
     /**
-     * アセットファイルから成果物を作成
+     * アセットファイル（Zip）から成果物を作成
      *
      * @param assetFile アセットファイル
      * @return 成果物のパス
+     * @throws OtherSystemException exp
      */
-    private Path buildDeliverable(@NonNull Path assetFile) {
+    private Path buildDeliverableFromArchive(@NonNull Path assetFile) throws OtherSystemException {
+
         // distファイルを探す
         final DistFileFormatV1 distInfo;
-        try {
-            distInfo = salvageDistFileV1FromAsset(assetFile).orElseGet(() ->
-                    DistFileFormatV1
-                            .builder()
-                            .filter(Collections.singletonList("Plugin.dll$")) // default
-                            .isArchive(Boolean.FALSE) // default
-                            .build()
-            );
-        } catch (MachineException e) {
-            throw new IllegalStateException("Salvage dist exception.", e);
-        }
+        distInfo = salvageDistFileV1FromAsset(assetFile).orElseGet(() ->
+                DistFileFormatV1
+                        .builder()
+                        .filter(Collections.singletonList("Plugin.dll$")) // default
+                        .isArchive(Boolean.FALSE) // default
+                        .build()
+        );
 
         // assertファイルからリソースを抽出
         final Map<Path, Path> files;
-        try {
-            files = salvageFilesFromAssetFile(assetFile, distInfo);
-        } catch (MachineException e) {
-            throw new IllegalStateException("Salvage file exception.", e);
-        }
+        files = salvageFilesFromAssetFile(assetFile, distInfo);
 
         // 成果物を作成
         return deliverable(files, distInfo);
@@ -252,11 +296,11 @@ public class DistributionService {
      * @param assetFile        アセットファイル
      * @param distFileFormatV1 dist情報
      * @return 抽出されたファイルマップ.
-     * @throws MachineException exp
+     * @throws OtherSystemException exp
      */
     @VisibleForTesting
     public Map<Path, Path> salvageFilesFromAssetFile(@NonNull Path assetFile,
-                                                     @NonNull DistFileFormatV1 distFileFormatV1) throws MachineException {
+                                                     @NonNull DistFileFormatV1 distFileFormatV1) throws OtherSystemException {
         final Map<Path, Path> result = new HashMap<>();
 
         final Pattern pattern = Pattern.compile(String.join("|", distFileFormatV1.getFilter()));
@@ -290,10 +334,10 @@ public class DistributionService {
      *
      * @param files 抽出したファイル
      * @return 成果物のzip
-     * @throws MachineException exp
+     * @throws OtherSystemException exp
      */
     @VisibleForTesting
-    public Path concreteZip(@NonNull Map<Path, Path> files) throws MachineException {
+    public Path concreteZip(@NonNull Map<Path, Path> files) throws OtherSystemException {
 
         // 一時ファイルの場所
         final Path result;
@@ -333,9 +377,10 @@ public class DistributionService {
      * @param files            抽出したファイル
      * @param distFileFormatV1 dist情報
      * @return 成果物のパス
+     * @throws OtherSystemException exp
      */
     private Path deliverable(@NonNull Map<Path, Path> files,
-                             @NonNull DistFileFormatV1 distFileFormatV1) {
+                             @NonNull DistFileFormatV1 distFileFormatV1) throws OtherSystemException {
         // 1つもみつからない。
         if (files.size() == 0) {
             throw new IllegalArgumentException("Not found deliverable.");
@@ -353,36 +398,64 @@ public class DistributionService {
         }
 
         // zipにまとめて返却
-        try {
-            return concreteZip(files);
-        } catch (MachineException e) {
-            throw new IllegalStateException("");
+        return concreteZip(files);
+    }
+
+    /**
+     * @param gitHubReposResponse GitHubの情報
+     * @param assetId             アセットID
+     * @return 永続化されたらtrue
+     * @throws OtherSystemException 引数異常
+     */
+    private boolean assetPersist(@NonNull GitHubReposResponse gitHubReposResponse,
+                                 int assetId) throws OtherSystemException {
+        final FileDao fileDao = fileDaoMapper.selectByAssetId(assetId);
+        if (Objects.isNull(fileDao)) {
+
+            // gitHubからアセットを取得
+            final GitHubApiService.NetworkResource assetFile = gitHubApiService.getDllFromAsset(
+                    gitHubReposResponse.getOwner().getLogin(),
+                    gitHubReposResponse.getName(),
+                    assetId
+            );
+
+            //ファイル形式に応じて処理を変更
+            Optional<String> ext = getExt(assetFile.getOriginalFileNamePath());
+            if (ext.isEmpty()) {
+                throw new GitHubResourceException("not found ext");
+            }
+
+            try {
+                switch (ext.get()) {
+                    case "zip":
+                        saveDeliverable(buildDeliverableFromArchive(assetFile.getPath()), assetId);
+                        break;
+                    case "json":
+                        registerDeliverableFromJson(assetFile.getPath(), assetId);
+                        break;
+                    default:
+                        throw new ArgumentException("Not support file type", assetFile);
+                }
+            } catch (ArgumentException e) {
+                throw new GitHubResourceException("bad asset", e);
+            }
+
+            return true;
+        } else {
+            return false;
         }
     }
 
+
     @Transactional
-    void update(
-            @NonNull Map<Integer, Integer> exeId2assetId,
-            @NonNull GitHubReposResponse gitHubReposResponse) {
+    void update(@NonNull Map<Integer, Integer> exeId2assetId,
+                @NonNull GitHubReposResponse gitHubReposResponse) throws OtherSystemException {
         for (Map.Entry<Integer, Integer> entry : exeId2assetId.entrySet()) {
             final int exeId = entry.getKey();
             final int assetId = entry.getValue();
 
-            final FileDao fileDao = fileDaoMapper.selectByAssetId(assetId);
-            if (Objects.isNull(fileDao)) {
-                final Path assetFile = gitHubApiService.getDllFromAsset(
-                        gitHubReposResponse.getOwner().getLogin(),
-                        gitHubReposResponse.getName(),
-                        assetId
-                );
-
-                final Path deliverable = buildDeliverable(assetFile);
-
-                try {
-                    saveDeliverable(deliverable, assetId);
-                } catch (MachineException e) {
-                    throw new IllegalStateException(e);
-                }
+            if (assetPersist(gitHubReposResponse, assetId)) {
+                log.info("persist asset");
             }
 
             final List<ExeDao> exeDaoList = exeDaoMapper.list(ExeSelectCondition
@@ -393,7 +466,7 @@ public class DistributionService {
             );
 
             if (exeDaoList.size() != 1) {
-                throw new IllegalArgumentException("a");
+                throw new OtherSystemException("exeDaoList is not one. Maybe db state error.");
             }
 
             exeDaoList.get(0).setDistributionAssetId(assetId);
