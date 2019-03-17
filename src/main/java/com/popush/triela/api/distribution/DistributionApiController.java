@@ -1,10 +1,10 @@
 package com.popush.triela.api.distribution;
 
-import com.popush.triela.Manager.distribution.DistributionService;
+import com.popush.triela.manager.distribution.DistributionService;
 import com.popush.triela.api.TrielaApiV1Controller;
-import com.popush.triela.common.DB.FileDao;
-import com.popush.triela.common.DB.FileSelectCondition;
-import com.popush.triela.common.Exception.NotModifiedException;
+import com.popush.triela.common.db.FileDao;
+import com.popush.triela.common.db.FileSelectCondition;
+import com.popush.triela.common.exception.NotModifiedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;

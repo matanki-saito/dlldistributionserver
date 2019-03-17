@@ -1,10 +1,10 @@
 package com.popush.triela.common.github;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.popush.triela.common.Exception.GitHubResourceException;
-import com.popush.triela.common.Exception.GitHubServiceException;
-import com.popush.triela.common.Exception.MachineException;
-import com.popush.triela.common.Exception.OtherSystemException;
+import com.popush.triela.common.exception.GitHubResourceException;
+import com.popush.triela.common.exception.GitHubServiceException;
+import com.popush.triela.common.exception.MachineException;
+import com.popush.triela.common.exception.OtherSystemException;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
