@@ -1,7 +1,7 @@
 package com.popush.triela.common.github;
 
-import com.popush.triela.common.Exception.ArgumentException;
-import com.popush.triela.common.Exception.OtherSystemException;
+import com.popush.triela.common.exception.ArgumentException;
+import com.popush.triela.common.exception.OtherSystemException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
