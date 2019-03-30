@@ -24,6 +24,7 @@
 <body>
 <header th:include="header"></header>
 <main class="container">
+    <h2 th:text="${gitHubRepositoryName}"></h2>
     <form class="form-group" enctype="multipart/form-data" method="post"
           th:action="@{'/mgr/v1/product/' + ${gitHubRepositoryId} + '/distribution'}">
         <table class="table table-striped">
@@ -47,9 +48,9 @@
                     <div class="custom-control custom-radio">
                         <input class="custom-control-input"
                                th:checked="${exe.distributionAssetId != null and asset.assetId != null and exe.distributionAssetId.toString() == asset.assetId.toString()}"
-                               th:id="${exe.id}" th:name="${exe.id}" th:radiogroup="${exe.id}"
+                               th:id="${exe.id} + '-' +${asset.assetId}" th:name="${exe.id}" th:radiogroup="${exe.id}"
                                th:value="${asset.assetId}" type="radio"/>
-                        <label class="custom-control-label" th:for="${exe.id}"></label>
+                        <label class="custom-control-label" th:for="${exe.id} + '-' +${asset.assetId}"></label>
                     </div>
                 </td>
             </tr>

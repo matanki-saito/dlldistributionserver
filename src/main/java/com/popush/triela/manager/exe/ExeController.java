@@ -24,6 +24,7 @@ public class ExeController extends TrielaManagerV1Controller {
             @PathVariable("gitHubMyRepoId") int gitHubMyRepoId,
             GitHubReposResponse gitHubReposResponse
     ) {
+        model.addAttribute("gitHubRepositoryName", gitHubReposResponse.getFullName());
         model.addAttribute("gitHubRepositoryId", gitHubReposResponse.getId());
         model.addAttribute("form", exeForm);
         model.addAttribute("list", exeService.list(gitHubReposResponse.getId()));
