@@ -4,7 +4,7 @@
 #
 version: 2.1
 jobs:
-  build:
+  only_my_sisters:
     docker:
       # specify the version you desire here
       - image: circleci/openjdk:11-jdk
@@ -69,4 +69,4 @@ workflows:
   version: 2
   build_deploy:
     jobs:
-      - build
+      - only_my_sisters
