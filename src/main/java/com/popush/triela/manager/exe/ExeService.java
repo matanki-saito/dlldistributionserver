@@ -31,12 +31,17 @@ public class ExeService {
         );
     }
 
+    @Transactional
+    void delete(int id) {
+        exeDaoMapper.delete(id);
+    }
+
     @Transactional(readOnly = true)
     public List<ExeForm> list(int gitHubRepoId) {
         return exeDaoMapper.list(ExeSelectCondition.builder().gitHubRepoId(gitHubRepoId).build()).stream().map(
                 elem -> ExeForm
                         .builder()
-                        .Id(elem.getId())
+                        .id(elem.getId())
                         .description(elem.getDescription())
                         .md5(elem.getMd5())
                         .version(elem.getVersion())

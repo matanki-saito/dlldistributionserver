@@ -18,7 +18,7 @@ class ExeForm implements Serializable, Comparable<ExeForm> {
     /**
      * ID
      */
-    private int Id;
+    private int id;
 
     /**
      * eu4.exe or ck2game.exe message digest

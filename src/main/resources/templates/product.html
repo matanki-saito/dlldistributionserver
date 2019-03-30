@@ -4,20 +4,23 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
     <title>Product Manager</title>
-    <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
-          integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" rel="stylesheet">
-
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container {
+            padding: 3rem 1.5rem;
+            text-align: center;
+        }
+    </style>
 </head>
 
 <body>
-<div class="container">
-    <header th:include="header"></header>
+<header th:include="header"></header>
 
-    <p>productはあなたがpush権限を持つgithubのrepositoryと対応します。</p>
-    <table class="table table-striped">
+<main class="container" role="main">
+    <p>These items are Github repositories where you have Push authority.</p>
+    <table class="table table-hover ">
         <thead>
         <tr class="thead-light">
-            <th scope="col">GitHub repository id</th>
             <th scope="col">GitHub repository name</th>
             <th scope="col">exe</th>
             <th scope="col">distribution</th>
@@ -25,18 +28,23 @@
         </thead>
         <tbody>
         <tr th:each="product : ${list}" th:object="${product}">
-            <td th:text="*{gitHubRepositoryId}"></td>
-            <td th:text="*{gitHubRepositoryName}"></td>
             <td>
-                <a th:href="@{'/mgr/v1/product/' + ${product.gitHubRepositoryId} + '/exe'}">link</a>
+                <a class="form-control btn btn-outline-primary"
+                   th:href="'https://github.com/' + *{gitHubRepositoryName}"
+                   th:text="*{gitHubRepositoryName}"></a>
             </td>
             <td>
-                <a th:href="@{'/mgr/v1/product/' + ${product.gitHubRepositoryId} + '/distribution'}">link</a>
+                <a class="form-control btn btn-success"
+                   th:href="@{'/mgr/v1/product/' + ${product.gitHubRepositoryId} + '/exe'}">Settings</a>
+            </td>
+            <td>
+                <a class="form-control btn btn-info"
+                   th:href="@{'/mgr/v1/product/' + ${product.gitHubRepositoryId} + '/distribution'}">Settings</a>
             </td>
         </tr>
         </tbody>
     </table>
-</div>
+</main>
 
 
 <!-- Optional JavaScript -->

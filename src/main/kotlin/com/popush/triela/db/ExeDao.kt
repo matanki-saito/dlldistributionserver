@@ -30,6 +30,16 @@ interface ExeDao {
     """)
     fun upsert(@NonNull exeDao: ExeDto)
 
+    @Delete("""
+        <script>
+            DELETE FROM exe
+            <where>
+                id = #{id}
+            </where>
+        </script>
+    """)
+    fun delete(@NonNull id: Int)
+
     @Results(
             Result(property = "distributionAssetId", column = "distribution_asset_id"),
             Result(property = "gitHubRepoId", column = "github_repo_id")

@@ -1,7 +1,7 @@
 package com.popush.triela.manager.exe;
 
-import com.popush.triela.manager.TrielaManagerV1Controller;
 import com.popush.triela.common.github.GitHubReposResponse;
+import com.popush.triela.manager.TrielaManagerV1Controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -41,5 +41,17 @@ public class ExeController extends TrielaManagerV1Controller {
         exeService.save(exeForm, gitHubMyRepoId);
 
         return "redirect:exe";
+    }
+
+    @PostMapping("product/{gitHubMyRepoId}/delete/{id}")
+    public String postProductDelete(
+            Model model,
+            @PathVariable("gitHubMyRepoId") int gitHubMyRepoId,
+            @PathVariable("id") int id,
+            GitHubReposResponse gitHubReposResponse
+    ) {
+        exeService.delete(id);
+
+        return "redirect:../exe";
     }
 }
