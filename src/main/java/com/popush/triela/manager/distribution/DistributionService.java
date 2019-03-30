@@ -4,11 +4,16 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.popush.triela.common.aws.S3Service;
-import com.popush.triela.common.db.*;
+import com.popush.triela.common.db.ExeDto;
+import com.popush.triela.common.db.ExeSelectCondition;
+import com.popush.triela.common.db.FileDto;
+import com.popush.triela.common.db.FileSelectCondition;
 import com.popush.triela.common.exception.*;
 import com.popush.triela.common.github.GitHubApiService;
 import com.popush.triela.common.github.GitHubReleaseResponse;
 import com.popush.triela.common.github.GitHubReposResponse;
+import com.popush.triela.db.ExeDao;
+import com.popush.triela.db.FileDao;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,8 +45,8 @@ import java.util.zip.ZipOutputStream;
 @RequiredArgsConstructor
 public class DistributionService {
 
-    private final ExeDaoMapper exeDaoMapper;
-    private final FileDaoMapper fileDaoMapper;
+    private final ExeDao exeDaoMapper;
+    private final FileDao fileDaoMapper;
     private final GitHubApiService gitHubApiService;
     private final DistributionProperties properties;
     private final S3Service s3Service;
@@ -126,7 +131,7 @@ public class DistributionService {
         }
 
         fileDaoMapper.upsert(
-                FileDao.builder()
+                FileDto.builder()
                         .assetId(assetId)
                         .data(null)
                         .md5(jsonData.getFileMd5())
@@ -157,7 +162,7 @@ public class DistributionService {
             );
 
             fileDaoMapper.upsert(
-                    FileDao.builder()
+                    FileDto.builder()
                             .assetId(assetId)
                             .data(null)
                             .md5(calMd5(deliverable))
@@ -174,7 +179,7 @@ public class DistributionService {
             }
 
             fileDaoMapper.upsert(
-                    FileDao.builder()
+                    FileDto.builder()
                             .assetId(assetId)
                             .data(allDataBytes)
                             .md5(calMd5(allDataBytes))
@@ -193,8 +198,8 @@ public class DistributionService {
      */
     //@Cacheable("dllCache") うまく動作してるか心配だったのでコメントアウトしてる
     @Transactional(readOnly = true)
-    public Optional<FileDao> getDllData(@NonNull FileSelectCondition condition) throws NotModifiedException {
-        final List<FileDao> fileDaoList = fileDaoMapper.list(condition);
+    public Optional<FileDto> getDllData(@NonNull FileSelectCondition condition) throws NotModifiedException {
+        final List<FileDto> fileDaoList = fileDaoMapper.list(condition);
 
         if (fileDaoList.size() != 1) {
             throw new NotModifiedException();
@@ -409,7 +414,7 @@ public class DistributionService {
      */
     private boolean assetPersist(@NonNull GitHubReposResponse gitHubReposResponse,
                                  int assetId) throws OtherSystemException {
-        final FileDao fileDao = fileDaoMapper.selectByAssetId(assetId);
+        final FileDto fileDao = fileDaoMapper.selectByAssetId(assetId);
         if (Objects.isNull(fileDao)) {
 
             // gitHubからアセットを取得
@@ -458,7 +463,7 @@ public class DistributionService {
                 log.info("persist asset");
             }
 
-            final List<ExeDao> exeDaoList = exeDaoMapper.list(ExeSelectCondition
+            final List<ExeDto> exeDaoList = exeDaoMapper.list(ExeSelectCondition
                     .builder()
                     .id(exeId)
                     .gitHubRepoId(gitHubReposResponse.getId())
