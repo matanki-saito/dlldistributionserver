@@ -59,7 +59,7 @@ public class ExceptionHandler {
         log.error("RuntimeException={}", e);
 
         // work around
-        if (e.getMessage().startsWith("Access token provider returned ExeDao null access token,")) {
+        if (e.getMessage().startsWith("Access token provider returned a null access token,")) {
             final HttpHeaders headers = new HttpHeaders();
             headers.setLocation(URI.create("/logout"));
 
