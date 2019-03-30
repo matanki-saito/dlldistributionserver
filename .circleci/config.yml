@@ -4,19 +4,10 @@
 #
 version: 2.1
 jobs:
-  only_my_sisters:
+  build:
     docker:
       # specify the version you desire here
       - image: circleci/openjdk:11-jdk
-
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/postgres:9.4
-    branches:
-      only:
-        - master
-
     working_directory: ~/repo
 
     environment:
@@ -65,8 +56,13 @@ jobs:
       - run: git config --global user.name "circleci"
       - run: |
           ./gradlew release -Prelease.useAutomaticVersion=true
+
 workflows:
-  version: 2
-  build_deploy:
+  build_and_docker_deploy:
     jobs:
-      - only_my_sisters
+      - build:
+          name: build
+          filters:
+            branches:
+              only:
+                - master
