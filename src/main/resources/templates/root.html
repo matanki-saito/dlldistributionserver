@@ -4,14 +4,18 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
     <title>Exe Manager</title>
-    <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
-          integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" rel="stylesheet">
-
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container {
+            padding: 3rem 1.5rem;
+            text-align: center;
+        }
+    </style>
 </head>
 
 <body>
+<header th:include="header"></header>
 <div class="container">
-    <header th:include="header"></header>
     <p>Triela preview version</p>
 </div>
 
