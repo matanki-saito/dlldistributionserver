@@ -4,7 +4,10 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.popush.triela.common.aws.S3Service;
-import com.popush.triela.common.db.*;
+import com.popush.triela.common.db.ExeDto;
+import com.popush.triela.common.db.ExeSelectCondition;
+import com.popush.triela.common.db.FileDto;
+import com.popush.triela.common.db.FileSelectCondition;
 import com.popush.triela.common.exception.*;
 import com.popush.triela.common.github.GitHubApiService;
 import com.popush.triela.common.github.GitHubReleaseResponse;
@@ -367,7 +370,7 @@ public class DistributionService {
             bos.flush();
             bout.flush();
         } catch (IOException e) {
-            throw new MachineException("Cannot write ExeDao temp file.", e);
+            throw new MachineException("Cannot write a temp file.", e);
         }
 
         return result;
