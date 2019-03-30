@@ -27,7 +27,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
      * Cache-Controlを設定する
      *
      * @param registry registry
-     * @see <a href="https://stackoverflow.com/questions/24164014/how-to-enable-http-response-caching-in-spring-boot">参考</a>
+     * @see <ExeDao href="https://stackoverflow.com/questions/24164014/how-to-enable-http-response-caching-in-spring-boot">参考</ExeDao>
      */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {

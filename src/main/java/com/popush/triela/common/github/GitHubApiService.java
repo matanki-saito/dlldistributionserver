@@ -187,7 +187,7 @@ public class GitHubApiService {
         try {
             tmpFile = Files.createTempFile("triela_asset", ".tmp");
         } catch (IOException e) {
-            throw new MachineException("Cannot create a temp file", e);
+            throw new MachineException("Cannot create ExeDao temp file", e);
         }
 
         try (InputStream is = responseBody.byteStream()) {

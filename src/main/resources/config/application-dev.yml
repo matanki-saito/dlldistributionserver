@@ -1,6 +1,6 @@
 server:
   ssl:
-    key-store: ../triela-private/triela.tk/triela.pkcs12
+    key-store: ../triela-private/triela.ml/triela.pkcs12
     #key-store-password: [from triela-private]
     keyStoreType: PKCS12
     keyAlias: triela

@@ -2,7 +2,7 @@ package com.popush.triela.api.distribution;
 
 import com.popush.triela.manager.distribution.DistributionService;
 import com.popush.triela.api.TrielaApiV1Controller;
-import com.popush.triela.common.db.FileDao;
+import com.popush.triela.common.db.FileDto;
 import com.popush.triela.common.db.FileSelectCondition;
 import com.popush.triela.common.exception.NotModifiedException;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +31,7 @@ public class DistributionApiController extends TrielaApiV1Controller {
                                   @RequestParam(value = "phase", required = false, defaultValue = "prod") String phase) throws NotModifiedException {
 
         // リクエストに一致するエントリの取得
-        final Optional<FileDao> result = distributionMgrService.getDllData(FileSelectCondition.builder()
+        final Optional<FileDto> result = distributionMgrService.getDllData(FileSelectCondition.builder()
                 .distributedExeMd5(exeMd5)
                 .gitHubRepoId(gitHubRepoId)
                 .md5(dllMd5)
@@ -42,7 +42,7 @@ public class DistributionApiController extends TrielaApiV1Controller {
         if (result.isEmpty()) {
             throw new IllegalStateException();
         }
-        final FileDao fileDao = result.get();
+        final FileDto fileDao = result.get();
 
         Object responseBody;
         HttpStatus status;

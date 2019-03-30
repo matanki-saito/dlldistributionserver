@@ -1,9 +1,9 @@
 package com.popush.triela.manager.exe;
 
-import com.popush.triela.common.db.ExeDao;
-import com.popush.triela.common.db.ExeDaoMapper;
+import com.popush.triela.common.db.ExeDto;
 import com.popush.triela.common.db.ExeSelectCondition;
 import com.popush.triela.common.github.GitHubApiService;
+import com.popush.triela.db.ExeDao;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,12 +16,12 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ExeService {
-    final ExeDaoMapper exeDaoMapper;
+    final ExeDao exeDaoMapper;
     final GitHubApiService apiService;
 
     @Transactional
     void save(@NonNull ExeForm form, int gitHubRepoId) {
-        exeDaoMapper.upsert(ExeDao.builder()
+        exeDaoMapper.upsert(ExeDto.builder()
                 .gitHubRepoId(gitHubRepoId)
                 .md5(form.getMd5())
                 .version(form.getVersion())
