@@ -8,7 +8,8 @@ import org.apache.ibatis.annotations.*
 @Mapper
 interface ExeDao {
     @Insert("""
-        INSERT INTO exe (
+        INSERT INTO exe
+        (
             id,
             md5,
             version,
@@ -17,7 +18,8 @@ interface ExeDao {
             distribution_asset_id,
             phase
         )
-        VALUES (
+        VALUES
+        (
             #{id},
             #{md5},
             #{version},
@@ -25,7 +27,7 @@ interface ExeDao {
             #{description},
             #{distributionAssetId},
             #{phase}
-        )
+        );
         ON DUPLICATE KEY UPDATE distribution_asset_id = #{distributionAssetId}
     """)
     fun upsert(@NonNull exeDao: ExeDto)

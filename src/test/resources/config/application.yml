@@ -1,0 +1,7 @@
+spring:
+  # このデータソース設定は別になくても動作する
+  datasource:
+    driverClassName: org.h2.Driver
+    url: jdbc:h2:mem:;DB_CLOSE_ON_EXIT=TRUE;MODE=MySQL
+    username:
+    password:
