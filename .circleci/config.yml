@@ -9,10 +9,10 @@ jobs:
       # specify the version you desire here
       - image: circleci/openjdk:11-jdk
       - image: mysql:8.0.15
-          environment:
-            MYSQL_ROOT_PASSWORD: 1qaz2wsx
-            MYSQL_DATABASE: testdb
-          command: [--character-set-server=utf8mb4, --collation-server=utf8mb4_general_ci, --default-storage-engine=innodb]
+        environment:
+          MYSQL_ROOT_PASSWORD: 1qaz2wsx
+          MYSQL_DATABASE: testdb
+        command: [--character-set-server=utf8mb4, --collation-server=utf8mb4_general_ci, --default-storage-engine=innodb]
     working_directory: ~/repo
 
     environment:
