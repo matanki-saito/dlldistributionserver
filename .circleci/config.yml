@@ -14,6 +14,15 @@ executors:
           # Customize the JVM maximum heap limit
           JVM_OPTS: -Xmx3200m
           TERM: dumb
+  tester:
+    working_directory: ~/repo
+    docker:
+      # specify the version you desire here
+      - image: circleci/openjdk:11-jdk
+        environment:
+          # Customize the JVM maximum heap limit
+          JVM_OPTS: -Xmx3200m
+          TERM: dumb
       - image: mysql:8.0.15
         environment:
           MYSQL_ROOT_PASSWORD: 1qaz2wsx
@@ -43,15 +52,15 @@ jobs:
       - checkout
       - restore_gradle
       - run: ./gradlew dependencies
-      - run: dockerize -wait tcp://localhost:3306 -timeout 1m
       - save_gradle
 
   test:
     executor:
-      name: default
+      name: tester
     steps:
       - checkout
       - restore_gradle
+      - run: dockerize -wait tcp://localhost:3306 -timeout 1m
       - run: ./gradlew test
 
   deploy:
@@ -86,6 +95,10 @@ workflows:
       - test:
           requires:
             - setup
+          filters:
+            only:
+              - master
+              - develop
 
       - deploy:
           requires:
