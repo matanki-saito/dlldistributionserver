@@ -90,7 +90,12 @@ jobs:
 workflows:
   build_and_docker_deploy:
     jobs:
-      - setup
+      - setup:
+        filters:
+          branches:
+            only:
+              - master
+              - develop
 
       - test:
           requires:
