@@ -96,9 +96,10 @@ workflows:
           requires:
             - setup
           filters:
-            only:
-              - master
-              - develop
+            branches:
+              only:
+                - master
+                - develop
 
       - deploy:
           requires:
