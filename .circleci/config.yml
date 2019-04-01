@@ -86,9 +86,9 @@ workflows:
       - test:
           requires:
             - setup
-          commit:
-            only:
-              - .*<test>.*
+          filters:
+            commit:
+              only: .*<test>.*
 
       - deploy:
           requires:
