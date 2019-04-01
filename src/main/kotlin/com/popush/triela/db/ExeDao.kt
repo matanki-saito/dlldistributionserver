@@ -27,7 +27,7 @@ interface ExeDao {
             #{description},
             #{distributionAssetId},
             #{phase}
-        );
+        )
         ON DUPLICATE KEY UPDATE distribution_asset_id = #{distributionAssetId}
     """)
     fun upsert(@NonNull exeDao: ExeDto)
