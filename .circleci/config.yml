@@ -81,6 +81,8 @@ jobs:
 workflows:
   build_and_docker_deploy:
     jobs:
+      - setup
+
       - test:
           requires:
             - setup
