@@ -3,66 +3,112 @@
 # Check https://circleci.com/docs/2.0/language-java/ for more details
 #
 version: 2.1
-jobs:
-  build:
+
+executors:
+  default:
+    working_directory: ~/repo
     docker:
       # specify the version you desire here
       - image: circleci/openjdk:11-jdk
+        environment:
+          # Customize the JVM maximum heap limit
+          JVM_OPTS: -Xmx3200m
+          TERM: dumb
+  tester:
     working_directory: ~/repo
+    docker:
+      # specify the version you desire here
+      - image: circleci/openjdk:11-jdk
+        environment:
+          # Customize the JVM maximum heap limit
+          JVM_OPTS: -Xmx3200m
+          TERM: dumb
+      - image: mysql:8.0.15
+        environment:
+          MYSQL_ROOT_PASSWORD: 1qaz2wsx
+          MYSQL_DATABASE: testdb
+        command: [--character-set-server=utf8mb4, --collation-server=utf8mb4_general_ci, --default-storage-engine=innodb]
 
-    environment:
-      # Customize the JVM maximum heap limit
-      JVM_OPTS: -Xmx3200m
-      TERM: dumb
-
+commands:
+  restore_gradle:
     steps:
-      - checkout
-
-      - setup_remote_docker:   # (2)
-          docker_layer_caching: true # (3)
-
-      - run:
-          name: Install Docker client
-          command: |
-            set -x
-            VER="17.03.0-ce"
-            curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
-            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
-            sudo mv -f /tmp/docker/* /usr/bin
-
-      # Download and cache dependencies
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "build.gradle" }}
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
-
-      - run: ./gradlew dependencies
-
+  save_gradle:
+    steps:
       - save_cache:
           paths:
             - ~/.gradle
           key: v1-dependencies-{{ checksum "build.gradle" }}
 
+jobs:
+  setup:
+    executor:
+      name: default
+    steps:
+      - checkout
+      - restore_gradle
+      - run: ./gradlew dependencies
+      - save_gradle
+
+  test:
+    executor:
+      name: tester
+    steps:
+      - checkout
+      - restore_gradle
+      - run: dockerize -wait tcp://localhost:3306 -timeout 1m
+      - run: ./gradlew test
+
+  deploy:
+    executor:
+      name: default
+    steps:
+      - checkout
+      - restore_gradle
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run: |
+          set -x
+          VER="17.03.0-ce"
+          curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
+          tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+          sudo mv -f /tmp/docker/* /usr/bin
       - run: |
           docker login -u $DOCKER_USER -p $DOCKER_PASS
           ./gradlew docker dockerPush
-
       - add_ssh_keys:
           fingerprints:
             - "27:9e:e8:82:c9:46:d9:b1:f0:0f:97:cd:1f:ab:fc:fd"
-
       - run: git config --global user.email "matanki.saito@gmail.com"
       - run: git config --global user.name "circleci"
-      - run: |
-          ./gradlew release -Prelease.useAutomaticVersion=true
+      - run: ./gradlew release -Prelease.useAutomaticVersion=true
 
 workflows:
   build_and_docker_deploy:
     jobs:
-      - build:
-          name: build
+      - setup:
           filters:
             branches:
               only:
                 - master
+                - develop
+
+      - test:
+          requires:
+            - setup
+          filters:
+            branches:
+              only:
+                - master
+                - develop
+
+      - deploy:
+          requires:
+            - test
+          filters:
+            branches:
+              only: master
