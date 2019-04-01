@@ -26,19 +26,8 @@ public class SampleTest {
 
     @Test
     public void simpleTest() {
-//        dao.upsert(ExeDto.builder()
-//                .id(1)
-//                .description("hoge")
-//                .distributionAssetId(1)
-//                .gitHubRepoId(1)
-//                .md5("123456")
-//                .phase("dev")
-//                .version("1.0.0.0")
-//                .build()
-//        );
-        var list = dao.list(ExeSelectCondition.builder().build());
+        var list = dao.list(ExeSelectCondition.builder().id(1).build());
 
         softly.assertThat(list.size()).isEqualTo(1);
-
     }
 }
