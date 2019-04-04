@@ -4,16 +4,22 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
     <title>Exe Manager</title>
-    <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
-          integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" rel="stylesheet">
-
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container {
+            padding: 3rem 1.5rem;
+            text-align: center;
+        }
+    </style>
 </head>
 
 <body>
-<div class="container">
-    <header th:include="header"></header>
+<header th:include="header"></header>
+
+<main class="container">
+    <h2 th:text="${gitHubRepositoryName}"></h2>
     <p>exeはrepositoryに対して存在します。画面上にexeをD&Dすることでmd5とdescriptionを自動で埋めることができます</p>
-    <table class="table table-striped">
+    <table class="table table-hover">
         <tbody>
         <tr class="thead-light">
             <th scope="col">md5</th>
@@ -23,14 +29,31 @@
             <th scope="col">operation</th>
         </tr>
         <tr>
-            <form enctype="multipart/form-data" method="post"
+            <form class="form-group"
+                  enctype="multipart/form-data"
+                  method="post"
                   th:action="@{'/mgr/v1/product/' + ${gitHubRepositoryId} + '/exe'}" th:object="${form}">
-                <td><input id="md5" th:field="*{md5}" type="text"/></td>
-                <td><input th:field="*{version}" type="text"/></td>
-                <td><input id="phase" th:field="*{phase}" type="text"/></td>
-                <td><input id="description" th:field="*{description}" type="text"/></td>
+                <td><input class="form-control" id="md5" th:field="*{md5}"
+                           th:placeholder="c2765bbe64b36757b276274cafe2c3f1"
+                           type="text"/></td>
+                <td><input class="form-control" th:field="*{version}" th:placeholder="1.0.1.1" type="text"/></td>
                 <td>
-                    <button type="submit">register</button>
+                    <input autocomplete="on"
+                           class="form-control"
+                           id="phase"
+                           list="phase_list"
+                           th:field="*{phase}"
+                           th:placeholder="prod"
+                           type="text"
+                    />
+                    <datalist id="phase_list">
+                        <option value="prod">
+                        <option value="dev">
+                    </datalist>
+                </td>
+                <td><input class="form-control" id="description" th:field="*{description}" type="text"/></td>
+                <td>
+                    <button class="form-control btn btn-success" type="submit">register</button>
                 </td>
             </form>
         </tr>
@@ -42,17 +65,28 @@
             <th scope="col">operation</th>
         </tr>
         <tr th:each="exe : ${list}" th:object="${exe}">
-            <td th:text="*{md5}"></td>
-            <td th:text="*{version}"></td>
-            <td th:text="*{phase}"></td>
+            <td>
+                <span class="badge badge-dark" th:text="*{md5}"></span>
+            </td>
+            <td>
+                <span class="badge badge-info" th:text="*{version}"></span>
+            </td>
+            <td>
+                <div class="badge badge-warning" th:if="${exe.phase == 'dev'}" th:text="*{phase}"></div>
+                <div class="badge badge-success" th:if="${exe.phase == 'prod'}" th:text="*{phase}"></div>
+            </td>
             <td th:text="*{description}"></td>
             <td>
-                <button>delete</button>
+                <form enctype="multipart/form-data"
+                      method="post"
+                      th:action="@{'/mgr/v1/product/' + ${gitHubRepositoryId} + '/delete/' + ${exe.id} }">
+                    <button class="form-control btn btn-danger">DELETE</button>
+                </form>
             </td>
         </tr>
         </tbody>
     </table>
-</div>
+</main>
 
 
 <!-- Optional JavaScript -->

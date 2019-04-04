@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class FileDao {
+public class FileDto {
     private String md5;
     private byte[] data;
     private String dataUrl;

@@ -6,7 +6,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ExeDao {
+public class ExeDto {
     private int id;
     private int gitHubRepoId;
     @NonNull
