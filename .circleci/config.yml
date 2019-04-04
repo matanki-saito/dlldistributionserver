@@ -65,7 +65,7 @@ jobs:
 
   deploy:
     executor:
-      name: default
+      name: tester
     steps:
       - checkout
       - restore_gradle
@@ -94,7 +94,6 @@ workflows:
           filters:
             branches:
               only:
-                - master
                 - develop
 
       - test:
@@ -103,12 +102,9 @@ workflows:
           filters:
             branches:
               only:
-                - master
                 - develop
 
       - deploy:
-          requires:
-            - test
           filters:
             branches:
               only: master
