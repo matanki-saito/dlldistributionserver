@@ -17,8 +17,30 @@
 <header th:include="header"></header>
 
 <main class="container" role="main">
-    <p>These items are Github repositories where you have Push authority.</p>
-    <table class="table table-hover ">
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light" th:object="${condition}">
+        <div class="collapse navbar-collapse" id="Navber">
+            <form class="form-inline my-2 my-lg-0" th:action="@{'/mgr/v1/product'}" th:method="get">
+                <input th:value="${condition.name}"
+                       type="search"
+                       th:name="name"
+                       class="form-control mr-sm-2"
+                       placeholder="eu4..."
+                       list="suggest"
+                       aria-label="Search...">
+                <datalist id="suggest">
+                    <option value="CK2"></option>
+                    <option value="EU4"></option>
+                    <option value="ImperatorRome"></option>
+                    <option value="Mod"></option>
+                    <option value="font"></option>
+                </datalist>
+                <button type="submit" class="btn btn-outline-success my-2 my-sm-0">Search</button>
+            </form>
+        </div>
+    </nav>
+
+    <table class="table table-hover" th:object="${form}">
         <thead>
         <tr class="thead-light">
             <th scope="col">GitHub repository name</th>
@@ -27,23 +49,50 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="product : ${list}" th:object="${product}">
+        <tr th:each="element : ${form.data}">
             <td>
                 <a class="form-control btn btn-outline-primary"
-                   th:href="'https://github.com/' + *{gitHubRepositoryName}"
-                   th:text="*{gitHubRepositoryName}"></a>
+                   th:href="'https://github.com/' + ${element.gitHubRepositoryName}"
+                   th:text="${element.gitHubRepositoryName}"></a>
             </td>
             <td>
                 <a class="form-control btn btn-success"
-                   th:href="@{'/mgr/v1/product/' + ${product.gitHubRepositoryId} + '/exe'}">Settings</a>
+                   th:href="@{'/mgr/v1/product/' + ${element.gitHubRepositoryId} + '/exe'}">Settings</a>
             </td>
             <td>
                 <a class="form-control btn btn-info"
-                   th:href="@{'/mgr/v1/product/' + ${product.gitHubRepositoryId} + '/distribution'}">Settings</a>
+                   th:href="@{'/mgr/v1/product/' + ${element.gitHubRepositoryId} + '/distribution'}">Settings</a>
             </td>
         </tr>
         </tbody>
     </table>
+
+    <nav aria-label="..." th:unless="${form.getData().getSize() == 0}">
+        <ul class="pagination">
+            <li class="page-item"
+                th:classappend="${form.getData().first} ? 'disabled':''">
+                <a class="page-link"
+                   th:href="@{${'/mgr/v1/product'}(page=0,name=${condition.getName()})}"
+                   aria-label="|<">
+                    first
+                </a>
+            </li>
+            <li class="page-item"
+                th:each='i : ${#numbers.sequence(0, form.getData().totalPages -1)}'
+                th:classappend="(${i}==${form.getData().number})? 'active' : ''">
+                <a class="page-link" href="#" th:href="@{${'/mgr/v1/product'}(page=${i},name=${condition.getName()})}">
+                    <span th:text='${i+1}'>1</span>
+                </a>
+            </li>
+            <li class="page-item"
+                th:classappend="${form.getData().last} ? 'disabled':''">
+                <a class="page-link" href="#" aria-label=">|"
+                   th:href="@{${'/mgr/v1/product'}(page=(${form.getData().totalPages}-1),name=${condition.getName()})}">
+                    <span aria-hidden="true">Last</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
 </main>
 
 

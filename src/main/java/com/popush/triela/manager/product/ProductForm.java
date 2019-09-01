@@ -1,6 +1,7 @@
 package com.popush.triela.manager.product;
 
 import lombok.*;
+import org.springframework.data.domain.Page;
 
 import javax.validation.constraints.NotNull;
 
@@ -9,9 +10,17 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 class ProductForm {
-    @NotNull
-    private int gitHubRepositoryId;
+    private Page<ProductElement> data;
 
-    @NonNull
-    private String gitHubRepositoryName;
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    static class ProductElement {
+        @NotNull
+        private int gitHubRepositoryId;
+
+        @NonNull
+        private String gitHubRepositoryName;
+    }
 }
