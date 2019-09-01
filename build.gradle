@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        springBootVersion = '2.1.3.RELEASE'
+        springBootVersion = '2.1.5.RELEASE'
         kotlinVersion = "1.3.11"
     }
     repositories {
@@ -69,7 +69,7 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-cache')
     //implementation('org.springframework.boot:spring-boot-starter-data-elasticsearch')
     implementation('org.springframework.boot:spring-boot-starter-security')
-    implementation('org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:2.1.1.RELEASE')
+    implementation('org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:2.1.5.RELEASE')
     implementation('org.springframework.boot:spring-boot-starter-thymeleaf')
     implementation('com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.7')
     implementation('org.springframework.boot:spring-boot-starter-validation')
@@ -102,7 +102,7 @@ dependencies {
     testImplementation('com.squareup.okhttp3:mockwebserver:3.11.0')
     testImplementation('org.mybatis.spring.boot:mybatis-spring-boot-starter-test:1.3.2')
     testImplementation('org.assertj:assertj-core:3.12.0')
-    
+
 }
 
 dependencyManagement {
