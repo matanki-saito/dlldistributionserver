@@ -64,7 +64,7 @@ task unpack(type: Copy) {
 }
 
 gitPublish {
-    repoUri = "git@github.com:matanki-saito/dlldistributionserver.git"
+    repoUri = "git@github.com:matanki-saito/documants.git"
     branch = 'gh-pages'
 
     repoDir = file("$buildDir/build/docs")
@@ -74,7 +74,7 @@ gitPublish {
         from 'schemaspydoc'
     }
 
-    commitMessage = 'Publishing a new page'
+    commitMessage = '[skip ci] Publishing a new page'
 }
 
 // このアプリケーションでは作れないので、別にあるサーバで生成する
