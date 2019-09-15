@@ -45,6 +45,7 @@
   - swagger: https://swagger.io
   - logback
   - Slf4j
+  - schemaspy
 
 ## IDE and doc
   - IntelliJ IDEA: https://www.jetbrains.com/idea/
@@ -57,3 +58,7 @@
 ```
 $ docker-compose down && docker-compose up -d
 ```
+
+## documents
+ - [Schemaspy](https://matanki-saito.github.io/dlldistributionserver/schemadoc/)
+ - [Javadoc](https://matanki-saito.github.io/dlldistributionserver/javadoc/)
