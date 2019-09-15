@@ -196,7 +196,6 @@ public class DistributionService {
      * @param condition 条件
      * @return データ
      */
-    //@Cacheable("dllCache") うまく動作してるか心配だったのでコメントアウトしてる
     @Transactional(readOnly = true)
     public Optional<FileDto> getDllData(@NonNull FileSelectCondition condition) throws NotModifiedException {
         final List<FileDto> fileDaoList = fileDaoMapper.list(condition);
