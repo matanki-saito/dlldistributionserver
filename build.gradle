@@ -65,7 +65,7 @@ task unpack(type: Copy) {
 
 gitPublish {
     repoUri = "git@github.com:matanki-saito/dlldistributionserver.git"
-    branch = 'documents'
+    branch = 'master'
 
     contents {
         from(javadoc) {

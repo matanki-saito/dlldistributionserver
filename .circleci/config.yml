@@ -28,7 +28,7 @@ executors:
           MYSQL_ROOT_PASSWORD: 1qaz2wsx
           MYSQL_DATABASE: testdb
         command: [--character-set-server=utf8mb4, --collation-server=utf8mb4_general_ci, --default-storage-engine=innodb]
-  schemaspytest:
+  deployer:
     working_directory: ~/repo
     docker:
       - image: circleci/openjdk:11-jdk
@@ -80,7 +80,7 @@ jobs:
 
   deploy:
     executor:
-      name: tester
+      name: deployer
     steps:
       - checkout
       - restore_gradle
@@ -100,22 +100,8 @@ jobs:
             - "27:9e:e8:82:c9:46:d9:b1:f0:0f:97:cd:1f:ab:fc:fd"
       - run: git config --global user.email "matanki.saito@gmail.com"
       - run: git config --global user.name "circleci"
-      - run: ./gradlew release -Prelease.useAutomaticVersion=true
-
-  schemaspytest:
-    executor:
-      name: schemaspytest
-    steps:
-      - checkout
-      - restore_gradle
-      - run: dockerize -wait tcp://localhost:3306 -timeout 1m
-      - add_ssh_keys:
-          fingerprints:
-            - "27:9e:e8:82:c9:46:d9:b1:f0:0f:97:cd:1f:ab:fc:fd"
       - run: |
-          git config --global user.email "matanki.saito@gmail.com"
-          git config --global user.name "circleci"
-      - run: |
+          ./gradlew release -Prelease.useAutomaticVersion=true
           ./gradlew test
           ./gradlew schemaspydoc
           ./gradlew gitPublishPush
@@ -141,9 +127,3 @@ workflows:
           filters:
             branches:
               only: master
-
-      - schemaspytest:
-          filters:
-            branches:
-              only:
-                - /feature\/issue-75-.*/
