@@ -1,0 +1,15 @@
+com.popush.triela
+com.popush.triela.api
+com.popush.triela.api.distribution
+com.popush.triela.common
+com.popush.triela.common.auth
+com.popush.triela.common.aws
+com.popush.triela.common.db
+com.popush.triela.common.exception
+com.popush.triela.common.github
+com.popush.triela.help
+com.popush.triela.manager
+com.popush.triela.manager.distribution
+com.popush.triela.manager.exe
+com.popush.triela.manager.product
+com.popush.triela.root
