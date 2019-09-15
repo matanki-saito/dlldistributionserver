@@ -67,13 +67,12 @@ gitPublish {
     repoUri = "git@github.com:matanki-saito/dlldistributionserver.git"
     branch = 'documents'
 
-    repoDir = file("$buildDir/docs")
-
     contents {
-        from 'build/docs/javadoc'
-        from 'build/docs/schemaspydoc'
+        from(javadoc) {
+            into 'api'
+        }
     }
-    
+
     commitMessage = '[skip ci] Publishing a new page'
 }
 
