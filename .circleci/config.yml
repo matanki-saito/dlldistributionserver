@@ -117,6 +117,7 @@ jobs:
           git config --global user.name "circleci"
       - run: |
           ./gradlew test
+          ./gradlew schemaspydoc
           ./gradlew gitPublishPush
 
 workflows:

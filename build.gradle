@@ -71,9 +71,7 @@ gitPublish {
         from(javadoc) {
             into 'docs/javadoc'
         }
-        from(schemaspydoc) {
-            into 'docs/schemaspy'
-        }
+        from "$buildDir/docs/schemadoc"
     }
 
     commitMessage = '[skip ci] Publishing a new page'
