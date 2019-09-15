@@ -113,13 +113,13 @@ jobs:
           fingerprints:
             - "27:9e:e8:82:c9:46:d9:b1:f0:0f:97:cd:1f:ab:fc:fd"
       - run: |
-        git config --global user.email "matanki.saito@gmail.com"
-        git config --global user.name "circleci"
+          git config --global user.email "matanki.saito@gmail.com"
+          git config --global user.name "circleci"
       - run: |
-        ./gradlew test
-        ./gradlew javadoc
-        ./gradlew schemaspydoc
-        ./gradlew gitPublishPush
+          ./gradlew test
+          ./gradlew javadoc
+          ./gradlew schemaspydoc
+          ./gradlew gitPublishPush
 
 workflows:
   build_and_docker_deploy:
