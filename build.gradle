@@ -64,16 +64,16 @@ task unpack(type: Copy) {
 }
 
 gitPublish {
-    repoUri = "git@github.com:matanki-saito/documants.git"
-    branch = 'gh-pages'
+    repoUri = "git@github.com:matanki-saito/dlldistributionserver.git"
+    branch = 'documents'
 
-    repoDir = file("$buildDir/build/docs")
+    repoDir = file("$buildDir/docs")
 
     contents {
-        from 'javadoc'
-        from 'schemaspydoc'
+        from 'build/docs/javadoc'
+        from 'build/docs/schemaspydoc'
     }
-
+    
     commitMessage = '[skip ci] Publishing a new page'
 }
 
