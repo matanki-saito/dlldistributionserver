@@ -76,6 +76,11 @@ gitPublish {
         }
     }
 
+    preserve {
+        include '**'
+        exclude 'docs'
+    }
+
     commitMessage = '[skip ci] Publishing a new page'
 }
 
