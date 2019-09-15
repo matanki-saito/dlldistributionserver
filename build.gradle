@@ -69,7 +69,10 @@ gitPublish {
 
     contents {
         from(javadoc) {
-            into 'api'
+            into 'docs/javadoc'
+        }
+        from(schemaspydoc) {
+            into 'docs/schemaspy'
         }
     }
 
