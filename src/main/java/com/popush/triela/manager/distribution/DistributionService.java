@@ -91,8 +91,7 @@ public class DistributionService {
 
         try (DigestInputStream input = new DigestInputStream(Files.newInputStream(source), md)) {
             // ファイルの読み込み
-            while (input.read() != -1) {
-            }
+            input.readAllBytes();
         } catch (IOException e) {
             throw new MachineException("file read error", e);
         }
@@ -102,10 +101,10 @@ public class DistributionService {
         return String.format("%032x", bigInt);
     }
 
-    public static Optional<String> getExt(Path fileName) {
+    private static Optional<String> getExt(Path fileName) {
         if (fileName == null)
             return Optional.empty();
-        int point = fileName.toString().lastIndexOf(".");
+        int point = fileName.toString().lastIndexOf('.');
         if (point != -1) {
             return Optional.of(fileName.toString().substring(point + 1));
         }
@@ -211,14 +210,16 @@ public class DistributionService {
      * リリース情報からアセットの一覧を列挙して出力する
      *
      * @param gitHubReposResponse githubの情報
+     * @param token               アクセストークン
      * @return アセットの一覧
      * @throws OtherSystemException exp
      */
-    List<AssetForm> list(@NonNull GitHubReposResponse gitHubReposResponse) throws OtherSystemException {
+    List<AssetForm> list(@NonNull GitHubReposResponse gitHubReposResponse, @NonNull String token) throws OtherSystemException {
 
         final List<GitHubReleaseResponse> response = gitHubApiService.getReleasesSync(
                 gitHubReposResponse.getOwner().getLogin(),
-                gitHubReposResponse.getName()
+                gitHubReposResponse.getName(),
+                token
         );
 
         return response.stream()
@@ -391,10 +392,10 @@ public class DistributionService {
         }
 
         // archiveがfalse
-        if (!distFileFormatV1.getIsArchive()) {
+        if (distFileFormatV1.getIsArchive().equals(Boolean.FALSE)) {
             // 1つのみ -> そのまま成果物とする
             if (files.size() == 1) {
-                return files.entrySet().stream().findFirst().get().getValue();
+                return files.entrySet().stream().findFirst().orElseThrow().getValue();
             } else {
                 // 複数あるのにarchiveがfalse -> なにかおかしいが無視して圧縮
                 log.info("logic err ? files.size > 1 and archive false ");
@@ -406,21 +407,28 @@ public class DistributionService {
     }
 
     /**
-     * @param gitHubReposResponse GitHubの情報
-     * @param assetId             アセットID
+     * アセットを永続化する
+     *
+     * @param owner    Github repo owner
+     * @param repoName repository name
+     * @param assetId  アセットID
+     * @param token    トークン
      * @return 永続化されたらtrue
      * @throws OtherSystemException 引数異常
      */
-    private boolean assetPersist(@NonNull GitHubReposResponse gitHubReposResponse,
-                                 int assetId) throws OtherSystemException {
-        final FileDto fileDao = fileDaoMapper.selectByAssetId(assetId);
-        if (Objects.isNull(fileDao)) {
+    private boolean assetPersist(@NonNull String owner,
+                                 @NonNull String repoName,
+                                 int assetId,
+                                 String token) throws OtherSystemException {
+        final Optional<FileDto> fileDao = fileDaoMapper.selectByAssetId(assetId);
+        if (fileDao.isPresent()) {
 
             // gitHubからアセットを取得
             final GitHubApiService.NetworkResource assetFile = gitHubApiService.getDllFromAsset(
-                    gitHubReposResponse.getOwner().getLogin(),
-                    gitHubReposResponse.getName(),
-                    assetId
+                    owner,
+                    repoName,
+                    assetId,
+                    token
             );
 
             //ファイル形式に応じて処理を変更
@@ -450,22 +458,34 @@ public class DistributionService {
         }
     }
 
-
+    /**
+     * データを更新する
+     *
+     * @param exeId2assetId 更新対象となるexeIDとアセットIDのマップ
+     * @param owner         レポジトリオーナー
+     * @param repoName      レポジトリ名
+     * @param repoId        レポジトリID
+     * @param token         アクセストークン
+     * @throws OtherSystemException 外部異常
+     */
     @Transactional
-    void update(@NonNull Map<Integer, Integer> exeId2assetId,
-                @NonNull GitHubReposResponse gitHubReposResponse) throws OtherSystemException {
+    public void update(@NonNull Map<Integer, Integer> exeId2assetId,
+                       @NonNull String owner,
+                       @NonNull String repoName,
+                       @NonNull Integer repoId,
+                       @NonNull String token) throws OtherSystemException {
         for (Map.Entry<Integer, Integer> entry : exeId2assetId.entrySet()) {
             final int exeId = entry.getKey();
             final int assetId = entry.getValue();
 
-            if (assetPersist(gitHubReposResponse, assetId)) {
+            if (assetPersist(owner, repoName, assetId, token)) {
                 log.info("persist asset");
             }
 
             final List<ExeDto> exeDaoList = exeDaoMapper.list(ExeSelectCondition
                     .builder()
                     .id(exeId)
-                    .gitHubRepoId(gitHubReposResponse.getId())
+                    .gitHubRepoId(repoId)
                     .build()
             );
 

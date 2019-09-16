@@ -14,7 +14,7 @@ import java.io.Serializable;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-class ExeForm implements Serializable, Comparable<ExeForm> {
+public class ExeForm implements Serializable, Comparable<ExeForm> {
     /**
      * ID
      */

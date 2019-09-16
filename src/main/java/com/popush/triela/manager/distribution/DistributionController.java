@@ -5,6 +5,7 @@ import com.popush.triela.common.github.GitHubReposResponse;
 import com.popush.triela.manager.TrielaManagerV1Controller;
 import com.popush.triela.manager.exe.ExeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MultiValueMap;
@@ -22,6 +23,7 @@ public class DistributionController extends TrielaManagerV1Controller {
 
     private final DistributionService distributionMgrService;
     private final ExeService exeService;
+    private final OAuth2RestTemplate auth2RestTemplate;
 
     @GetMapping("product/{gitHubMyRepoId}/distribution")
     public String distributionGet(
@@ -29,9 +31,11 @@ public class DistributionController extends TrielaManagerV1Controller {
             @PathVariable("gitHubMyRepoId") int gitHubMyRepoId,
             GitHubReposResponse gitHubReposResponse
     ) throws OtherSystemException {
+        final var token = String.format("token %s", auth2RestTemplate.getAccessToken().getValue());
+
         model.addAttribute("gitHubRepositoryName", gitHubReposResponse.getFullName());
         model.addAttribute("gitHubRepositoryId", gitHubReposResponse.getId());
-        model.addAttribute("assetList", distributionMgrService.list(gitHubReposResponse));
+        model.addAttribute("assetList", distributionMgrService.list(gitHubReposResponse, token));
         model.addAttribute("exeRegisterList", exeService.list(gitHubReposResponse.getId()));
 
         return "distribution";
@@ -53,9 +57,14 @@ public class DistributionController extends TrielaManagerV1Controller {
                         e -> Integer.parseInt(e.getValue().get(0))
                 ));
 
+        final var token = String.format("token %s", auth2RestTemplate.getAccessToken().getValue());
+
         distributionMgrService.update(
                 exeId2assetIdMap,
-                gitHubReposResponse
+                gitHubReposResponse.getOwner().getLogin(),
+                gitHubReposResponse.getName(),
+                gitHubReposResponse.getId(),
+                token
         );
 
         return "redirect:distribution";

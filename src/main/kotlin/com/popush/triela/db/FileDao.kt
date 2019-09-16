@@ -4,6 +4,7 @@ import com.popush.triela.common.db.FileDto
 import com.popush.triela.common.db.FileSelectCondition
 import lombok.NonNull
 import org.apache.ibatis.annotations.*
+import java.util.*
 
 @Mapper
 interface FileDao {
@@ -32,7 +33,7 @@ interface FileDao {
         Result(property = "dataUrl", column = "data_url")
     ])
     @Select("SELECT * FROM file WHERE asset_id = #{assetId}")
-    fun selectByAssetId(asset_id: Int): FileDto
+    fun selectByAssetId(assetId: Int): Optional<FileDto>
 
     @Results(id = "filedao2", value = [
         Result(property = "assetId", column = "asset_id"),

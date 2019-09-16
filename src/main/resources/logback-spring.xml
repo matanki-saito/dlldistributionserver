@@ -7,7 +7,7 @@
 
     <!--ローカル環境及びテスト環境では、INFO レベル以上を console に出力する -->
     <springProfile name="dev">
-        <root level="ERROR">
+        <root level="INFO">
             <appender-ref ref="CONSOLE"/>
         </root>
     </springProfile>

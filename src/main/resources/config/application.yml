@@ -29,3 +29,6 @@ distribution:
   s3-bucket-region: ap-north-east-1
   s3-bucket-name: triela-file
   cloud-front-domain-name: d3fxmsw7mhzbqi.cloudfront.net
+
+# [webhook_secret]
+
