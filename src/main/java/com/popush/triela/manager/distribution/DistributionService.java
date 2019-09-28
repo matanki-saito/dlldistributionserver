@@ -253,7 +253,7 @@ public class DistributionService {
                     continue;
                 }
 
-                if (Paths.get(entry.getName()).compareTo(Path.of(".dist.v1.json")) == 0) {
+                if (Paths.get(entry.getName()).endsWith(Path.of("dist.v1.json"))) {
                     result = new ObjectMapper().readValue(zis.readAllBytes(), DistFileFormatV1.class);
                     zis.closeEntry();
                     break;
@@ -421,7 +421,7 @@ public class DistributionService {
                                  int assetId,
                                  String token) throws OtherSystemException {
         final Optional<FileDto> fileDao = fileDaoMapper.selectByAssetId(assetId);
-        if (fileDao.isPresent()) {
+        if (fileDao.isEmpty()) {
 
             // gitHubからアセットを取得
             final GitHubApiService.NetworkResource assetFile = gitHubApiService.getDllFromAsset(
