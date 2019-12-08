@@ -132,9 +132,9 @@ workflows:
   restart_service:
     jobs:
       - aws-ecs/deploy-service-update:
-          family: 'deploy'
-          cluster-name: 'test'
-          service-name: 'test-service'
+          family: 'triela-task'
+          cluster-name: 'sisters'
+          service-name: 'triela-service'
           container-image-name-updates: 'container=triela-app,image-and-tag=registry.hub.docker.com/gnagaoka/triela-app:${CIRCLE_TAG}'
           filters:
             tags:
