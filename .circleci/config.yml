@@ -137,5 +137,5 @@ workflows:
           service-name: 'test-service'
           container-image-name-updates: 'container=triela-app,image-and-tag=registry.hub.docker.com/gnagaoka/triela-app:${CIRCLE_TAG}'
           filters:
-            branches:
-              only: /feature\/.*/
+            tags:
+              only: /[0-9]+\.[0-9]+\.[0-9]+/
