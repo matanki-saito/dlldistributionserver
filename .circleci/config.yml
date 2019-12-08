@@ -134,7 +134,7 @@ workflows:
       - aws-ecs/deploy-service-update:
           family: 'triela-task'
           cluster-name: 'sisters'
-          service-name: 'triela-service'
+          service-name: 'triela-sv'
           container-image-name-updates: 'container=triela-app,image-and-tag=registry.hub.docker.com/gnagaoka/triela-app:${CIRCLE_TAG}'
           filters:
             tags:
