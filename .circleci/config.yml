@@ -4,6 +4,9 @@
 #
 version: 2.1
 
+orbs:
+  aws-ecs: circleci/aws-ecs@0.0.8
+
 executors:
   default:
     working_directory: ~/repo
@@ -85,10 +88,10 @@ jobs:
       - checkout
       - restore_gradle
       - setup_remote_docker:
-          docker_layer_caching: true
+          docker_layer_caching: false # 有料になった
       - run: |
           set -x
-          VER="17.03.0-ce"
+          VER="18.06.0-ce"
           curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
           tar -xz -C /tmp -f /tmp/docker-$VER.tgz
           sudo mv -f /tmp/docker/* /usr/bin
@@ -112,18 +115,27 @@ workflows:
       - setup:
           filters:
             branches:
-              only:
-                - develop
+              only: develop
 
       - test:
           requires:
             - setup
           filters:
             branches:
-              only:
-                - develop
+              only: develop
 
       - deploy:
           filters:
             branches:
               only: master
+
+  restart_service:
+    jobs:
+      - aws-ecs/deploy-service-update:
+          family: 'deploy'
+          cluster-name: 'test'
+          service-name: 'test-service'
+          container-image-name-updates: 'container=triela-app,image-and-tag=registry.hub.docker.com/gnagaoka/triela-app:${CIRCLE_TAG}'
+          filters:
+            branches:
+              only: feature/**
