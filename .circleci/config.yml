@@ -138,4 +138,4 @@ workflows:
           container-image-name-updates: 'container=triela-app,image-and-tag=registry.hub.docker.com/gnagaoka/triela-app:${CIRCLE_TAG}'
           filters:
             branches:
-              only: feature/**
+              only: /feature\/.*/
