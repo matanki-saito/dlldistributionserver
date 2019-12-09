@@ -1,4 +1,4 @@
-date=2019-12-08 11:35:09+0000
+date=2019-12-09 17:40:15+0000
 os=Linux 4.15.0-1052-aws
 schemaspy-version=6.1.0-SNAPSHOT
 schemaspy-build=6.1.0-SNAPSHOT
