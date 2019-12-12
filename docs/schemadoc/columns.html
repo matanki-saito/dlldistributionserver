@@ -105,14 +105,14 @@
                 <script>
                     var tableData = [
     {
-        "tableName": "file",
+        "tableName": "exe",
         "tableType": "Table",
         "keyClass": "",
         "keyTitle": "",
-        "name": "data_url",
+        "name": "md5",
         "type": "VARCHAR",
-        "length": 512,
-        "nullable": "√",
+        "length": 32,
+        "nullable": "",
         "autoUpdated": "",
         "defaultValue": "null",
         "comments": ""
@@ -131,40 +131,14 @@
         "comments": ""
     },
     {
-        "tableName": "exe",
-        "tableType": "Table",
-        "keyClass": "",
-        "keyTitle": "",
-        "name": "github_repo_id",
-        "type": "INT",
-        "length": 10,
-        "nullable": "",
-        "autoUpdated": "",
-        "defaultValue": "null",
-        "comments": ""
-    },
-    {
         "tableName": "file",
         "tableType": "Table",
         "keyClass": "",
         "keyTitle": "",
-        "name": "data_size",
-        "type": "INT",
-        "length": 10,
-        "nullable": "√",
-        "autoUpdated": "",
-        "defaultValue": "null",
-        "comments": ""
-    },
-    {
-        "tableName": "exe",
-        "tableType": "Table",
-        "keyClass": "",
-        "keyTitle": "",
-        "name": "version",
+        "name": "data_url",
         "type": "VARCHAR",
-        "length": 100,
-        "nullable": "",
+        "length": 512,
+        "nullable": "√",
         "autoUpdated": "",
         "defaultValue": "null",
         "comments": ""
@@ -187,23 +161,10 @@
         "tableType": "Table",
         "keyClass": "",
         "keyTitle": "",
-        "name": "data",
-        "type": "MEDIUMBLOB",
-        "length": 16777215,
+        "name": "data_size",
+        "type": "INT",
+        "length": 10,
         "nullable": "√",
-        "autoUpdated": "",
-        "defaultValue": "null",
-        "comments": ""
-    },
-    {
-        "tableName": "file",
-        "tableType": "Table",
-        "keyClass": "",
-        "keyTitle": "",
-        "name": "md5",
-        "type": "VARCHAR",
-        "length": 32,
-        "nullable": "",
         "autoUpdated": "",
         "defaultValue": "null",
         "comments": ""
@@ -235,6 +196,45 @@
         "comments": ""
     },
     {
+        "tableName": "file",
+        "tableType": "Table",
+        "keyClass": "",
+        "keyTitle": "",
+        "name": "data",
+        "type": "MEDIUMBLOB",
+        "length": 16777215,
+        "nullable": "√",
+        "autoUpdated": "",
+        "defaultValue": "null",
+        "comments": ""
+    },
+    {
+        "tableName": "exe",
+        "tableType": "Table",
+        "keyClass": "",
+        "keyTitle": "",
+        "name": "github_repo_id",
+        "type": "INT",
+        "length": 10,
+        "nullable": "",
+        "autoUpdated": "",
+        "defaultValue": "null",
+        "comments": ""
+    },
+    {
+        "tableName": "exe",
+        "tableType": "Table",
+        "keyClass": "",
+        "keyTitle": "",
+        "name": "version",
+        "type": "VARCHAR",
+        "length": 100,
+        "nullable": "",
+        "autoUpdated": "",
+        "defaultValue": "null",
+        "comments": ""
+    },
+    {
         "tableName": "exe",
         "tableType": "Table",
         "keyClass": "primaryKey",
@@ -248,7 +248,7 @@
         "comments": ""
     },
     {
-        "tableName": "exe",
+        "tableName": "file",
         "tableType": "Table",
         "keyClass": "",
         "keyTitle": "",
