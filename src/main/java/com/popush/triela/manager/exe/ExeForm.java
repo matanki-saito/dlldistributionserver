@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExeForm implements Serializable, Comparable<ExeForm> {
+public class ExeForm implements Serializable {
   /**
    * ID
    */
@@ -31,7 +31,7 @@ public class ExeForm implements Serializable, Comparable<ExeForm> {
    * ex) 3.0.0.0
    */
   @NotNull
-  @Pattern(regexp = "[0-3]+\\.[0-9]+\\.[0-9]+\\.[0-9]+(-(beta|hotfix)[0-9]+)?")
+  @Pattern(regexp = "[0-3]+\\.[0-9]+\\.[0-9]+\\.[0-9]+(-(alpha|beta|rc|hotfix)[0-9]+)?")
   private String version;
 
   /**
@@ -52,8 +52,8 @@ public class ExeForm implements Serializable, Comparable<ExeForm> {
   @Pattern(regexp = "[a-zA-Z0-9_]*")
   private String phase;
 
-  @Override
-  public int compareTo(ExeForm o) {
-    return this.version.compareTo(o.version);
-  }
+  /**
+   * 自動更新フラグ
+   */
+  private boolean autoUpdate;
 }

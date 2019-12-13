@@ -32,7 +32,8 @@
             <form class="form-group"
                   enctype="multipart/form-data"
                   method="post"
-                  th:action="@{'/mgr/v1/product/' + ${gitHubRepositoryId} + '/exe'}" th:object="${form}">
+                  th:action="@{'/mgr/v1/product/' + ${gitHubRepositoryId} + '/exe'}"
+                  th:object="${form}">
                 <td><input class="form-control" id="md5" th:field="*{md5}"
                            th:placeholder="c2765bbe64b36757b276274cafe2c3f1"
                            type="text"/></td>
@@ -63,19 +64,20 @@
             <th scope="col">phase</th>
             <th scope="col">description</th>
             <th scope="col">operation</th>
+            <th scope="col">Auto Update</th>
         </tr>
-        <tr th:each="exe : ${list}" th:object="${exe}">
+        <tr th:each="exe : ${page.getContent()}">
             <td>
-                <span class="badge badge-dark" th:text="*{md5}"></span>
+                <span class="badge badge-dark" th:text="${exe.md5}"></span>
             </td>
             <td>
-                <span class="badge badge-info" th:text="*{version}"></span>
+                <span class="badge badge-info" th:text="${exe.version}"></span>
             </td>
             <td>
-                <div class="badge badge-warning" th:if="${exe.phase == 'dev'}" th:text="*{phase}"></div>
-                <div class="badge badge-success" th:if="${exe.phase == 'prod'}" th:text="*{phase}"></div>
+                <div class="badge badge-warning" th:if="${exe.phase == 'dev'}" th:text="${exe.phase}"></div>
+                <div class="badge badge-success" th:if="${exe.phase == 'prod'}" th:text="${exe.phase}"></div>
             </td>
-            <td th:text="*{description}"></td>
+            <td th:text="${exe.description}"></td>
             <td>
                 <form enctype="multipart/form-data"
                       method="post"
@@ -83,9 +85,47 @@
                     <button class="form-control btn btn-danger">DELETE</button>
                 </form>
             </td>
+            <td>
+                <form enctype="multipart/form-data"
+                      method="post"
+                      th:action="@{'/mgr/v1/product/' + ${gitHubRepositoryId} + '/autoUpdate/' + ${exe.id}}">
+                    <input name="autoUpdate" th:value="!${exe.autoUpdate}" type="hidden"/>
+                    <button class="form-control btn" th:classappend="${exe.autoUpdate} ? 'btn-danger' : 'btn-primary'"
+                            th:text="${exe.autoUpdate} ? 'ENABLE' : 'DISABLE'"></button>
+                </form>
+            </td>
         </tr>
         </tbody>
     </table>
+
+    <nav aria-label="..." th:unless="${page.getSize() == 0}">
+        <ul class="pagination">
+            <li class="page-item"
+                th:classappend="${page.first} ? 'disabled':''">
+                <a aria-label="|<"
+                   class="page-link"
+                   th:href="@{'/mgr/v1/product/'+ ${gitHubRepositoryId} + '/exe'(page=0)}">
+                    first
+                </a>
+            </li>
+            <li class="page-item"
+                th:classappend="(${i}==${page.number})? 'active' : ''"
+                th:each='i : ${#numbers.sequence(0, page.totalPages -1)}'>
+                <a class="page-link" href="#"
+                   th:href="@{'/mgr/v1/product/' + ${gitHubRepositoryId} + '/exe' (page=${i})}">
+                    <span th:text='${i+1}'>1</span>
+                </a>
+            </li>
+            <li class="page-item"
+                th:classappend="${page.last} ? 'disabled':''">
+                <a aria-label=">|" class="page-link" href="#"
+                   th:href="@{'/mgr/v1/product/' + ${gitHubRepositoryId} + '/exe' (page=(${page.totalPages}-1))}">
+                    <span aria-hidden="true">Last</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
 </main>
 
 
