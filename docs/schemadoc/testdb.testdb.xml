@@ -9,9 +9,15 @@
          <column autoUpdated="false" defaultValue="null" digits="0" id="4" name="distribution_asset_id" nullable="true" remarks="" size="10" type="INT" typeCode="4"/>
          <column autoUpdated="true" defaultValue="null" digits="0" id="5" name="id" nullable="false" remarks="" size="10" type="INT" typeCode="4"/>
          <column autoUpdated="false" defaultValue="prod" digits="0" id="6" name="phase" nullable="false" remarks="" size="45" type="VARCHAR" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="0" digits="0" id="7" name="auto_update" nullable="false" remarks="" size="1" type="TINYINT UNSIGNED" typeCode="-7"/>
          <primaryKey column="id" sequenceNumberInPK="1"/>
          <index name="PRIMARY" unique="true">
             <column ascending="true" name="id"/>
+         </index>
+         <index name="uk1" unique="true">
+            <column ascending="true" name="github_repo_id"/>
+            <column ascending="true" name="version"/>
+            <column ascending="true" name="phase"/>
          </index>
       </table>
       <table catalog="testdb" name="file" numRows="0" remarks="file cacheとして" type="TABLE">
