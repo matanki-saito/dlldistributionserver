@@ -66,9 +66,13 @@ public class WebHookApiController extends TrielaApiV1Controller {
 
     final var token = String.format("token %s", personalAccessToken);
 
-    var response = findWebhookResponse(xGitHubEvent, payload)
-        .orElseThrow(() -> new ArgumentException("No published release"));
+    var webhookResponse = findWebhookResponse(xGitHubEvent, payload);
+    if (webhookResponse.isEmpty()) {
+      log.info("not released notice");
+      return "not released";
+    }
 
+    var response = webhookResponse.get();
     var owner = response.getRepository().getOwner().getLogin();
     var repoName = response.getRepository().getName();
     var repoId = response.getRepository().getId();
