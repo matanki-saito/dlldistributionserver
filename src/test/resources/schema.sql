@@ -9,27 +9,21 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
---
--- Table structure for table `exe`
---
-
---
--- Table structure for table `exe`
---
-
 DROP TABLE IF EXISTS `exe`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
 CREATE TABLE `exe` (
   `github_repo_id` int(11) NOT NULL,
-  `md5` varchar(32) NOT NULL,
-  `version` varchar(100) NOT NULL,
-  `description` varchar(1000) DEFAULT NULL,
+  `md5` varchar(32) COLLATE utf8mb4_general_ci NOT NULL,
+  `version` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` varchar(1000) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `distribution_asset_id` int(11) DEFAULT NULL,
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `phase` varchar(45) NOT NULL DEFAULT 'prod',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `phase` varchar(45) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'prod',
+  `auto_update` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk1` (`github_repo_id`,`version`,`phase`)
+) ENGINE=InnoDB AUTO_INCREMENT=102 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
