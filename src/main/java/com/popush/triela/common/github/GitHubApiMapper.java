@@ -13,11 +13,17 @@ public interface GitHubApiMapper {
                                                @Path("owner") String owner,
                                                @Path("repo_name") String repoName);
 
+    @GET("repos/{owner}/{repo_name}/releases/{release_id}")
+    Call<GitHubReleaseResponse> release(@Header("Authorization") String token,
+                                        @Path("owner") String owner,
+                                        @Path("repo_name") String repoName,
+                                        @Path("release_id") Integer releaseId);
+
     @GET("repos/{owner}/{repo_name}/releases/assets/{asset_id}")
     Call<GitHubAssetResponse> asset(@Header("Authorization") String token,
                                     @Path("owner") String owner,
                                     @Path("repo_name") String repoName,
-                                    @Path("asset_id") int asset_id);
+                                    @Path("asset_id") int assetId);
 
     @GET("user/repos")
     Call<List<GitHubReposResponse>> repos(@Header("Authorization") String token);

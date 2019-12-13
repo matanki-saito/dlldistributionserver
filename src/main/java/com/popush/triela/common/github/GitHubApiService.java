@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.ResponseBody;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -30,13 +29,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class GitHubApiService {
     final GitHubApiMapper gitHubApiMapper;
-    private final OAuth2RestTemplate auth2RestTemplate;
 
     /**
      * レスポンスチェック
      *
      * @param response レスポンス
-     * @param <T>      レスポンスボディ型
+     * @param <T>      レスポンスボディ　Type
      * @return レスポンスボディ
      * @throws OtherSystemException exp
      */
@@ -57,35 +55,40 @@ public class GitHubApiService {
     }
 
     /**
+     * 通信を実施する
+     *
+     * @param caller http request caller
+     * @param <R>    Response type
+     * @return Retrofit Response
+     * @throws GitHubServiceException 通信異常
+     */
+    private <R> Response<R> executer(Call<R> caller) throws GitHubServiceException {
+        try {
+            return caller.execute();
+        } catch (IOException e) {
+            throw new GitHubServiceException("Cannot get repository", e);
+        }
+    }
+
+    /**
      * レポジトリ情報の一覧を取得
      *
+     * @param token アクセストークン
      * @return レポジトリ情報の一覧
      * @throws OtherSystemException exp
      */
-    public List<GitHubReposResponse> getMyAdminRepos() throws OtherSystemException {
-        final Call<List<GitHubReposResponse>> request = gitHubApiMapper.repos(
-                "token " + auth2RestTemplate.getAccessToken().getValue()
-        );
+    public List<GitHubReposResponse> getMyAdminRepos(@NonNull String token) throws OtherSystemException {
+        final Call<List<GitHubReposResponse>> request = gitHubApiMapper.repos(token);
 
-        final List<GitHubReposResponse> result;
-
-        final Response<List<GitHubReposResponse>> response;
-        try {
-            response = request.execute();
-        } catch (IOException e) {
-            throw new GitHubServiceException("Cannot get repository info.", e);
-        }
-
+        final Response<List<GitHubReposResponse>> response = executer(request);
         final List<GitHubReposResponse> responseBody = responseCheck(response);
 
         // push権限を持つ
-        result = responseBody
+        return responseBody
                 .stream()
                 .filter(elem -> elem.getPermissions().containsKey("push") && elem.getPermissions()
                         .get("push"))
                 .collect(Collectors.toList());
-
-        return result;
     }
 
     /**
@@ -93,27 +96,21 @@ public class GitHubApiService {
      *
      * @param owner    レポジトリのオーナー
      * @param repoName レポジトリ名
+     * @param token    アクセストークン
      * @return リリース一覧
      * @throws OtherSystemException exp
      */
     public List<GitHubReleaseResponse> getReleasesSync(@NonNull String owner,
-                                                       @NonNull String repoName) throws OtherSystemException {
-
-        String token = auth2RestTemplate.getAccessToken().getValue();
+                                                       @NonNull String repoName,
+                                                       @NonNull String token) throws OtherSystemException {
 
         final Call<List<GitHubReleaseResponse>> request = gitHubApiMapper.releases(
-                "token " + token,
+                token,
                 owner,
                 repoName
         );
 
-        final Response<List<GitHubReleaseResponse>> response;
-        try {
-            response = request.execute();
-        } catch (IOException e) {
-            throw new GitHubServiceException("Connection error.", e);
-        }
-
+        final Response<List<GitHubReleaseResponse>> response = executer(request);
         return responseCheck(response);
     }
 
@@ -123,27 +120,24 @@ public class GitHubApiService {
      * @param owner    レポジトリのオーナー
      * @param repoName レポジトリ名
      * @param assetId  アセットID
+     * @param token    アクセストークン
      * @return アセットのURIとMimeType
      * @throws OtherSystemException exp
      */
     private NetworkResource getAssetDownloadUrl(@NonNull String owner,
                                                 @NonNull String repoName,
-                                                int assetId) throws OtherSystemException {
+                                                int assetId,
+                                                @NonNull String token) throws OtherSystemException {
 
         final Call<GitHubAssetResponse> request = gitHubApiMapper.asset(
-                "token " + auth2RestTemplate.getAccessToken().getValue(),
+                token,
                 owner,
                 repoName,
                 assetId
         );
 
         // 取得！
-        Response<GitHubAssetResponse> response;
-        try {
-            response = request.execute();
-        } catch (IOException e) {
-            throw new GitHubServiceException("Connection error.", e);
-        }
+        Response<GitHubAssetResponse> response = executer(request);
 
         // チェック
         final GitHubAssetResponse gitHubAssetResponse = responseCheck(response);
@@ -165,23 +159,22 @@ public class GitHubApiService {
      * URLからアセット（zipファイル）を取ってくる
      *
      * @param networkResource アセットのURLとタイプ
+     * @param token           アクセストークン
      * @return 一時ファイルになったzipファイルのパス
      * @throws OtherSystemException exp
      */
     @VisibleForTesting
-    private NetworkResource getAssetFile(@NonNull GitHubApiService.NetworkResource networkResource) throws OtherSystemException {
+    private NetworkResource getAssetFile(
+            @NonNull GitHubApiService.NetworkResource networkResource,
+            @NonNull String token
+    ) throws OtherSystemException {
 
-        final Response<ResponseBody> response;
-        try {
-            response = gitHubApiMapper.downloadFileWithDynamicUrlSync(
-                    "token " + auth2RestTemplate.getAccessToken().getValue(),
-                    networkResource.getUrl()
-            ).execute();
-        } catch (IOException e) {
-            throw new GitHubServiceException("Connection failed.", e);
-        }
+        final Call<ResponseBody> request = gitHubApiMapper.downloadFileWithDynamicUrlSync(
+                token,
+                networkResource.getUrl()
+        );
 
-        final ResponseBody responseBody = responseCheck(response);
+        final ResponseBody responseBody = responseCheck(executer(request));
 
         final Path tmpFile;
         try {
@@ -210,14 +203,46 @@ public class GitHubApiService {
      * @param owner    アセットのオーナー
      * @param repoName レポジトリ名
      * @param assetId  アセットID
+     * @param token    アクセストークン
      * @return アセットファイル
      * @throws OtherSystemException exp
      */
     public NetworkResource getDllFromAsset(@NonNull String owner,
                                            @NonNull String repoName,
-                                           int assetId) throws OtherSystemException {
+                                           int assetId,
+                                           @NonNull String token) throws OtherSystemException {
 
-        return getAssetFile(getAssetDownloadUrl(owner, repoName, assetId));
+        return getAssetFile(getAssetDownloadUrl(owner, repoName, assetId, token), token);
+    }
+
+    /**
+     * asset idを取得する
+     *
+     * @param owner     repositoryのオーナー名
+     * @param repoName  レポジトリ名
+     * @param releaseId release ID
+     * @param token     アクセストークン
+     * @return asset ID
+     */
+    public List<Integer> getAssetIds(@NonNull String owner,
+                                     @NonNull String repoName,
+                                     @NonNull Integer releaseId,
+                                     @NonNull String token) throws OtherSystemException {
+
+        final Call<GitHubReleaseResponse> request = gitHubApiMapper.release(
+                token,
+                owner,
+                repoName,
+                releaseId
+        );
+        final Response<GitHubReleaseResponse> response = executer(request);
+        final GitHubReleaseResponse content = responseCheck(response);
+
+        return content
+                .getAssets()
+                .stream()
+                .map(GitHubReleaseResponse.Asset::getId)
+                .collect(Collectors.toList());
     }
 
     @Value
@@ -228,6 +253,4 @@ public class GitHubApiService {
         private Path path;
         private Path originalFileNamePath;
     }
-
-
 }

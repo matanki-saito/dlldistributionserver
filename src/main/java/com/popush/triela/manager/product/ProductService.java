@@ -18,8 +18,16 @@ public class ProductService {
 
     private final GitHubApiService gitHubApiService;
 
-    public ProductForm page(ProductSearchConditionForm condition, Pageable pageable) throws OtherSystemException {
-        List<GitHubReposResponse> originalList = gitHubApiService.getMyAdminRepos();
+    private static ProductForm.ProductElement convertToProductElement(GitHubReposResponse entity) {
+        return ProductForm.ProductElement
+                .builder()
+                .gitHubRepositoryId(entity.getId())
+                .gitHubRepositoryName(entity.getFullName())
+                .build();
+    }
+
+    public ProductForm page(ProductSearchConditionForm condition, Pageable pageable, String token) throws OtherSystemException {
+        List<GitHubReposResponse> originalList = gitHubApiService.getMyAdminRepos(token);
 
         var convertList = originalList
                 .stream()
@@ -40,14 +48,6 @@ public class ProductService {
                 pageable,
                 convertList.size()
         )).build();
-    }
-
-    private static ProductForm.ProductElement convertToProductElement(GitHubReposResponse entity) {
-        return ProductForm.ProductElement
-                .builder()
-                .gitHubRepositoryId(entity.getId())
-                .gitHubRepositoryName(entity.getFullName())
-                .build();
     }
 
 }

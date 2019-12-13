@@ -28,9 +28,42 @@ interface ExeDao {
             #{distributionAssetId},
             #{phase}
         )
-        ON DUPLICATE KEY UPDATE distribution_asset_id = #{distributionAssetId}
     """)
-    fun upsert(@NonNull exeDao: ExeDto)
+    fun insert(@NonNull exeDao: ExeDto)
+
+    @Update("""
+        <script>
+            UPDATE `exe`
+            <set>
+              <if test="data.id != null">id=#{data.id},</if>
+              <if test="data.gitHubRepoId != null">github_repo_id=#{data.gitHubRepoId},</if>
+              <if test="data.md5 != null">md5=#{data.md5},</if>
+              <if test="data.version != null">version=#{data.version},</if>
+              <if test="data.description != null">description=#{data.description},</if>
+              <if test="data.distributionAssetId != null">distribution_asset_id=#{data.distributionAssetId},</if>
+              <if test="data.phase != null">phase=#{data.phase},</if>
+              <if test="data.autoUpdate != null">auto_update=#{data.autoUpdate}</if>
+            </set>
+            <where>
+                <if test="condition.gitHubRepoId != null">
+                    AND github_repo_id = #{condition.gitHubRepoId}
+                </if>
+                <if test="condition.md5 != null">
+                    AND md5 = #{condition.md5}
+                </if>
+                <if test="condition.phase != null">
+                    AND phase = #{condition.phase}
+                </if>
+                <if test="condition.id != null">
+                    AND id = #{condition.id}
+                </if>
+            </where>
+        </script>
+    """)
+    fun update(
+            @Param("condition") @NonNull condition: ExeSelectCondition,
+            @Param("data") exeDao: ExeDto
+    );
 
     @Delete("""
         <script>
@@ -62,7 +95,12 @@ interface ExeDao {
                 <if test="id != null">
                     AND id = #{id}
                 </if>
+                <if test="autoUpdate != null">
+                    AND auto_update = #{autoUpdate}
+                </if>
             </where>
+            ORDER BY `version` DESC,`phase` ASC 
+            LIMIT 100
         </script>
     """)
     fun list(@NonNull condition: ExeSelectCondition): List<ExeDto>
