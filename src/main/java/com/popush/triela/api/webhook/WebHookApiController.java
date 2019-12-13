@@ -4,20 +4,13 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.popush.triela.api.TrielaApiV1Controller;
-import com.popush.triela.common.db.ExeSelectCondition;
 import com.popush.triela.common.exception.ArgumentException;
 import com.popush.triela.common.exception.GitHubResourceException;
 import com.popush.triela.common.exception.MachineException;
 import com.popush.triela.common.exception.OtherSystemException;
-import com.popush.triela.common.github.GitHubApiService;
 import com.popush.triela.common.github.GitHubReleaseWebhookResponse;
-import com.popush.triela.manager.distribution.DistributionService;
-import com.popush.triela.manager.exe.ExeForm;
-import com.popush.triela.manager.exe.ExeService;
 import java.io.IOException;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -36,10 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Slf4j
 public class WebHookApiController extends TrielaApiV1Controller {
-
-  private final GitHubApiService gitHubApiService;
-  private final DistributionService distributionService;
-  private final ExeService exeService;
+  private final WebHookAsyncService webHookAsyncService;
 
   @Value("${webhook.secret}")
   private String secret;
@@ -58,7 +48,7 @@ public class WebHookApiController extends TrielaApiV1Controller {
                         @RequestHeader(value = "X-Hub-Signature") String xHubSignature,
                         @PathVariable("token") String personalAccessToken,
                         @RequestBody String payload
-  ) throws OtherSystemException, ArgumentException {
+  ) throws OtherSystemException, InterruptedException, ArgumentException {
     if (!checkHmac(xHubSignature, payload)) {
       log.info("invalid");
       return "hmac is invalid";
@@ -72,42 +62,14 @@ public class WebHookApiController extends TrielaApiV1Controller {
       return "not released";
     }
 
-    var response = webhookResponse.get();
-    var owner = response.getRepository().getOwner().getLogin();
-    var repoName = response.getRepository().getName();
-    var repoId = response.getRepository().getId();
-    var releaseId = response.getRelease().getId();
+    var process = webHookAsyncService.release(token, webhookResponse.get());
 
-    log.info("{} {} {} {}", owner, repoId, repoName, releaseId);
-
-    var assetIds = gitHubApiService.getAssetIds(owner, repoName, releaseId, token);
-
-    if (assetIds.isEmpty()) {
-      throw new ArgumentException("Not found asset");
-    }
-
-    log.info(assetIds.toString());
-
-    var list = exeService.list(
-        ExeSelectCondition
-            .builder()
-            .gitHubRepoId(repoId)
-            .autoUpdate(true)
-            .build()
-    );
-
-    log.info(list.toString());
-
-    Map<Integer, Integer> mapping = list
-        .stream()
-        .collect(Collectors.toMap(
-            ExeForm::getId,
-            v -> assetIds.get(0)
-        ));
-
-    log.info(mapping.toString());
-
-    distributionService.update(mapping, owner, repoName, repoId, token);
+    process
+        .thenAcceptAsync(heavyProcessResult -> log.warn("finished"))
+        .exceptionally(e -> {
+          log.warn(e.getMessage());
+          return null;
+        });
 
     return "do release";
   }
