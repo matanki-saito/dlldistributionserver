@@ -121,6 +121,7 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-security')
     implementation('org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:2.1.5.RELEASE')
     implementation('org.springframework.boot:spring-boot-starter-thymeleaf')
+    implementation('org.springframework.boot:spring-boot-starter-data-jpa')
     implementation('com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.7')
     implementation('org.springframework.boot:spring-boot-starter-validation')
     implementation('org.springframework.boot:spring-boot-starter-web')
@@ -136,8 +137,9 @@ dependencies {
     implementation('io.springfox:springfox-swagger2:2.8.0')
     implementation('com.github.napstr:logback-discord-appender:1.0.0')
     implementation('software.amazon.awssdk:s3')
-    implementation('org.springframework.session:spring-session-data-redis')
-    implementation('io.lettuce:lettuce-core:5.1.4.RELEASE')
+    // For cost reduction
+    //implementation('org.springframework.session:spring-session-data-redis')
+    //implementation('io.lettuce:lettuce-core:5.1.4.RELEASE')
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation('commons-codec:commons-codec:1.13')
 
