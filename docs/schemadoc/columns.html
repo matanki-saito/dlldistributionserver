@@ -105,6 +105,19 @@
                 <script>
                     var tableData = [
     {
+        "tableName": "file",
+        "tableType": "Table",
+        "keyClass": "",
+        "keyTitle": "",
+        "name": "data_size",
+        "type": "INT",
+        "length": 10,
+        "nullable": "√",
+        "autoUpdated": "",
+        "defaultValue": "null",
+        "comments": ""
+    },
+    {
         "tableName": "exe",
         "tableType": "Table",
         "keyClass": "indexedColumn",
@@ -114,19 +127,6 @@
         "length": 100,
         "nullable": "",
         "autoUpdated": "",
-        "defaultValue": "null",
-        "comments": ""
-    },
-    {
-        "tableName": "exe",
-        "tableType": "Table",
-        "keyClass": "primaryKey",
-        "keyTitle": "Primary Key",
-        "name": "<i class='icon ion-key iconkey' style='padding-left: 5px;'><\/i>id",
-        "type": "INT",
-        "length": 10,
-        "nullable": "",
-        "autoUpdated": "√",
         "defaultValue": "null",
         "comments": ""
     },
@@ -157,19 +157,6 @@
         "comments": ""
     },
     {
-        "tableName": "exe",
-        "tableType": "Table",
-        "keyClass": "",
-        "keyTitle": "",
-        "name": "distribution_asset_id",
-        "type": "INT",
-        "length": 10,
-        "nullable": "√",
-        "autoUpdated": "",
-        "defaultValue": "null",
-        "comments": ""
-    },
-    {
         "tableName": "file",
         "tableType": "Table",
         "keyClass": "primaryKey",
@@ -183,16 +170,29 @@
         "comments": ""
     },
     {
+        "tableName": "file",
+        "tableType": "Table",
+        "keyClass": "",
+        "keyTitle": "",
+        "name": "data",
+        "type": "MEDIUMBLOB",
+        "length": 16777215,
+        "nullable": "√",
+        "autoUpdated": "",
+        "defaultValue": "null",
+        "comments": ""
+    },
+    {
         "tableName": "exe",
         "tableType": "Table",
         "keyClass": "",
         "keyTitle": "",
-        "name": "md5",
-        "type": "VARCHAR",
-        "length": 32,
+        "name": "auto_update",
+        "type": "TINYINT UNSIGNED",
+        "length": 1,
         "nullable": "",
         "autoUpdated": "",
-        "defaultValue": "null",
+        "defaultValue": "0",
         "comments": ""
     },
     {
@@ -213,20 +213,7 @@
         "tableType": "Table",
         "keyClass": "",
         "keyTitle": "",
-        "name": "auto_update",
-        "type": "TINYINT UNSIGNED",
-        "length": 1,
-        "nullable": "",
-        "autoUpdated": "",
-        "defaultValue": "0",
-        "comments": ""
-    },
-    {
-        "tableName": "file",
-        "tableType": "Table",
-        "keyClass": "",
-        "keyTitle": "",
-        "name": "data_size",
+        "name": "distribution_asset_id",
         "type": "INT",
         "length": 10,
         "nullable": "√",
@@ -235,7 +222,33 @@
         "comments": ""
     },
     {
+        "tableName": "exe",
+        "tableType": "Table",
+        "keyClass": "primaryKey",
+        "keyTitle": "Primary Key",
+        "name": "<i class='icon ion-key iconkey' style='padding-left: 5px;'><\/i>id",
+        "type": "INT",
+        "length": 10,
+        "nullable": "",
+        "autoUpdated": "√",
+        "defaultValue": "null",
+        "comments": ""
+    },
+    {
         "tableName": "file",
+        "tableType": "Table",
+        "keyClass": "",
+        "keyTitle": "",
+        "name": "data_url",
+        "type": "VARCHAR",
+        "length": 512,
+        "nullable": "√",
+        "autoUpdated": "",
+        "defaultValue": "null",
+        "comments": ""
+    },
+    {
+        "tableName": "exe",
         "tableType": "Table",
         "keyClass": "",
         "keyTitle": "",
@@ -252,23 +265,10 @@
         "tableType": "Table",
         "keyClass": "",
         "keyTitle": "",
-        "name": "data",
-        "type": "MEDIUMBLOB",
-        "length": 16777215,
-        "nullable": "√",
-        "autoUpdated": "",
-        "defaultValue": "null",
-        "comments": ""
-    },
-    {
-        "tableName": "file",
-        "tableType": "Table",
-        "keyClass": "",
-        "keyTitle": "",
-        "name": "data_url",
+        "name": "md5",
         "type": "VARCHAR",
-        "length": 512,
-        "nullable": "√",
+        "length": 32,
+        "nullable": "",
         "autoUpdated": "",
         "defaultValue": "null",
         "comments": ""
