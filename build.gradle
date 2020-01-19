@@ -21,6 +21,7 @@ buildscript {
         classpath("org.jetbrains.kotlin:kotlin-noarg:${kotlinVersion}")
         classpath("de.undercouch:gradle-download-task:4.0.0")
         classpath("org.ajoberstar:gradle-git-publish:${gradleGitPublishVersion}")
+        classpath("gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:2.2.0")
     }
 }
 
@@ -34,10 +35,15 @@ apply plugin: 'com.palantir.docker'
 apply plugin: 'net.researchgate.release'
 apply plugin: 'de.undercouch.download'
 apply plugin: 'org.ajoberstar.git-publish'
+apply plugin: 'com.gorylenko.gradle-git-properties'
 
 group = 'com.popush'
 sourceCompatibility = 11
 targetCompatibility = 11
+
+gitProperties {
+    customProperty 'version', version
+}
 
 repositories {
     mavenCentral()
@@ -142,10 +148,11 @@ dependencies {
     //implementation('io.lettuce:lettuce-core:5.1.4.RELEASE')
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation('commons-codec:commons-codec:1.13')
+    implementation('org.springframework.boot:spring-boot-starter-actuator')
 
     runtimeOnly('org.springframework.boot:spring-boot-devtools')
     runtimeOnly('mysql:mysql-connector-java')
-    compileOnly('org.springframework.boot:spring-boot-starter-actuator')
+
     compileOnly('org.springframework.boot:spring-boot-configuration-processor')
     compileOnly('org.projectlombok:lombok')
 

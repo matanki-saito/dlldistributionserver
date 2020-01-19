@@ -36,3 +36,8 @@ mybatis:
 
 # [webhook_secret]
 
+management:
+  info:
+    git:
+      mode: full
+
