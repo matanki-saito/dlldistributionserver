@@ -25,13 +25,16 @@ import java.util.zip.ZipOutputStream;
 
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.annotations.VisibleForTesting;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.codehaus.jackson.JsonParseException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.annotations.VisibleForTesting;
 import com.popush.triela.common.aws.S3Service;
 import com.popush.triela.common.db.ExeDto;
 import com.popush.triela.common.db.ExeSelectCondition;
@@ -40,17 +43,12 @@ import com.popush.triela.common.db.FileSelectCondition;
 import com.popush.triela.common.exception.ArgumentException;
 import com.popush.triela.common.exception.GitHubResourceException;
 import com.popush.triela.common.exception.MachineException;
-import com.popush.triela.common.exception.NotModifiedException;
 import com.popush.triela.common.exception.OtherSystemException;
 import com.popush.triela.common.github.GitHubApiService;
 import com.popush.triela.common.github.GitHubReleaseResponse;
 import com.popush.triela.common.github.GitHubReposResponse;
 import com.popush.triela.db.ExeDao;
 import com.popush.triela.db.FileDao;
-
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -206,18 +204,43 @@ public class DistributionService {
     /**
      * ファイルを検索
      *
-     * @param condition 条件
-     * @return データ
+     * @param exeMd5       exeのMD5
+     * @param gitHubRepoId github レポジトリ ID
+     * @param dllMd5       dllのmd5
+     * @param phase        prodかdevか
+     * @return あればDLLのデータ
      */
     @Transactional(readOnly = true)
-    public Optional<FileDto> getDllData(@NonNull FileSelectCondition condition) throws NotModifiedException {
-        final List<FileDto> fileDaoList = fileDaoMapper.list(condition);
+    public Optional<FileDto> getAttachDllData(@NotNull String exeMd5,
+                                              int gitHubRepoId,
+                                              @NotNull String dllMd5,
+                                              @NotNull String phase) {
+        return fileDaoMapper.list(FileSelectCondition.builder()
+                                                     .distributedExeMd5(exeMd5)
+                                                     .gitHubRepoId(gitHubRepoId)
+                                                     .md5(dllMd5)
+                                                     .phase(phase)
+                                                     .build())
+                            .stream()
+                            .findFirst();
+    }
 
-        if (fileDaoList.size() != 1) {
-            throw new NotModifiedException();
-        }
-
-        return Optional.of(fileDaoList.get(0));
+    /**
+     * ファイルを検索
+     *
+     * @param gitHubRepoId github レポジトリ ID
+     * @param phase        prodかdevか
+     * @return あればDLLのデータ
+     */
+    @Transactional(readOnly = true)
+    public Optional<FileDto> getLatestDllData(int gitHubRepoId,
+                                              @NotNull String phase) {
+        return fileDaoMapper.list(FileSelectCondition.builder()
+                                                     .gitHubRepoId(gitHubRepoId)
+                                                     .phase(phase)
+                                                     .build())
+                            .stream()
+                            .findFirst();
     }
 
     /**

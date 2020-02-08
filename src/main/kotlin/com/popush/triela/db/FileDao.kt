@@ -42,22 +42,23 @@ interface FileDao {
     ])
     @Select("""
         <script>
-            SELECT b.* FROM exe ExeDao
-            LEFT JOIN file b ON ExeDao.distribution_asset_id = b.asset_id
+            SELECT b.* FROM exe ExeDao AS a
+            JOIN file AS b ON a.distribution_asset_id = b.asset_id
             <where>
                 <if test="distributedExeMd5 != null">
-                    AND ExeDao.md5 = #{distributedExeMd5}
+                    AND a.md5 = #{distributedExeMd5}
                 </if>
                 <if test="md5 != null">
                     AND b.md5 &lt;&gt; #{md5}
                 </if>
                 <if test="gitHubRepoId != null">
-                    AND ExeDao.github_repo_id = #{gitHubRepoId}
+                    AND a.github_repo_id = #{gitHubRepoId}
                 </if>
                 <if test="phase != null">
-                    AND ExeDao.phase = #{phase}
+                    AND a.phase = #{phase}
                 </if>
             </where>
+            ORDER BY a.version DESC
         </script>
     """)
     fun list(@NonNull condition: FileSelectCondition): List<FileDto>
