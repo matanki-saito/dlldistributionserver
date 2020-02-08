@@ -1,47 +1,74 @@
 @startuml
 
-User -> EU4: user click exe
+participant User
+participant Paradox_launcher
+participant exe
+participant version.dll
+participant autoupdate64.bat
+participant dllautoupdater.exe
+participant Plugin64.dll
+participant claes.exe
+participant contentserver
 
-activate EU4
-EU4 -> d3d9.dll: dllmain
+activate contentserver
 
-activate d3d9.dll
-d3d9.dll -> autoupdate.bat : createprocess
+activate User
+User -> Paradox_launcher: run
 
-activate autoupdate.bat
-autoupdate.bat -> curl.exe : run
+activate Paradox_launcher
+Paradox_launcher -> exe: call application
 
-activate curl.exe
-curl.exe -> dllserver : exe_md5,dll_md5
+activate exe
+exe -> version.dll: dllmain
 
-activate dllserver
+deactivate Paradox_launcher
 
-curl.exe <- dllserver : download Plugin.dll
+activate version.dll
+version.dll -> autoupdate64.bat : createprocess
 
-deactivate dllserver
+activate autoupdate64.bat
+autoupdate64.bat -> dllautoupdater.exe : run
 
-curl.exe --> Plugin.dll : Plugin.dll update
-curl.exe <-- Plugin.dll : success
+activate dllautoupdater.exe
+dllautoupdater.exe -> contentserver : exe_md5,dll_md5
 
-autoupdate.bat <- curl.exe
-deactivate curl.exe
+dllautoupdater.exe <- contentserver : download Plugin64.dll
 
-d3d9.dll <- autoupdate.bat
-deactivate autoupdate.bat
+dllautoupdater.exe --> Plugin64.dll : Plugin64.dll update
+dllautoupdater.exe <-- Plugin64.dll : success
 
-d3d9.dll -> d3d9.dll : injection Plugin.dll
+autoupdate64.bat <- dllautoupdater.exe
+deactivate dllautoupdater.exe
 
-EU4 <-- Plugin.dll
+version.dll <- autoupdate64.bat
+deactivate autoupdate64.bat
 
-EU4 <- d3d9.dll
+version.dll -> version.dll : injection Plugin64.dll
+
+exe <-- Plugin64.dll
+
+exe <- version.dll
+
+exe -> Plugin64.dll : dll main
+activate Plugin64.dll
+
+Plugin64.dll -> claes.exe : call
+
+activate claes.exe
+claes.exe -> contentserver : check newest mod
+
+claes.exe <- contentserver : download new mods
+
+claes.exe -> claes.exe : Update mods in\n documents folder
+
+Plugin64.dll <- claes.exe
+
+deactivate claes.exe
 
 
-EU4 -> Plugin.dll : dll main
-activate Plugin.dll
-EU4 <- Plugin.dll
+exe <- Plugin64.dll: patches multi byte fix
 
-User <-  EU4 : Launcher
-
+User <- exe : show load image
 
 
 @enduml
