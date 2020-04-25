@@ -42,7 +42,8 @@ interface FileDao {
     ])
     @Select("""
         <script>
-            SELECT b.* FROM exe ExeDao AS a
+            SELECT b.*
+            FROM exe AS a
             JOIN file AS b ON a.distribution_asset_id = b.asset_id
             <where>
                 <if test="distributedExeMd5 != null">
