@@ -1,25 +1,21 @@
 package com.popush.triela.api.distribution;
 
-import java.net.URI;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-
+import com.popush.triela.manager.distribution.DistributionService;
+import com.popush.triela.api.TrielaApiV1Controller;
+import com.popush.triela.common.db.FileDto;
+import com.popush.triela.common.db.FileSelectCondition;
+import com.popush.triela.common.exception.NotModifiedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.CacheControl;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.popush.triela.api.TrielaApiV1Controller;
-import com.popush.triela.common.db.FileDto;
-import com.popush.triela.common.exception.NotModifiedException;
-import com.popush.triela.manager.distribution.DistributionService;
+import java.net.URI;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,29 +25,24 @@ public class DistributionApiController extends TrielaApiV1Controller {
     private final DistributionService distributionMgrService;
 
     @GetMapping("/distribution/{gitHubRepoId}/{exe_md5}")
-    public ResponseEntity<Object> fileGet(@PathVariable(value = "gitHubRepoId") int gitHubRepoId,
-                                          @PathVariable(value = "exe_md5") String exeMd5,
-                                          @RequestParam(value = "dll_md5", required = false) String dllMd5,
-                                          @RequestParam(value = "phase", required = false, defaultValue = "prod") String phase)
-            throws NotModifiedException {
+    public ResponseEntity fileGet(@PathVariable(value = "gitHubRepoId") int gitHubRepoId,
+                                  @PathVariable(value = "exe_md5") String exeMd5,
+                                  @RequestParam(value = "dll_md5", required = false) String dllMd5,
+                                  @RequestParam(value = "phase", required = false, defaultValue = "prod") String phase) throws NotModifiedException {
 
         // リクエストに一致するエントリの取得
-        final Optional<FileDto> result = distributionMgrService.getAttachDllData(exeMd5,
-                                                                                 gitHubRepoId,
-                                                                                 dllMd5,
-                                                                                 phase);
-        final FileDto fileDao;
+        final Optional<FileDto> result = distributionMgrService.getDllData(FileSelectCondition.builder()
+                .distributedExeMd5(exeMd5)
+                .gitHubRepoId(gitHubRepoId)
+                .md5(dllMd5)
+                .phase(phase)
+                .build());
 
         // 存在しない
         if (result.isEmpty()) {
-            // 存在しない場合は一番新しいものに追従する
-            var latest = distributionMgrService.getLatestDllData(gitHubRepoId, phase);
-
-            // それもない場合はエラー
-            fileDao = latest.orElseThrow(NotModifiedException::new);
-        } else {
-            fileDao = result.get();
+            throw new IllegalStateException();
         }
+        final FileDto fileDao = result.get();
 
         Object responseBody;
         HttpStatus status;
