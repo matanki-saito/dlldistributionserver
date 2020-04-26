@@ -211,14 +211,33 @@ public class DistributionService {
      * @return あればDLLのデータ
      */
     @Transactional(readOnly = true)
-    public Optional<FileDto> getAttachDllData(@NotNull String exeMd5,
-                                              int gitHubRepoId,
-                                              @NotNull String dllMd5,
-                                              @NotNull String phase) {
+    public Optional<FileDto> getCurrentDistributedDllData(@NotNull String exeMd5,
+                                                          int gitHubRepoId,
+                                                          @NotNull String dllMd5,
+                                                          @NotNull String phase) {
         return fileDaoMapper.list(FileSelectCondition.builder()
                                                      .distributedExeMd5(exeMd5)
                                                      .gitHubRepoId(gitHubRepoId)
                                                      .md5(dllMd5)
+                                                     .phase(phase)
+                                                     .build())
+                            .stream()
+                            .findFirst();
+    }
+
+    /**
+     * ファイルを検索
+     *
+     * @param gitHubRepoId github レポジトリ ID
+     * @param phase        prodかdevか
+     * @return あればDLLのデータ
+     */
+    @Transactional(readOnly = true)
+    public Optional<FileDto> getMatchDllData(@NotNull String exeMd5,
+                                             int gitHubRepoId,
+                                             @NotNull String phase) {
+        return fileDaoMapper.list(FileSelectCondition.builder()
+                                                     .gitHubRepoId(gitHubRepoId)
                                                      .phase(phase)
                                                      .build())
                             .stream()

@@ -35,22 +35,30 @@ public class DistributionApiController extends TrielaApiV1Controller {
                                           @RequestParam(value = "phase", required = false, defaultValue = "prod") String phase)
             throws NotModifiedException {
 
-        // リクエストに一致するエントリの取得
-        final Optional<FileDto> result = distributionMgrService.getAttachDllData(exeMd5,
-                                                                                 gitHubRepoId,
-                                                                                 dllMd5,
-                                                                                 phase);
+        // 現在配信中のデータを取得
+        final Optional<FileDto> result = distributionMgrService.getCurrentDistributedDllData(exeMd5,
+                                                                                             gitHubRepoId,
+                                                                                             dllMd5,
+                                                                                             phase);
+
+        // 存在していればさらに更新する必要はないので、405を返却するために例外を発生させる
+        if (result.isPresent()) {
+            throw new NotModifiedException();
+        }
+
+        // 必要なDLLを取得
         final FileDto fileDao;
 
-        // 存在しない
-        if (result.isEmpty()) {
-            // 存在しない場合は一番新しいものに追従する
+        // 現在のdll状態を無視して検索
+        var match = distributionMgrService.getMatchDllData(exeMd5, gitHubRepoId, phase);
+        if (match.isPresent()) {
+            fileDao = match.get();
+        } else {
+            // exeがまだ未登録だと判断して、最新のversionを取得
             var latest = distributionMgrService.getLatestDllData(gitHubRepoId, phase);
 
-            // それもない場合はエラー
-            fileDao = latest.orElseThrow(NotModifiedException::new);
-        } else {
-            fileDao = result.get();
+            // それもない場合はリクエストに問題がある（存在しないrepoId）としてエラー
+            fileDao = latest.orElseThrow(IllegalArgumentException::new);
         }
 
         Object responseBody;
