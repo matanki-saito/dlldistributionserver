@@ -1,9 +1,90 @@
 buildscript {
-    ext {
-        springBootVersion = '2.1.5.RELEASE'
-        kotlinVersion = "1.3.50"
-        gradleGitPublishVersion = "2.1.1"
-    }
+    ext.versions = [
+            // Spring
+            'springBootVersion'                 : '2.2.4.RELEASE',
+            'springStateMachine'                : '2.2.0.RELEASE',
+            'springOauth2Autoconfig'            : '2.1.5.RELEASE',
+
+            // OR mepper
+            // https://mybatis.org/mybatis-3/ja/
+            'mybatisSpringBootStater'           : '2.1.2',
+
+            // redis client 実装
+            // https://lettuce.io/
+            'lettuce'                           : '5.1.4.RELEASE',
+
+            // http client
+            // https://square.github.io/okhttp/
+            'okhttp'                            : '3.11.0',
+            'retrofit'                          : '2.5.0',
+
+            // discord client library
+            // https://github.com/DV8FromTheWorld/JDA
+            'JDA'                               : '4.1.1_101',
+
+            // aws library
+            // https://github.com/aws/aws-sdk-java-v2/
+            'awssdk'                            : '2.11.12',
+
+            // apache common library. hmacの算出に使用
+            // https://commons.apache.org/
+            'apacheCommonCodec'                 : '1.13',
+
+            // log
+            // http://www.slf4j.org/
+            'slf4jApi'                          : '1.7.30',
+
+            // エラーDiscord通知
+            // https://github.com/napstr/logback-discord-appender
+            'logbackDiscord'                    : '1.0.0',
+
+            // 日付処理用
+            // https://qiita.com/tag1216/items/25a64bba2bde98ea88d3
+            'jacksonDatatypeJsr310'             : '2.9.7',
+
+            // state machineをpoolするのに必要
+            'apacheCommonsPool'                 : '2.8.0',
+
+            // API document 生成
+            // https://swagger.io/
+            'swagger'                           : '2.8.0',
+
+            // mapperをkotlinで記述しているので必要
+            'kotlinVersion'                     : "1.3.50",
+
+            // githubのリリースを登録するのに必要
+            // https://github.com/ajoberstar/gradle-git-publish
+            'gradleGitPublishPlugin'            : "2.1.3",
+
+            // Dockerhubにdocker imageをuploadするのに必要
+            // https://github.com/palantir/gradle-docker
+            'gradleDockerPlugin'                : "0.25.0",
+
+            // schemaspyで作った結果をダウンロードするのに必要
+            // https://github.com/michel-kraemer/gradle-download-task
+            'gradleDownloadTaskletPlugin'       : '4.0.4',
+
+            // actuator apiでコミットversionを確認する
+            // https://plugins.gradle.org/plugin/com.gorylenko.gradle-git-properties
+            'gradleGitPropertiesGeneraterPlugin': '2.2.2',
+
+            // リリース処理に必要
+            // https://github.com/researchgate/gradle-release
+            'gradleReleasePlugin'               : '2.6.0',
+
+            // awsのbomのために必要
+            // https://docs.spring.io/dependency-management-plugin/docs/current/reference/html/
+            'gradleDependencyManagementPlugin'  : '1.0.6.RELEASE',
+
+            // test用
+            // https://assertj.github.io/doc/
+            'assertj'                           : '3.15.0',
+
+            // lombok
+            //
+            'lombok'                            : '1.18.12'
+    ]
+
     repositories {
         mavenCentral()
         maven {
@@ -12,16 +93,16 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-        classpath("gradle.plugin.com.palantir.gradle.docker:gradle-docker:0.20.1")
-        classpath("io.spring.gradle:dependency-management-plugin:1.0.3.RELEASE")
-        classpath("net.researchgate:gradle-release:2.6.0")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
-        classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
-        classpath("org.jetbrains.kotlin:kotlin-noarg:${kotlinVersion}")
-        classpath("de.undercouch:gradle-download-task:4.0.0")
-        classpath("org.ajoberstar:gradle-git-publish:${gradleGitPublishVersion}")
-        classpath("gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:2.2.0")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${versions.springBootVersion}")
+        classpath("com.palantir.gradle.docker:gradle-docker:${versions.gradleDockerPlugin}")
+        classpath("io.spring.gradle:dependency-management-plugin:${versions.gradleDependencyManagementPlugin}")
+        classpath("net.researchgate:gradle-release:${versions.gradleReleasePlugin}")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlinVersion}")
+        classpath("org.jetbrains.kotlin:kotlin-allopen:${versions.kotlinVersion}")
+        classpath("org.jetbrains.kotlin:kotlin-noarg:${versions.kotlinVersion}")
+        classpath("de.undercouch:gradle-download-task:${versions.gradleDownloadTaskletPlugin}")
+        classpath("org.ajoberstar:gradle-git-publish:${versions.gradleGitPublishPlugin}")
+        classpath("gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:${versions.gradleGitPropertiesGeneraterPlugin}")
     }
 }
 
@@ -47,6 +128,7 @@ gitProperties {
 
 repositories {
     mavenCentral()
+    jcenter()
     maven {
         url 'https://jitpack.io'
     }
@@ -113,6 +195,12 @@ docker {
     buildArgs(['DEPENDENCY': "dependency"])
 }
 
+// junit 5対策
+// https://stackoverflow.com/questions/30474767/no-tests-found-for-given-includes-error-when-running-parameterized-unit-test-in
+test {
+    useJUnitPlatform()
+}
+
 release {
     // [skip ci]をコメントに入れないと、無限ループする
     preTagCommitMessage = '[skip ci] [Gradle Release Plugin] - pre tag commit: '
@@ -121,52 +209,70 @@ release {
 }
 
 dependencies {
-    implementation('org.springframework.boot:spring-boot-starter-aop')
-    implementation('org.springframework.boot:spring-boot-starter-cache')
-    //implementation('org.springframework.boot:spring-boot-starter-data-elasticsearch')
-    implementation('org.springframework.boot:spring-boot-starter-security')
-    implementation('org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:2.1.5.RELEASE')
-    implementation('org.springframework.boot:spring-boot-starter-thymeleaf')
-    implementation('org.springframework.boot:spring-boot-starter-data-jpa')
-    implementation('com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.7')
-    implementation('org.springframework.boot:spring-boot-starter-validation')
-    implementation('org.springframework.boot:spring-boot-starter-web')
-    implementation('org.mybatis.spring.boot:mybatis-spring-boot-starter:2.0.1')
-    implementation('org.springframework.boot:spring-boot-starter-jdbc')
-    implementation('org.springframework.retry:spring-retry')
-    implementation('com.squareup.okhttp3:okhttp:3.11.0')
-    implementation('com.squareup.retrofit2:retrofit:2.5.0')
-    implementation('com.squareup.retrofit2:converter-jackson:2.5.0')
-    implementation('com.github.ben-manes.caffeine:caffeine')
-    implementation('org.slf4j:slf4j-api:1.7.25')
-    implementation('io.springfox:springfox-swagger-ui:2.8.0')
-    implementation('io.springfox:springfox-swagger2:2.8.0')
-    implementation('com.github.napstr:logback-discord-appender:1.0.0')
-    implementation('software.amazon.awssdk:s3')
-    // For cost reduction
+    // spring boot
+    implementation("org.springframework.boot:spring-boot-starter-aop:${versions.springBootVersion}")
+    implementation("org.springframework.boot:spring-boot-starter-cache:${versions.springBootVersion}")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis:${versions.springBootVersion}")
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf:${versions.springBootVersion}")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa:${versions.springBootVersion}")
+    implementation("org.springframework.boot:spring-boot-starter-security:${versions.springBootVersion}")
+    implementation("org.springframework.boot:spring-boot-starter-validation:${versions.springBootVersion}")
+    implementation("org.springframework.boot:spring-boot-starter-web:${versions.springBootVersion}")
+    implementation("org.springframework.boot:spring-boot-starter-jdbc:${versions.springBootVersion}")
+    implementation("org.springframework.boot:spring-boot-starter-actuator:${versions.springBootVersion}")
+
+    // spring
+    //implementation('org.springframework.retry:spring-retry')
+    implementation("org.springframework.statemachine:spring-statemachine-autoconfigure:${versions.springStateMachine}")
+    implementation("org.springframework.statemachine:spring-statemachine-data-common:${versions.springStateMachine}")
+    implementation("org.springframework.statemachine:spring-statemachine-data-redis:${versions.springStateMachine}")
+    implementation("org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:${versions.springOauth2Autoconfig}")
     //implementation('org.springframework.session:spring-session-data-redis')
-    //implementation('io.lettuce:lettuce-core:5.1.4.RELEASE')
+
+    // spring support
+    implementation("io.springfox:springfox-swagger-ui:${versions.swagger}")
+    implementation("io.springfox:springfox-swagger2:${versions.swagger}")
+    implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:${versions.mybatisSpringBootStater}")
+
+    // other
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${versions.jacksonDatatypeJsr310}")
+    implementation("org.apache.commons:commons-pool2:${versions.apacheCommonsPool}")
+    implementation("io.lettuce:lettuce-core:${versions.lettuce}")
+    implementation("com.squareup.okhttp3:okhttp:${versions.okhttp}")
+    implementation("com.squareup.retrofit2:retrofit:${versions.retrofit}")
+    implementation("com.squareup.retrofit2:converter-jackson:${versions.retrofit}")
+    implementation('com.github.ben-manes.caffeine:caffeine')
+    implementation("org.slf4j:slf4j-api:${versions.slf4jApi}")
+    implementation("com.github.napstr:logback-discord-appender:${versions.logbackDiscord}")
+    implementation('software.amazon.awssdk:s3')
+    implementation("net.dv8tion:JDA:${versions.JDA}")
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
-    implementation('commons-codec:commons-codec:1.13')
-    implementation('org.springframework.boot:spring-boot-starter-actuator')
+    implementation("commons-codec:commons-codec:${versions.apacheCommonCodec}")
 
-    runtimeOnly('org.springframework.boot:spring-boot-devtools')
+
     runtimeOnly('mysql:mysql-connector-java')
+    runtimeOnly('org.springframework.boot:spring-boot-devtools')
 
+
+    // lombokにはcompileOnly,annotationProcessor,testImplementationが必要
+    // https://medium.com/@tsuyoshiushio/gradle-5-0-with-lombok-and-spring-boot-e8ca564fc552
+    annotationProcessor("org.projectlombok:lombok:${versions.lombok}")
+    compileOnly("org.projectlombok:lombok:${versions.lombok}")
     compileOnly('org.springframework.boot:spring-boot-configuration-processor')
-    compileOnly('org.projectlombok:lombok')
+    compileOnly('org.springframework.boot:spring-boot-configuration-processor')
 
-    testImplementation('org.projectlombok:lombok')
+
     testImplementation('org.springframework.boot:spring-boot-starter-test')
     testImplementation('org.springframework.security:spring-security-test')
-    testImplementation('com.squareup.okhttp3:mockwebserver:3.11.0')
-    testImplementation('org.mybatis.spring.boot:mybatis-spring-boot-starter-test:2.0.1')
-    testImplementation('org.assertj:assertj-core:3.12.0')
-
+    testImplementation("org.projectlombok:lombok:${versions.lombok}")
+    testImplementation("com.squareup.okhttp3:mockwebserver:${versions.okhttp}")
+    testImplementation("org.mybatis.spring.boot:mybatis-spring-boot-starter-test:${versions.mybatisSpringBootStater}")
+    testImplementation("org.assertj:assertj-core:${versions.assertj}")
 }
 
 dependencyManagement {
     imports {
-        mavenBom 'software.amazon.awssdk:bom:2.3.7'
+        mavenBom "software.amazon.awssdk:bom:${versions.awssdk}"
     }
 }
+
