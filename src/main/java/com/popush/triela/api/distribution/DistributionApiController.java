@@ -31,7 +31,7 @@ public class DistributionApiController extends TrielaApiV1Controller {
     @GetMapping("/distribution/{gitHubRepoId}/{exe_md5}")
     public ResponseEntity<Object> fileGet(@PathVariable(value = "gitHubRepoId") int gitHubRepoId,
                                           @PathVariable(value = "exe_md5") String exeMd5,
-                                          @RequestParam(value = "dll_md5", required = false) String dllMd5,
+                                          @RequestParam(value = "dll_md5", required = false, defaultValue = "") String dllMd5,
                                           @RequestParam(value = "phase", required = false, defaultValue = "prod") String phase)
             throws NotModifiedException {
 

@@ -237,6 +237,7 @@ public class DistributionService {
                                              int gitHubRepoId,
                                              @NotNull String phase) {
         return fileDaoMapper.list(FileSelectCondition.builder()
+                                                     .distributedExeMd5(exeMd5)
                                                      .gitHubRepoId(gitHubRepoId)
                                                      .phase(phase)
                                                      .build())

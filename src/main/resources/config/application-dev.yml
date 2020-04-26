@@ -6,7 +6,7 @@ server:
     keyAlias: triela
 spring:
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/mydb?characterEncoding=UTF-8&serverTimezone=JST
+    url: jdbc:mysql://127.0.0.1:53306/mydb?characterEncoding=UTF-8&serverTimezone=JST
     username: root
     #password: [from triela-private]
     type: com.zaxxer.hikari.HikariDataSource

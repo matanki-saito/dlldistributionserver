@@ -42,7 +42,7 @@
                     th:classappend="|${exe.phase eq 'dev' ? 'bg-warning' : ''} ${exe.phase eq 'alpha' ? 'bg-danger' : ''}|"
                     th:each="exe : ${exeRegisterList}" th:object="${exe}"
                 >
-                    <a th:href="'https://triela.tk:8443/api/v1/distribution/' + ${gitHubRepositoryId} + '/' + ${exe.getMd5()} + '?phase=' + ${exe.phase}"
+                    <a th:href="'/api/v1/distribution/' + ${gitHubRepositoryId} + '/' + ${exe.getMd5()} + '?phase=' + ${exe.phase}"
                        th:text="*{version}"></a>
                 </th>
             </tr>
