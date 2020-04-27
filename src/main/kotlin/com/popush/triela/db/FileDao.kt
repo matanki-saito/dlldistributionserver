@@ -49,7 +49,7 @@ interface FileDao {
                     AND ExeDao.md5 = #{distributedExeMd5}
                 </if>
                 <if test="md5 != null">
-                    AND b.md5 &lt;&gt; #{md5}
+                    AND b.md5 = #{md5}
                 </if>
                 <if test="gitHubRepoId != null">
                     AND ExeDao.github_repo_id = #{gitHubRepoId}
