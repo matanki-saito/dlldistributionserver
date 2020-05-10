@@ -14,9 +14,8 @@
 
     <springProfile name="prod">
         <appender name="DISCORD" class="com.github.napstr.logback.DiscordAppender">
-            <!-- do not set your webhook here if you want to commit this file to your VCS, instead look below for an example on how to set it at runtime -->
             <webhookUri>
-                https://discordapp.com/api/webhooks/532246133695578123/EuLl5DiW-stybrFgY9UOdxe3WW7S-9Qzw_n1xSHvROdidxAQAoTZsB945RA_F2Z49yip
+                ${LOGBACK_DISCORD_WEBHOOK}
             </webhookUri>
             <layout class="ch.qos.logback.classic.PatternLayout">
                 <pattern>%d{HH:mm:ss} [%thread] [%-5level] %logger{36} - %msg%n```%ex{full}```</pattern>
