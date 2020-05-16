@@ -43,7 +43,7 @@ interface FileDao {
     @Select("""
         <script>
             SELECT b.* FROM exe ExeDao
-            LEFT JOIN file b ON ExeDao.distribution_asset_id = b.asset_id
+            JOIN file b ON ExeDao.distribution_asset_id = b.asset_id
             <where>
                 <if test="distributedExeMd5 != null">
                     AND ExeDao.md5 = #{distributedExeMd5}
@@ -58,6 +58,7 @@ interface FileDao {
                     AND ExeDao.phase = #{phase}
                 </if>
             </where>
+            ORDER BY ExeDao.version DESC
         </script>
     """)
     fun list(@NonNull condition: FileSelectCondition): List<FileDto>
