@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.annotations.VisibleForTesting;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.CacheControl;
@@ -28,13 +29,12 @@ public class DistributionApiController extends TrielaApiV1Controller {
 
     private final DistributionService distributionMgrService;
 
-    @GetMapping("/distribution/{gitHubRepoId}/{exe_md5}")
-    public ResponseEntity<Object> fileGet(@PathVariable(value = "gitHubRepoId") int gitHubRepoId,
-                                          @PathVariable(value = "exe_md5") String exeMd5,
-                                          @RequestParam(value = "dll_md5", required = false, defaultValue = "") String dllMd5,
-                                          @RequestParam(value = "phase", required = false, defaultValue = "prod") String phase)
-            throws NotModifiedException {
 
+    @VisibleForTesting
+    FileDto searchOptimalFileDto(int gitHubRepoId,
+                                 String exeMd5,
+                                 String dllMd5,
+                                 String phase) throws NotModifiedException {
         // 現在配信中のデータを取得
         final Optional<FileDto> result = distributionMgrService.getCurrentDistributedDllData(exeMd5,
                                                                                              gitHubRepoId,
@@ -59,26 +59,44 @@ public class DistributionApiController extends TrielaApiV1Controller {
 
             // それもない場合はリクエストに問題がある（存在しないrepoId）としてエラー
             fileDao = latest.orElseThrow(IllegalArgumentException::new);
+
+            // ただしそれがすでに最新であれば更新の必要はない
+            if (fileDao.getMd5().equals(dllMd5)) {
+                throw new NotModifiedException();
+            }
         }
+
+        return fileDao;
+    }
+
+    @GetMapping("/distribution/{gitHubRepoId}/{exe_md5}")
+    public ResponseEntity<Object> fileGet(@PathVariable(value = "gitHubRepoId") int gitHubRepoId,
+                                          @PathVariable(value = "exe_md5") String exeMd5,
+                                          @RequestParam(value = "dll_md5", required = false, defaultValue = "") String dllMd5,
+                                          @RequestParam(value = "phase", required = false, defaultValue = "prod") String phase)
+            throws NotModifiedException {
+
+
+        final FileDto fileDto = searchOptimalFileDto(gitHubRepoId, exeMd5, dllMd5, phase);
 
         Object responseBody;
         HttpStatus status;
         final HttpHeaders headers = new HttpHeaders();
 
-        if (fileDao.getDataUrl() == null) {
-            if (fileDao.getData().length <= 0) {
+        if (fileDto.getDataUrl() == null) {
+            if (fileDto.getData().length <= 0) {
                 // 不明
                 throw new IllegalStateException("???");
             } else {
                 // dataあり
                 headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-                headers.setContentLength(fileDao.getDataSize());
+                headers.setContentLength(fileDto.getDataSize());
                 status = HttpStatus.OK;
-                responseBody = fileDao.getData();
+                responseBody = fileDto.getData();
             }
         } else {
             // redirect URL
-            headers.setLocation(URI.create(fileDao.getDataUrl()));
+            headers.setLocation(URI.create(fileDto.getDataUrl()));
             status = HttpStatus.FOUND;
             responseBody = "redirect";
         }

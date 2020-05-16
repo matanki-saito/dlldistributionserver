@@ -204,7 +204,6 @@ public class DistributionService {
     /**
      * ファイルを検索
      *
-     * @param condition 条件
      * @return データ
      */
     @Transactional(readOnly = true)
