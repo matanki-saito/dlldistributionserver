@@ -1,8 +1,7 @@
 buildscript {
     ext.versions = [
             // Spring
-            'springBootVersion'                 : '2.2.4.RELEASE',
-            'springStateMachine'                : '2.2.0.RELEASE',
+            'springBootVersion'                 : '2.3.1.RELEASE',
             'springOauth2Autoconfig'            : '2.1.5.RELEASE',
 
             // OR mepper
@@ -41,9 +40,6 @@ buildscript {
             // 日付処理用
             // https://qiita.com/tag1216/items/25a64bba2bde98ea88d3
             'jacksonDatatypeJsr310'             : '2.9.7',
-
-            // state machineをpoolするのに必要
-            'apacheCommonsPool'                 : '2.8.0',
 
             // API document 生成
             // https://swagger.io/
@@ -223,9 +219,6 @@ dependencies {
 
     // spring
     //implementation('org.springframework.retry:spring-retry')
-    implementation("org.springframework.statemachine:spring-statemachine-autoconfigure:${versions.springStateMachine}")
-    implementation("org.springframework.statemachine:spring-statemachine-data-common:${versions.springStateMachine}")
-    implementation("org.springframework.statemachine:spring-statemachine-data-redis:${versions.springStateMachine}")
     implementation("org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:${versions.springOauth2Autoconfig}")
     //implementation('org.springframework.session:spring-session-data-redis')
 
@@ -236,7 +229,6 @@ dependencies {
 
     // other
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${versions.jacksonDatatypeJsr310}")
-    implementation("org.apache.commons:commons-pool2:${versions.apacheCommonsPool}")
     implementation("io.lettuce:lettuce-core:${versions.lettuce}")
     implementation("com.squareup.okhttp3:okhttp:${versions.okhttp}")
     implementation("com.squareup.retrofit2:retrofit:${versions.retrofit}")
