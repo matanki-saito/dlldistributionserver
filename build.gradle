@@ -131,8 +131,8 @@ repositories {
 }
 
 bootJar {
-    baseName = 'triela-docker'
-    version = '1.0.0'
+    archiveBaseName = 'triela-docker'
+    archiveVersion = '1.0.0'
 }
 
 // コメントに日本語があるので必要
