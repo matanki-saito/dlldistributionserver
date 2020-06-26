@@ -2,7 +2,6 @@ buildscript {
     ext.versions = [
             // Spring
             'springBootVersion'                 : '2.3.1.RELEASE',
-            'springOauth2Autoconfig'            : '2.1.5.RELEASE',
 
             // OR mepper
             // https://mybatis.org/mybatis-3/ja/
@@ -216,11 +215,10 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web:${versions.springBootVersion}")
     implementation("org.springframework.boot:spring-boot-starter-jdbc:${versions.springBootVersion}")
     implementation("org.springframework.boot:spring-boot-starter-actuator:${versions.springBootVersion}")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-client:${versions.springBootVersion}")
 
     // spring
-    //implementation('org.springframework.retry:spring-retry')
-    implementation("org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:${versions.springOauth2Autoconfig}")
-    //implementation('org.springframework.session:spring-session-data-redis')
+    implementation('org.springframework.session:spring-session-data-redis')
 
     // spring support
     implementation("io.springfox:springfox-swagger-ui:${versions.swagger}")
