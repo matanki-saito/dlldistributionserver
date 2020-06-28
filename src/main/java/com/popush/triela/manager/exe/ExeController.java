@@ -1,11 +1,11 @@
 package com.popush.triela.manager.exe;
 
-import com.popush.triela.common.github.GitHubReposResponse;
-import com.popush.triela.manager.TrielaManagerV1Controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Pageable;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,62 +13,119 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.popush.triela.common.db.ExeEntity;
+import com.popush.triela.common.db.ExeSelectCondition;
+import com.popush.triela.common.exception.ArgumentException;
+import com.popush.triela.common.exception.OtherSystemException;
+import com.popush.triela.common.github.GitHubReposResponse;
+import com.popush.triela.db.ExeMapper;
+import com.popush.triela.manager.TrielaManagerV1Controller;
+
 @Controller
 @RequiredArgsConstructor
 @Slf4j
 public class ExeController extends TrielaManagerV1Controller {
-  private final ExeService exeService;
+    private final ExeControllerSupport exeControllerSupport;
+    private final ExeMapper exeMapper;
 
-  @GetMapping("product/{gitHubMyRepoId}/exe")
-  public String getProduct(
-      ExeForm exeForm,
-      Model model,
-      @PathVariable("gitHubMyRepoId") int gitHubMyRepoId,
-      GitHubReposResponse gitHubReposResponse,
-      Pageable pageable
-  ) {
-    var condition = ExeSearchConditionForm.builder().gitHubRepoId(gitHubReposResponse.getId()).build();
-    model.addAttribute("gitHubRepositoryName", gitHubReposResponse.getFullName());
-    model.addAttribute("gitHubRepositoryId", gitHubReposResponse.getId());
-    model.addAttribute("page", exeService.page(condition, pageable));
-    model.addAttribute("form", exeForm);
+    @Transactional(readOnly = true)
+    @GetMapping("product/{gitHubMyRepoId}/exe")
+    public String getProduct(
+            @PathVariable("gitHubMyRepoId") int gitHubRepoId,
+            Model model,
+            @RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient
+    ) throws OtherSystemException, ArgumentException {
+        var reposResponse = getHavingPushAuthorityRepo(gitHubRepoId, authorizedClient);
 
-    return "exe";
-  }
+        var exeEntities = exeMapper.list(ExeSelectCondition.builder()
+                                                           .gitHubRepoId(gitHubRepoId)
+                                                           .build());
+        var exeView = exeControllerSupport.makeExeView(exeEntities,
+                                                       reposResponse);
 
-  @PostMapping("product/{gitHubMyRepoId}/exe")
-  public String postProduct(
-      @Validated ExeForm exeForm,
-      Model model,
-      @PathVariable("gitHubMyRepoId") int gitHubMyRepoId,
-      GitHubReposResponse gitHubReposResponse
-  ) {
-    exeService.save(exeForm, gitHubMyRepoId);
+        // thymleafで表示
+        model.addAttribute("view", exeView);
+        return "exe";
+    }
 
-    return "redirect:exe";
-  }
+    @Transactional
+    @PostMapping("product/{gitHubRepoId}/exe")
+    public String postProduct(
+            @PathVariable("gitHubRepoId") int gitHubRepoId,
+            @Validated ExeForm exeForm,
+            @RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient
+    ) throws OtherSystemException, ArgumentException {
+        getHavingPushAuthorityRepo(gitHubRepoId, authorizedClient);
 
-  @PostMapping("product/{gitHubMyRepoId}/delete/{id}")
-  public String postProductDelete(
-      Model model,
-      @PathVariable("gitHubMyRepoId") int gitHubMyRepoId,
-      @PathVariable("id") int id,
-      GitHubReposResponse gitHubReposResponse
-  ) {
-    exeService.delete(id);
+        exeMapper.insert(ExeEntity.builder()
+                                  .gitHubRepoId(gitHubRepoId)
+                                  .md5(exeForm.getMd5())
+                                  .autoUpdate(exeForm.isAutoUpdate())
+                                  .version(exeForm.getVersion())
+                                  .description(exeForm.getDescription())
+                                  .phase(exeForm.getPhase().isBlank() ? "prod" : exeForm.getPhase())
+                                  .build()
+        );
 
-    return "redirect:../exe";
-  }
+        return "redirect:exe";
+    }
 
-  @PostMapping("product/{gitHubMyRepoId}/autoUpdate/{id}")
-  public String postProductAutoUpdate(
-      Model model,
-      @PathVariable("gitHubMyRepoId") int gitHubMyRepoId,
-      @PathVariable("id") int id,
-      @RequestParam("autoUpdate") boolean autoUpdate,
-      GitHubReposResponse gitHubReposResponse
-  ) {
-    exeService.changeAutoUpdate(id, autoUpdate);
-    return "redirect:../exe";
-  }
+    @Transactional
+    @PostMapping("product/{gitHubRepoId}/delete/{id}")
+    public String postProductDelete(
+            @PathVariable("gitHubRepoId") int gitHubRepoId,
+            @PathVariable("id") int id,
+            @RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient
+    ) throws OtherSystemException, ArgumentException {
+        getHavingPushAuthorityRepo(gitHubRepoId, authorizedClient);
+        hasOwnId(id, gitHubRepoId);
+
+        exeMapper.delete(id);
+
+        return "redirect:../exe";
+    }
+
+    @Transactional
+    @PostMapping("product/{gitHubRepoId}/autoUpdate/{id}")
+    public String postProductAutoUpdate(
+            @PathVariable("gitHubRepoId") int gitHubRepoId,
+            @PathVariable("id") int id,
+            @RequestParam("autoUpdate") boolean autoUpdate,
+            @RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient
+    ) throws OtherSystemException, ArgumentException {
+        getHavingPushAuthorityRepo(gitHubRepoId, authorizedClient);
+        hasOwnId(id, gitHubRepoId);
+
+        exeMapper.update(
+                ExeSelectCondition.builder()
+                                  .id(id)
+                                  .build(),
+                ExeEntity.builder()
+                         .autoUpdate(autoUpdate)
+                         .build()
+        );
+
+        return "redirect:../exe";
+    }
+
+    private GitHubReposResponse getHavingPushAuthorityRepo(int gitHubRepoId, OAuth2AuthorizedClient authorizedClient)
+            throws OtherSystemException, ArgumentException {
+        // 権限チェック
+        var repoInfo = exeControllerSupport.hasPushAuthorityRepoInfo(gitHubRepoId, authorizedClient);
+        if (repoInfo.isEmpty()) {
+            throw new ArgumentException("You don't have `push` authority");
+        }
+        return repoInfo.get();
+    }
+
+    private void hasOwnId(int id, int gitHubRepoId) throws ArgumentException {
+        // ID所有者チェック
+        var exeEntity = exeMapper.selectById(id);
+        if (exeEntity.isEmpty()) {
+            throw new ArgumentException("Id is not found");
+        }
+        if (exeEntity.get().getGitHubRepoId() != gitHubRepoId) {
+            throw new ArgumentException("authenticate error");
+        }
+    }
 }

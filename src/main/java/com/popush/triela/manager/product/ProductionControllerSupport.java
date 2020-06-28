@@ -17,7 +17,7 @@ public class ProductionControllerSupport {
                                        ProductSearchConditionForm conditionForm) {
 
         // listをフィルタ。
-        List<ProductView.ProductElement> convertedRepos = repos
+        List<ProductView.Element> convertedRepos = repos
                 .stream()
                 .filter(item -> {
                     // push権限でフィルタ。これは絶対条件
@@ -33,7 +33,7 @@ public class ProductionControllerSupport {
                         return item.getFullName().toLowerCase().contains(conditionForm.getName().toLowerCase());
                     }
                 })
-                .map(x -> ProductView.ProductElement
+                .map(x -> ProductView.Element
                         .builder()
                         .gitHubRepositoryId(x.getId())
                         .gitHubRepositoryName(x.getFullName())

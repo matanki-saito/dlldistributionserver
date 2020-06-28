@@ -7,7 +7,7 @@ import com.popush.triela.common.github.GitHubApiService;
 import com.popush.triela.common.github.GitHubReleaseWebhookResponse;
 import com.popush.triela.manager.distribution.DistributionService;
 import com.popush.triela.manager.exe.ExeForm;
-import com.popush.triela.manager.exe.ExeService;
+
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;

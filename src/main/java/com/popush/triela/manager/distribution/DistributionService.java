@@ -36,7 +36,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.popush.triela.common.aws.S3Service;
-import com.popush.triela.common.db.ExeDto;
+import com.popush.triela.common.db.ExeEntity;
 import com.popush.triela.common.db.ExeSelectCondition;
 import com.popush.triela.common.db.FileDto;
 import com.popush.triela.common.db.FileSelectCondition;
@@ -47,7 +47,7 @@ import com.popush.triela.common.exception.OtherSystemException;
 import com.popush.triela.common.github.GitHubApiService;
 import com.popush.triela.common.github.GitHubReleaseResponse;
 import com.popush.triela.common.github.GitHubReposResponse;
-import com.popush.triela.db.ExeDao;
+import com.popush.triela.db.ExeMapper;
 import com.popush.triela.db.FileDao;
 
 @Slf4j
@@ -55,7 +55,7 @@ import com.popush.triela.db.FileDao;
 @RequiredArgsConstructor
 public class DistributionService {
 
-    private final ExeDao exeDaoMapper;
+    private final ExeMapper exeMapperMapper;
     private final FileDao fileDaoMapper;
     private final GitHubApiService gitHubApiService;
     private final DistributionProperties properties;
@@ -548,15 +548,15 @@ public class DistributionService {
                     .gitHubRepoId(repoId)
                     .build();
 
-            final List<ExeDto> exeDaoList = exeDaoMapper.list(condition);
+            final List<ExeEntity> exeDaoList = exeMapperMapper.list(condition);
 
             if (exeDaoList.size() != 1) {
                 throw new OtherSystemException("exeDaoList is not one. Maybe db state error.");
             }
 
-            exeDaoMapper.update(
+            exeMapperMapper.update(
                     condition,
-                    ExeDto
+                    ExeEntity
                             .builder()
                             .distributionAssetId(assetId)
                             .build()

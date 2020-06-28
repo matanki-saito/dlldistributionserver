@@ -56,7 +56,7 @@ public class GitHubReposResolver implements HandlerMethodArgumentResolver {
 
         final var token = String.format("token %s", "");
 
-        Optional<GitHubReposResponse> repo = gitHubApiService.getMyAdminRepos(token)
+        Optional<GitHubReposResponse> repo = gitHubApiService.getMyAdminReposCached(token)
                                                              .stream()
                                                              .filter(elem -> elem.getId() == gitHubRepoId)
                                                              .findFirst();

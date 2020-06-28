@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ExeDto {
+public class ExeEntity {
   private Integer id;
   private Integer gitHubRepoId;
   @NotNull

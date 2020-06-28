@@ -12,7 +12,7 @@ import org.springframework.data.domain.Page;
 @Data
 @Builder
 public class ProductView {
-    private Page<ProductElement> pageData;
+    private Page<Element> pageData;
 
     private ProductSearchConditionForm conditionForm;
 
@@ -20,7 +20,7 @@ public class ProductView {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class ProductElement {
+    public static class Element {
         @NotNull
         private int gitHubRepositoryId;
 

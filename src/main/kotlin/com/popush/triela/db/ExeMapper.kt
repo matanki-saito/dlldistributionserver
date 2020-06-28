@@ -1,12 +1,21 @@
 package com.popush.triela.db
 
-import com.popush.triela.common.db.ExeDto
+import com.popush.triela.common.db.ExeEntity
 import com.popush.triela.common.db.ExeSelectCondition
 import lombok.NonNull
 import org.apache.ibatis.annotations.*
+import java.util.*
 
 @Mapper
-interface ExeDao {
+interface ExeMapper {
+    @Select("""
+        SELECT *
+        FROM `exe`
+        WHERE `id` = #{exeId}
+        LIMIT 1
+    """)
+    fun selectById(exeId: Int): Optional<ExeEntity>
+
     @Insert("""
         INSERT INTO exe
         (
@@ -29,7 +38,7 @@ interface ExeDao {
             #{phase}
         )
     """)
-    fun insert(@NonNull exeDao: ExeDto)
+    fun insert(@NonNull exeDao: ExeEntity)
 
     @Update("""
         <script>
@@ -62,7 +71,7 @@ interface ExeDao {
     """)
     fun update(
             @Param("condition") @NonNull condition: ExeSelectCondition,
-            @Param("data") exeDao: ExeDto
+            @Param("data") exeDao: ExeEntity
     );
 
     @Delete("""
@@ -103,5 +112,5 @@ interface ExeDao {
             LIMIT 100
         </script>
     """)
-    fun list(@NonNull condition: ExeSelectCondition): List<ExeDto>
+    fun list(@NonNull condition: ExeSelectCondition): List<ExeEntity>
 }

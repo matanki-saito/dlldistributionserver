@@ -80,7 +80,7 @@ public class GitHubApiService {
      * @throws OtherSystemException exp
      */
     @Cacheable("getMyAdminRepos")
-    public List<GitHubReposResponse> getMyAdminRepos(@NonNull String token) throws OtherSystemException {
+    public List<GitHubReposResponse> getMyAdminReposCached(@NonNull String token) throws OtherSystemException {
         final Call<List<GitHubReposResponse>> request = gitHubApiMapper.repos(token);
 
         final Response<List<GitHubReposResponse>> response = executer(request);

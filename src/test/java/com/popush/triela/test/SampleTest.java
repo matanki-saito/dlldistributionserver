@@ -1,7 +1,7 @@
 package com.popush.triela.test;
 
 import com.popush.triela.common.db.ExeSelectCondition;
-import com.popush.triela.db.ExeDao;
+import com.popush.triela.db.ExeMapper;
 import org.assertj.core.api.JUnitSoftAssertions;
 import org.junit.Rule;
 import org.junit.Test;
@@ -22,7 +22,7 @@ public class SampleTest {
     /* こうしないとIntellijでアラートが出る */
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
-    private ExeDao dao;
+    private ExeMapper dao;
 
     @Test
     public void simpleTest() {

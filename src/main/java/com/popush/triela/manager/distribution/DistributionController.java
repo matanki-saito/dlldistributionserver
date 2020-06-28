@@ -16,7 +16,6 @@ import com.popush.triela.common.db.ExeSelectCondition;
 import com.popush.triela.common.exception.OtherSystemException;
 import com.popush.triela.common.github.GitHubReposResponse;
 import com.popush.triela.manager.TrielaManagerV1Controller;
-import com.popush.triela.manager.exe.ExeService;
 
 @Controller
 @RequiredArgsConstructor
