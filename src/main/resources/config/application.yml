@@ -9,7 +9,16 @@ spring:
     cache-names: dllCache
     caffeine:
       spec: maximumSize=1000000, expireAfterWrite=3600s
-
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            # client-id: TRIELA-PRIVATE
+            # client-secret: TRIELA-PRIVATE
+            redirect-uri: https://triela.ml:8443/login/oauth2/code/github
+            scope:
+              - read:repo
 distribution:
   s3-bucket-region: ap-north-east-1
   s3-bucket-name: triela-file
