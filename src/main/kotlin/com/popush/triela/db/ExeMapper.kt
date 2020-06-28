@@ -27,7 +27,7 @@ interface ExeMapper {
         </where>
         GROUP BY `github_repo_id`
     </script>""")
-    fun findGitHubIdSetByIds(exeIds: Set<Int>): Set<Int>
+    fun findGitHubIdSetByIds(@Param("exeIds") exeIds: Set<Int>): Set<Int>
 
     @Insert("""
         INSERT INTO exe

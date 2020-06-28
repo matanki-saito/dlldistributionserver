@@ -250,8 +250,10 @@ public class GitHubApiService {
                                      @NonNull Integer releaseId,
                                      @NonNull String token) throws OtherSystemException {
 
+        final var tokenHeader = String.format("token %s", token);
+
         final Call<GitHubReleaseResponse> request = gitHubApiMapper.release(
-                token,
+                tokenHeader,
                 owner,
                 repoName,
                 releaseId

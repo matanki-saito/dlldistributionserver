@@ -84,7 +84,6 @@ public class DistributionController extends TrielaManagerV1Controller {
                                                              ));
 
         validOwnExeIds(exeId2assetIdMap.keySet(), gitHubRepoId);
-        // TODO: validOwnAssetIds()
 
         distributionMgrService.update(
                 exeId2assetIdMap,
