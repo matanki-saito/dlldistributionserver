@@ -1,11 +1,17 @@
 package com.popush.triela.common.github;
 
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.http.*;
-
 import java.net.URI;
 import java.util.List;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.http.GET;
+import retrofit2.http.Header;
+import retrofit2.http.Headers;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
+import retrofit2.http.Streaming;
+import retrofit2.http.Url;
 
 public interface GitHubApiMapper {
     @GET("repos/{owner}/{repo_name}/releases")
@@ -25,8 +31,16 @@ public interface GitHubApiMapper {
                                     @Path("repo_name") String repoName,
                                     @Path("asset_id") int assetId);
 
+
     @GET("user/repos")
     Call<List<GitHubReposResponse>> repos(@Header("Authorization") String token);
+
+    @GET("user/repos")
+    Call<List<GitHubReposResponse>> repos(@Header("Authorization") String token,
+                                          @Query("page") int pageNumber,
+                                          @Query("per_page") int countPerPage,
+                                          @Query("affiliation") String affiliation
+    );
 
     @GET
     @Headers("Accept: application/octet-stream")
