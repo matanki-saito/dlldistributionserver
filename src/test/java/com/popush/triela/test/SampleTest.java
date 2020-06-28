@@ -26,7 +26,7 @@ public class SampleTest {
 
     @Test
     public void simpleTest() {
-        var list = dao.list(ExeSelectCondition.builder().id(1).build());
+        var list = dao.selectByCondition(ExeSelectCondition.builder().id(1).build());
 
         softly.assertThat(list.size()).isEqualTo(1);
     }

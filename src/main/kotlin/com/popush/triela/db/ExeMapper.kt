@@ -90,27 +90,60 @@ interface ExeMapper {
     )
     @Select("""
         <script>
-            SELECT * FROM exe
+            SELECT *
+            FROM `exe`
             <where>
-                <if test="gitHubRepoId != null">
-                    AND github_repo_id = #{gitHubRepoId}
+                <if test="condition.gitHubRepoId != null">
+                    AND github_repo_id = #{condition.gitHubRepoId}
                 </if>
-                <if test="md5 != null">
-                    AND md5 = #{md5}
+                <if test="condition.md5 != null">
+                    AND md5 = #{condition.md5}
                 </if>
-                <if test="phase != null">
-                    AND phase = #{phase}
+                <if test="condition.phase != null">
+                    AND phase = #{condition.phase}
                 </if>
-                <if test="id != null">
-                    AND id = #{id}
+                <if test="condition.id != null">
+                    AND id = #{condition.id}
                 </if>
-                <if test="autoUpdate != null">
-                    AND auto_update = #{autoUpdate}
+                <if test="condition.autoUpdate != null">
+                    AND auto_update = #{condition.autoUpdate}
                 </if>
             </where>
             ORDER BY `version` DESC,`phase` ASC 
-            LIMIT 100
+            LIMIT #{offset}, #{requestCount}
         </script>
     """)
-    fun list(@NonNull condition: ExeSelectCondition): List<ExeEntity>
+    fun selectByCondition(@Param("condition") condition: ExeSelectCondition,
+                          @Param("offset") offset: Long,
+                          @Param("requestCount") requestCount: Int): List<ExeEntity>
+
+    @Select("""
+        <script>
+            SELECT COUNT(*)
+            FROM (
+                SELECT id
+                FROM `exe`
+                <where>
+                    <if test="condition.gitHubRepoId != null">
+                        AND github_repo_id = #{condition.gitHubRepoId}
+                    </if>
+                    <if test="condition.md5 != null">
+                        AND md5 = #{condition.md5}
+                    </if>
+                    <if test="condition.phase != null">
+                        AND phase = #{condition.phase}
+                    </if>
+                    <if test="condition.id != null">
+                        AND id = #{condition.id}
+                    </if>
+                    <if test="condition.autoUpdate != null">
+                        AND auto_update = #{condition.autoUpdate}
+                    </if>
+                </where>
+                LIMIT #{maxLimit}
+            ) AS selectByCondition
+        </script>
+    """)
+    fun countByConditionWithLimit(@Param("condition") condition: ExeSelectCondition,
+                                  @Param("maxLimit") maxLimit: Long): Int
 }

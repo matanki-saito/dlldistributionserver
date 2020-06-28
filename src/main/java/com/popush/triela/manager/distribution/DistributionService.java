@@ -548,7 +548,7 @@ public class DistributionService {
                     .gitHubRepoId(repoId)
                     .build();
 
-            final List<ExeEntity> exeDaoList = exeMapperMapper.list(condition);
+            final List<ExeEntity> exeDaoList = exeMapperMapper.selectByCondition(condition, 0, 10000);
 
             if (exeDaoList.size() != 1) {
                 throw new OtherSystemException("exeDaoList is not one. Maybe db state error.");

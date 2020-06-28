@@ -17,7 +17,6 @@ import com.popush.triela.common.github.GitHubApiService;
 import com.popush.triela.common.github.GitHubReleaseWebhookResponse;
 import com.popush.triela.db.ExeMapper;
 import com.popush.triela.manager.distribution.DistributionService;
-import com.popush.triela.manager.exe.ExeForm;
 
 @Slf4j
 @Service
@@ -47,12 +46,13 @@ public class WebHookAsyncService {
             throw new ArgumentException("Not found asset");
         }
 
-        var list = exeMapper.list(
+        var list = exeMapper.selectByCondition(
                 ExeSelectCondition
                         .builder()
                         .gitHubRepoId(repoId)
                         .autoUpdate(true)
-                        .build()
+                        .build(),
+                0, 10000
         );
 
         Map<Integer, Integer> mapping = list

@@ -34,7 +34,9 @@ public class ExeControllerSupport {
     }
 
     public ExeView makeExeView(List<ExeEntity> exeEntities,
-                               GitHubReposResponse gitHubReposResponse) {
+                               Pageable pageable,
+                               GitHubReposResponse gitHubReposResponse,
+                               long limitedAllCount) {
 
         var elements = exeEntities.stream()
                                   .map(src -> {
@@ -49,8 +51,8 @@ public class ExeControllerSupport {
                       .gitHubRepositoryName(gitHubReposResponse.getFullName())
                       .pageData(new PageImpl<>(
                               elements,
-                              Pageable.unpaged(),
-                              elements.size()
+                              pageable,
+                              limitedAllCount
                       ))
                       .build();
     }

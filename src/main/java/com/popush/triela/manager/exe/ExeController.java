@@ -2,6 +2,7 @@ package com.popush.triela.manager.exe;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
 import org.springframework.stereotype.Controller;
@@ -33,15 +34,25 @@ public class ExeController extends TrielaManagerV1Controller {
     public String getProduct(
             @PathVariable("gitHubMyRepoId") int gitHubRepoId,
             Model model,
+            Pageable pageable,
             @RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient
     ) throws OtherSystemException, ArgumentException {
         var reposResponse = getHavingPushAuthorityRepo(gitHubRepoId, authorizedClient);
 
-        var exeEntities = exeMapper.list(ExeSelectCondition.builder()
-                                                           .gitHubRepoId(gitHubRepoId)
-                                                           .build());
+        var condition = ExeSelectCondition.builder()
+                                          .gitHubRepoId(gitHubRepoId)
+                                          .build();
+        var exeEntities = exeMapper.selectByCondition(condition,
+                                                      pageable.getOffset(),
+                                                      pageable.getPageSize());
+
+        var limitedAllCount = exeMapper.countByConditionWithLimit(condition,
+                                                                  1000L);
+
         var exeView = exeControllerSupport.makeExeView(exeEntities,
-                                                       reposResponse);
+                                                       pageable,
+                                                       reposResponse,
+                                                       limitedAllCount);
 
         // thymleafで表示
         model.addAttribute("view", exeView);

@@ -41,7 +41,7 @@ public class DistributionController extends TrielaManagerV1Controller {
         model.addAttribute("gitHubRepositoryName", gitHubReposResponse.getFullName());
         model.addAttribute("gitHubRepositoryId", gitHubReposResponse.getId());
         model.addAttribute("assetList", distributionMgrService.list(gitHubReposResponse, token));
-        model.addAttribute("exeRegisterList", exeMapper.list(condition));
+        model.addAttribute("exeRegisterList", exeMapper.selectByCondition(condition, 0, 10000));
 
         return "distribution";
     }
@@ -49,7 +49,8 @@ public class DistributionController extends TrielaManagerV1Controller {
 
     @PostMapping("product/{gitHubMyRepoId}/distribution")
     public String distributionPost(
-            @RequestParam MultiValueMap<String, String> params, Model model,
+            @RequestParam MultiValueMap<String, String> params,
+            Model model,
             @PathVariable("gitHubMyRepoId") int gitHubMyRepoId,
             GitHubReposResponse gitHubReposResponse
     ) throws OtherSystemException {
