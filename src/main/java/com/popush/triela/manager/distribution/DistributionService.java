@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -45,8 +44,6 @@ import com.popush.triela.common.exception.GitHubResourceException;
 import com.popush.triela.common.exception.MachineException;
 import com.popush.triela.common.exception.OtherSystemException;
 import com.popush.triela.common.github.GitHubApiService;
-import com.popush.triela.common.github.GitHubReleaseResponse;
-import com.popush.triela.common.github.GitHubReposResponse;
 import com.popush.triela.db.ExeMapper;
 import com.popush.triela.db.FileDao;
 
