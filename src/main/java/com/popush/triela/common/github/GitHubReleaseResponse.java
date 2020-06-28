@@ -1,17 +1,18 @@
 package com.popush.triela.common.github;
 
+import java.io.Serializable;
+import java.time.ZonedDateTime;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.ZonedDateTime;
-import java.util.List;
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 @NoArgsConstructor
 @Data
-public class GitHubReleaseResponse {
+public class GitHubReleaseResponse implements Serializable {
     private int id;
     @JsonProperty("html_url")
     private String htmlUrl;
@@ -34,7 +35,7 @@ public class GitHubReleaseResponse {
     @JsonIgnoreProperties(ignoreUnknown = true)
     @NoArgsConstructor
     @Data
-    public static class Asset {
+    public static class Asset implements Serializable {
         private int id;
         private String name;
         private int size;

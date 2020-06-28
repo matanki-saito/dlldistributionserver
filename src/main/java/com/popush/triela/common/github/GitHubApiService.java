@@ -118,12 +118,15 @@ public class GitHubApiService {
      * @return リリース一覧
      * @throws OtherSystemException exp
      */
+    @Cacheable(value = "getReleasesSync")
     public List<GitHubReleaseResponse> getReleasesSync(@NonNull String owner,
                                                        @NonNull String repoName,
                                                        @NonNull String token) throws OtherSystemException {
 
+        final String tokenHeader = String.format("token %s", token);
+
         final Call<List<GitHubReleaseResponse>> request = gitHubApiMapper.releases(
-                token,
+                tokenHeader,
                 owner,
                 repoName
         );

@@ -24,9 +24,9 @@
 <body>
 <header th:include="header"></header>
 <main class="container">
-    <h2 th:text="${gitHubRepositoryName}"></h2>
+    <h2 th:text="${view.gitHubRepositoryName}"></h2>
     <form class="form-group" enctype="multipart/form-data" method="post"
-          th:action="@{'/mgr/v1/product/' + ${gitHubRepositoryId} + '/distribution'}">
+          th:action="@{'/mgr/v1/product/' + ${view.gitHubRepositoryId} + '/distribution'}">
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <div class="btn-group btn-group-toggle" id="Navber">
                 <button class="btn btn-success" type="submit">submit</button>
@@ -40,31 +40,58 @@
                 <th>name</th>
                 <th scope="col"
                     th:classappend="|${exe.phase eq 'dev' ? 'bg-warning' : ''} ${exe.phase eq 'alpha' ? 'bg-danger' : ''}|"
-                    th:each="exe : ${exeRegisterList}" th:object="${exe}"
-                >
-                    <a th:href="'/api/v1/distribution/' + ${gitHubRepositoryId} + '/' + ${exe.getMd5()} + '?phase=' + ${exe.phase}"
+                    th:each="exe : ${view.exeRegistersPageData.content}" th:object="${exe}">
+                    <a th:href="'/api/v1/distribution/' + ${view.gitHubRepositoryId} + '/' + ${exe.md5} + '?phase=' + ${exe.phase}"
                        th:text="*{version}"></a>
                 </th>
             </tr>
             </thead>
             <tbody>
             <tr th:classappend="|${asset.draft ? 'bg-warning' : ''} ${asset.preRelease ? 'my-warning' : ''}|"
-                th:each="asset : ${assetList}">
-                <td><a th:href="${asset.url}" th:text="${asset.name}"></a></td>
-                <td th:each="exe : ${exeRegisterList}">
+                th:each="asset : ${view.assetFormsPageData.content}">
+                <td><a th:href="${asset.releaseUrl}" th:text="${asset.name}"></a></td>
+                <td th:each="exe : ${view.getExeRegistersPageData().content}">
                     <div class="custom-control custom-radio">
                         <input class="custom-control-input"
-                               th:checked="${exe.distributionAssetId != null and asset.assetId != null and exe.distributionAssetId.toString() == asset.assetId.toString()}"
-                               th:id="${exe.id} + '-' +${asset.assetId}" th:name="${exe.id}" th:radiogroup="${exe.id}"
-                               th:value="${asset.assetId}" type="radio"/>
-                        <label class="custom-control-label" th:for="${exe.id} + '-' +${asset.assetId}"></label>
+                               th:checked="${exe.distributionAssetId != null and asset.id != null and exe.distributionAssetId.toString() == asset.id.toString()}"
+                               th:id="${exe.id} + '-' +${asset.id}" th:name="${exe.id}" th:radiogroup="${exe.id}"
+                               th:value="${asset.id}" type="radio"/>
+                        <label class="custom-control-label" th:for="${exe.id} + '-' +${asset.id}"></label>
                     </div>
                 </td>
             </tr>
             </tbody>
         </table>
-
     </form>
+
+    <nav aria-label="..." th:unless="${view.getAssetFormsPageData().getSize() == 0}">
+        <ul class="pagination">
+            <li class="page-item"
+                th:classappend="${view.getAssetFormsPageData().first} ? 'disabled':''">
+                <a class="page-link"
+                   th:href="@{/mgr/v1/product/{githubrepoid}/distribution(githubrepoid=${view.gitHubRepositoryId},page=0)}"
+                   aria-label="|<">
+                    first
+                </a>
+            </li>
+            <li class="page-item"
+                th:each='i : ${#numbers.sequence(0, view.getAssetFormsPageData().totalPages -1)}'
+                th:classappend="(${i}==${view.getAssetFormsPageData().number})? 'active' : ''">
+                <a class="page-link" href="#"
+                   th:href="@{/mgr/v1/product/{githubrepoid}/distribution(githubrepoid=${view.gitHubRepositoryId},page=${i})}">
+                    <span th:text='${i+1}'>1</span>
+                </a>
+            </li>
+            <li class="page-item"
+                th:classappend="${view.getAssetFormsPageData().last} ? 'disabled':''">
+                <a class="page-link" href="#" aria-label=">|"
+                   th:href="@{/mgr/v1/product/{githubrepoid}/distribution(githubrepoid=${view.gitHubRepositoryId},page=${view.getAssetFormsPageData().totalPages}-1)}">
+                    <span aria-hidden="true">Last</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
 </main>
 
 

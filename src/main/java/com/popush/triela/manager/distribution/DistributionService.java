@@ -260,35 +260,6 @@ public class DistributionService {
     }
 
     /**
-     * リリース情報からアセットの一覧を列挙して出力する
-     *
-     * @param gitHubReposResponse githubの情報
-     * @param token               アクセストークン
-     * @return アセットの一覧
-     * @throws OtherSystemException exp
-     */
-    List<AssetForm> list(@NonNull GitHubReposResponse gitHubReposResponse, @NonNull String token)
-            throws OtherSystemException {
-
-        final List<GitHubReleaseResponse> response = gitHubApiService.getReleasesSync(
-                gitHubReposResponse.getOwner().getLogin(),
-                gitHubReposResponse.getName(),
-                token
-        );
-
-        return response.stream()
-                       .filter(elem -> !elem.getAssets().isEmpty())
-                       .map(elem -> AssetForm.builder()
-                                             .draft(elem.getDraft())
-                                             .preRelease(elem.getPreRelease())
-                                             .name(elem.getName())
-                                             .url(elem.getHtmlUrl())
-                                             .assetId(Integer.toString(elem.getAssets().get(0).getId()))
-                                             .build()
-                       ).collect(Collectors.toList());
-    }
-
-    /**
      * アセットファイルから.distファイルを見つけ出す。ない場合もあり得る。
      *
      * @param assetFile アセットファイルのパス

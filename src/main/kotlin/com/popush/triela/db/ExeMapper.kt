@@ -16,6 +16,19 @@ interface ExeMapper {
     """)
     fun selectById(exeId: Int): Optional<ExeEntity>
 
+    @Select("""<script>
+        SELECT `github_repo_id`
+        FROM `exe`
+        <where>
+            `id` IN 
+            <foreach item="exeId" collection="exeIds" open="(" separator="," close=")">
+                #{exeId}
+            </foreach>
+        </where>
+        GROUP BY `github_repo_id`
+    </script>""")
+    fun findGitHubIdSetByIds(exeIds: Set<Int>): Set<Int>
+
     @Insert("""
         INSERT INTO exe
         (
