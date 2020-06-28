@@ -1,11 +1,15 @@
 package com.popush.triela.common.github;
 
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -23,11 +27,15 @@ public class GitHubReleaseResponse implements Serializable {
     @JsonProperty("prerelease")
     private Boolean preRelease;
 
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonProperty("created_at")
-    private ZonedDateTime createdAt;
+    private LocalDateTime createdAt;
 
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonProperty("published_at")
-    private ZonedDateTime publishedAt;
+    private LocalDateTime publishedAt;
 
     private List<Asset> assets;
     private String body;
