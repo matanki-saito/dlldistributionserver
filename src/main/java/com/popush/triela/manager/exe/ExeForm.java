@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ExeForm implements Serializable {
+
     /**
      * eu4.exe or ck2game.exe message digest
      */

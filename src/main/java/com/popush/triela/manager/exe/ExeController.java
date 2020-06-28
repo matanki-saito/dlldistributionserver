@@ -45,6 +45,7 @@ public class ExeController extends TrielaManagerV1Controller {
 
         // thymleafで表示
         model.addAttribute("view", exeView);
+        model.addAttribute("form", new ExeForm());
         return "exe";
     }
 

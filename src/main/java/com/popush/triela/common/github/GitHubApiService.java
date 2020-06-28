@@ -79,18 +79,18 @@ public class GitHubApiService {
      * @return レポジトリ情報の一覧
      * @throws OtherSystemException exp
      */
-    @Cacheable("getMyAdminRepos")
+    @Cacheable("getMyAdminReposCached")
     public List<GitHubReposResponse> getMyAdminReposCached(@NonNull String token) throws OtherSystemException {
-        final Call<List<GitHubReposResponse>> request = gitHubApiMapper.repos(token);
 
-        final Response<List<GitHubReposResponse>> response = executer(request);
-        final List<GitHubReposResponse> responseBody = responseCheck(response);
+        final String tokenHeader = String.format("token %s", token);
 
-        // push権限を持つ
-        return responseBody
+        final Call<List<GitHubReposResponse>> reposRequest = gitHubApiMapper.repos(tokenHeader);
+        final Response<List<GitHubReposResponse>> reposResponse = executer(reposRequest);
+        final List<GitHubReposResponse> reposResponseBody = responseCheck(reposResponse);
+        return reposResponseBody
                 .stream()
-                .filter(elem -> elem.getPermissions().containsKey("push") && elem.getPermissions()
-                                                                                 .get("push"))
+                .filter(elem -> elem.getPermissions().containsKey("push")
+                                && elem.getPermissions().get("push"))
                 .collect(Collectors.toList());
     }
 

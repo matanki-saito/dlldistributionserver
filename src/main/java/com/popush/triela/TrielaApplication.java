@@ -6,11 +6,11 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 @SpringBootApplication
-@EnableCaching
 @EnableAsync
+@EnableCaching
 public class TrielaApplication {
-  public static void main(String[] args) {
-    SpringApplication.run(TrielaApplication.class, args);
-  }
+    public static void main(String[] args) {
+        SpringApplication.run(TrielaApplication.class, args);
+    }
 }
 

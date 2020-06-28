@@ -42,6 +42,9 @@ public interface GitHubApiMapper {
                                           @Query("affiliation") String affiliation
     );
 
+    @GET("user")
+    Call<GithubUserResponse> user(@Header("Authorization") String token);
+
     @GET
     @Headers("Accept: application/octet-stream")
     @Streaming

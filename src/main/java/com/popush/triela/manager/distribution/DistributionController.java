@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.popush.triela.common.db.ExeSelectCondition;
 import com.popush.triela.common.exception.OtherSystemException;
 import com.popush.triela.common.github.GitHubReposResponse;
+import com.popush.triela.db.ExeMapper;
 import com.popush.triela.manager.TrielaManagerV1Controller;
 
 @Controller
@@ -22,7 +23,7 @@ import com.popush.triela.manager.TrielaManagerV1Controller;
 public class DistributionController extends TrielaManagerV1Controller {
 
     private final DistributionService distributionMgrService;
-    private final ExeService exeService;
+    private final ExeMapper exeMapper;
 
 
     @GetMapping("product/{gitHubMyRepoId}/distribution")
@@ -40,7 +41,7 @@ public class DistributionController extends TrielaManagerV1Controller {
         model.addAttribute("gitHubRepositoryName", gitHubReposResponse.getFullName());
         model.addAttribute("gitHubRepositoryId", gitHubReposResponse.getId());
         model.addAttribute("assetList", distributionMgrService.list(gitHubReposResponse, token));
-        model.addAttribute("exeRegisterList", exeService.list(condition));
+        model.addAttribute("exeRegisterList", exeMapper.list(condition));
 
         return "distribution";
     }
