@@ -77,7 +77,12 @@ buildscript {
 
             // lombok
             //
-            'lombok'                            : '1.18.12'
+            'lombok'                            : '1.18.12',
+
+            // アクセスログを標準出力に吐き出す
+            // https://github.com/akihyro/logback-access-spring-boot-starter
+            // https://qiita.com/mito1213/items/0d9394d75dbd5642f37d
+            'accessLog'                         : '2.7.1'
     ]
 
     repositories {
@@ -224,6 +229,7 @@ dependencies {
     implementation("io.springfox:springfox-swagger-ui:${versions.swagger}")
     implementation("io.springfox:springfox-swagger2:${versions.swagger}")
     implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:${versions.mybatisSpringBootStater}")
+    implementation("net.rakugakibox.spring.boot:logback-access-spring-boot-starter:${versions.accessLog}")
 
     // other
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${versions.jacksonDatatypeJsr310}")
