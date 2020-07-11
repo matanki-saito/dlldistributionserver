@@ -54,15 +54,13 @@ public class WebHookApiController extends TrielaApiV1Controller {
       return "hmac is invalid";
     }
 
-    final var token = String.format("token %s", personalAccessToken);
-
     var webhookResponse = findWebhookResponse(xGitHubEvent, payload);
     if (webhookResponse.isEmpty()) {
       log.info("not released notice");
       return "not released";
     }
 
-    var process = webHookAsyncService.release(token, webhookResponse.get());
+    var process = webHookAsyncService.release(personalAccessToken, webhookResponse.get());
 
     process
         .thenAcceptAsync(heavyProcessResult -> log.warn("finished"))

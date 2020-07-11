@@ -1,9 +1,7 @@
 buildscript {
     ext.versions = [
             // Spring
-            'springBootVersion'                 : '2.2.4.RELEASE',
-            'springStateMachine'                : '2.2.0.RELEASE',
-            'springOauth2Autoconfig'            : '2.1.5.RELEASE',
+            'springBootVersion'                 : '2.3.1.RELEASE',
 
             // OR mepper
             // https://mybatis.org/mybatis-3/ja/
@@ -41,9 +39,6 @@ buildscript {
             // 日付処理用
             // https://qiita.com/tag1216/items/25a64bba2bde98ea88d3
             'jacksonDatatypeJsr310'             : '2.9.7',
-
-            // state machineをpoolするのに必要
-            'apacheCommonsPool'                 : '2.8.0',
 
             // API document 生成
             // https://swagger.io/
@@ -119,8 +114,8 @@ apply plugin: 'org.ajoberstar.git-publish'
 apply plugin: 'com.gorylenko.gradle-git-properties'
 
 group = 'com.popush'
-sourceCompatibility = 11
-targetCompatibility = 11
+sourceCompatibility = 14
+targetCompatibility = 14
 
 gitProperties {
     customProperty 'version', version
@@ -135,8 +130,8 @@ repositories {
 }
 
 bootJar {
-    baseName = 'triela-docker'
-    version = '1.0.0'
+    archiveBaseName = 'triela-docker'
+    archiveVersion = '1.0.0'
 }
 
 // コメントに日本語があるので必要
@@ -220,14 +215,10 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web:${versions.springBootVersion}")
     implementation("org.springframework.boot:spring-boot-starter-jdbc:${versions.springBootVersion}")
     implementation("org.springframework.boot:spring-boot-starter-actuator:${versions.springBootVersion}")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-client:${versions.springBootVersion}")
 
     // spring
-    //implementation('org.springframework.retry:spring-retry')
-    implementation("org.springframework.statemachine:spring-statemachine-autoconfigure:${versions.springStateMachine}")
-    implementation("org.springframework.statemachine:spring-statemachine-data-common:${versions.springStateMachine}")
-    implementation("org.springframework.statemachine:spring-statemachine-data-redis:${versions.springStateMachine}")
-    implementation("org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:${versions.springOauth2Autoconfig}")
-    //implementation('org.springframework.session:spring-session-data-redis')
+    implementation('org.springframework.session:spring-session-data-redis')
 
     // spring support
     implementation("io.springfox:springfox-swagger-ui:${versions.swagger}")
@@ -236,7 +227,6 @@ dependencies {
 
     // other
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${versions.jacksonDatatypeJsr310}")
-    implementation("org.apache.commons:commons-pool2:${versions.apacheCommonsPool}")
     implementation("io.lettuce:lettuce-core:${versions.lettuce}")
     implementation("com.squareup.okhttp3:okhttp:${versions.okhttp}")
     implementation("com.squareup.retrofit2:retrofit:${versions.retrofit}")

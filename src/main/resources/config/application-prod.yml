@@ -16,5 +16,5 @@ spring:
   session:
     store-type: redis
   redis:
-    host: session.dpsihg.0001.apne1.cache.amazonaws.com
+    host: localhost
     port: 6379

@@ -17,7 +17,7 @@
 <header th:include="header"></header>
 
 <main class="container">
-    <h2 th:text="${gitHubRepositoryName}"></h2>
+    <h2 th:text="${view.gitHubRepositoryName}"></h2>
     <p>exeはrepositoryに対して存在します。画面上にexeをD&Dすることでmd5とdescriptionを自動で埋めることができます</p>
     <table class="table table-hover">
         <tbody>
@@ -27,12 +27,13 @@
             <th scope="col">phase</th>
             <th scope="col">description</th>
             <th scope="col">operation</th>
+            <th scope="col">Auto Update</th>
         </tr>
         <tr>
             <form class="form-group"
                   enctype="multipart/form-data"
                   method="post"
-                  th:action="@{'/mgr/v1/product/' + ${gitHubRepositoryId} + '/exe'}"
+                  th:action="@{'/mgr/v1/product/' + ${view.gitHubRepositoryId} + '/exe'}"
                   th:object="${form}">
                 <td><input class="form-control" id="md5" th:field="*{md5}"
                            th:placeholder="c2765bbe64b36757b276274cafe2c3f1"
@@ -56,6 +57,7 @@
                 <td>
                     <button class="form-control btn btn-success" type="submit">register</button>
                 </td>
+                <td>-</td>
             </form>
         </tr>
         <tr class="thead-light">
@@ -66,7 +68,7 @@
             <th scope="col">operation</th>
             <th scope="col">Auto Update</th>
         </tr>
-        <tr th:each="exe : ${page.getContent()}">
+        <tr th:each="exe : ${view.pageData.getContent()}">
             <td>
                 <span class="badge badge-dark" th:text="${exe.md5}"></span>
             </td>
@@ -81,14 +83,14 @@
             <td>
                 <form enctype="multipart/form-data"
                       method="post"
-                      th:action="@{'/mgr/v1/product/' + ${gitHubRepositoryId} + '/delete/' + ${exe.id} }">
+                      th:action="@{'/mgr/v1/product/' + ${view.gitHubRepositoryId} + '/delete/' + ${exe.id} }">
                     <button class="form-control btn btn-danger">DELETE</button>
                 </form>
             </td>
             <td>
                 <form enctype="multipart/form-data"
                       method="post"
-                      th:action="@{'/mgr/v1/product/' + ${gitHubRepositoryId} + '/autoUpdate/' + ${exe.id}}">
+                      th:action="@{'/mgr/v1/product/' + ${view.gitHubRepositoryId} + '/autoUpdate/' + ${exe.id}}">
                     <input name="autoUpdate" th:value="!${exe.autoUpdate}" type="hidden"/>
                     <button class="form-control btn" th:classappend="${exe.autoUpdate} ? 'btn-danger' : 'btn-primary'"
                             th:text="${exe.autoUpdate} ? 'ENABLE' : 'DISABLE'"></button>
@@ -98,28 +100,28 @@
         </tbody>
     </table>
 
-    <nav aria-label="..." th:unless="${page.getSize() == 0}">
+    <nav aria-label="..." th:unless="${view.getPageData().getSize() == 0}">
         <ul class="pagination">
             <li class="page-item"
-                th:classappend="${page.first} ? 'disabled':''">
+                th:classappend="${view.getPageData().first} ? 'disabled':''">
                 <a aria-label="|<"
                    class="page-link"
-                   th:href="@{'/mgr/v1/product/'+ ${gitHubRepositoryId} + '/exe'(page=0)}">
+                   th:href="@{'/mgr/v1/product/'+ ${view.gitHubRepositoryId} + '/exe'(page=0)}">
                     first
                 </a>
             </li>
             <li class="page-item"
-                th:classappend="(${i}==${page.number})? 'active' : ''"
-                th:each='i : ${#numbers.sequence(0, page.totalPages -1)}'>
+                th:classappend="(${i}==${view.getPageData().number})? 'active' : ''"
+                th:each='i : ${#numbers.sequence(0, view.getPageData().totalPages -1)}'>
                 <a class="page-link" href="#"
-                   th:href="@{'/mgr/v1/product/' + ${gitHubRepositoryId} + '/exe' (page=${i})}">
+                   th:href="@{'/mgr/v1/product/' + ${view.gitHubRepositoryId} + '/exe' (page=${i})}">
                     <span th:text='${i+1}'>1</span>
                 </a>
             </li>
             <li class="page-item"
-                th:classappend="${page.last} ? 'disabled':''">
+                th:classappend="${view.getPageData().last} ? 'disabled':''">
                 <a aria-label=">|" class="page-link" href="#"
-                   th:href="@{'/mgr/v1/product/' + ${gitHubRepositoryId} + '/exe' (page=(${page.totalPages}-1))}">
+                   th:href="@{'/mgr/v1/product/' + ${view.gitHubRepositoryId} + '/exe' (page=(${view.getPageData().totalPages}-1))}">
                     <span aria-hidden="true">Last</span>
                 </a>
             </li>

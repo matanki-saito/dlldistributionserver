@@ -1,17 +1,22 @@
 package com.popush.triela.common.github;
 
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.ZonedDateTime;
-import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @NoArgsConstructor
 @Data
-public class GitHubReleaseResponse {
+public class GitHubReleaseResponse implements Serializable {
     private int id;
     @JsonProperty("html_url")
     private String htmlUrl;
@@ -22,11 +27,15 @@ public class GitHubReleaseResponse {
     @JsonProperty("prerelease")
     private Boolean preRelease;
 
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonProperty("created_at")
-    private ZonedDateTime createdAt;
+    private LocalDateTime createdAt;
 
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonProperty("published_at")
-    private ZonedDateTime publishedAt;
+    private LocalDateTime publishedAt;
 
     private List<Asset> assets;
     private String body;
@@ -34,7 +43,7 @@ public class GitHubReleaseResponse {
     @JsonIgnoreProperties(ignoreUnknown = true)
     @NoArgsConstructor
     @Data
-    public static class Asset {
+    public static class Asset implements Serializable {
         private int id;
         private String name;
         private int size;

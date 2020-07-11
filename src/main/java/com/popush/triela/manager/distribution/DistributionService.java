@@ -18,25 +18,24 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.codehaus.jackson.JsonParseException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.popush.triela.common.aws.S3Service;
-import com.popush.triela.common.db.ExeDto;
+import com.popush.triela.common.db.ExeEntity;
 import com.popush.triela.common.db.ExeSelectCondition;
 import com.popush.triela.common.db.FileDto;
 import com.popush.triela.common.db.FileSelectCondition;
@@ -45,9 +44,7 @@ import com.popush.triela.common.exception.GitHubResourceException;
 import com.popush.triela.common.exception.MachineException;
 import com.popush.triela.common.exception.OtherSystemException;
 import com.popush.triela.common.github.GitHubApiService;
-import com.popush.triela.common.github.GitHubReleaseResponse;
-import com.popush.triela.common.github.GitHubReposResponse;
-import com.popush.triela.db.ExeDao;
+import com.popush.triela.db.ExeMapper;
 import com.popush.triela.db.FileDao;
 
 @Slf4j
@@ -55,7 +52,7 @@ import com.popush.triela.db.FileDao;
 @RequiredArgsConstructor
 public class DistributionService {
 
-    private final ExeDao exeDaoMapper;
+    private final ExeMapper exeMapperMapper;
     private final FileDao fileDaoMapper;
     private final GitHubApiService gitHubApiService;
     private final DistributionProperties properties;
@@ -257,35 +254,6 @@ public class DistributionService {
                                                      .build())
                             .stream()
                             .findFirst();
-    }
-
-    /**
-     * リリース情報からアセットの一覧を列挙して出力する
-     *
-     * @param gitHubReposResponse githubの情報
-     * @param token               アクセストークン
-     * @return アセットの一覧
-     * @throws OtherSystemException exp
-     */
-    List<AssetForm> list(@NonNull GitHubReposResponse gitHubReposResponse, @NonNull String token)
-            throws OtherSystemException {
-
-        final List<GitHubReleaseResponse> response = gitHubApiService.getReleasesSync(
-                gitHubReposResponse.getOwner().getLogin(),
-                gitHubReposResponse.getName(),
-                token
-        );
-
-        return response.stream()
-                       .filter(elem -> !elem.getAssets().isEmpty())
-                       .map(elem -> AssetForm.builder()
-                                             .draft(elem.getDraft())
-                                             .preRelease(elem.getPreRelease())
-                                             .name(elem.getName())
-                                             .url(elem.getHtmlUrl())
-                                             .assetId(Integer.toString(elem.getAssets().get(0).getId()))
-                                             .build()
-                       ).collect(Collectors.toList());
     }
 
     /**
@@ -548,15 +516,15 @@ public class DistributionService {
                     .gitHubRepoId(repoId)
                     .build();
 
-            final List<ExeDto> exeDaoList = exeDaoMapper.list(condition);
+            final List<ExeEntity> exeDaoList = exeMapperMapper.selectByCondition(condition, 0, 10000);
 
             if (exeDaoList.size() != 1) {
                 throw new OtherSystemException("exeDaoList is not one. Maybe db state error.");
             }
 
-            exeDaoMapper.update(
+            exeMapperMapper.update(
                     condition,
-                    ExeDto
+                    ExeEntity
                             .builder()
                             .distributionAssetId(assetId)
                             .build()
