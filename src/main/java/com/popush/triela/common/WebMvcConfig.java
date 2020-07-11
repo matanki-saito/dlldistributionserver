@@ -1,6 +1,7 @@
 package com.popush.triela.common;
 
-import com.popush.triela.common.github.GitHubReposResolver;
+import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -12,23 +13,18 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.util.List;
-
 @Configuration
 @RequiredArgsConstructor
 public class WebMvcConfig implements WebMvcConfigurer {
 
-    private final GitHubReposResolver gitHubReposResolver;
-
     private PageableHandlerMethodArgumentResolver trielaPageableResolver() {
         PageableHandlerMethodArgumentResolver resolver = new PageableHandlerMethodArgumentResolver();
-        resolver.setFallbackPageable(PageRequest.of(0, 12));
+        resolver.setFallbackPageable(PageRequest.of(0, 8));
         return resolver;
     }
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-        argumentResolvers.add(gitHubReposResolver);
         argumentResolvers.add(trielaPageableResolver());
     }
 

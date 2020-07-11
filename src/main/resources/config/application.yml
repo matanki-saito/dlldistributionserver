@@ -2,21 +2,6 @@ server:
   port: 8443
   servlet:
     context-path: /
-security:
-  oauth2:
-    client:
-      # client-id: [from triela-private]
-      # client-secret: [from triela-private]
-      access-token-uri: https://github.com/login/oauth/access_token
-      user-authorization-uri: https://github.com/login/oauth/authorize
-      client-authentication-scheme: form
-      scope: repo
-
-    resource:
-      user-info-uri: https://api.github.com/user
-      prefer-token-info: false
-    sso:
-      login-path: /login
 spring:
   profiles:
     active: dev
@@ -24,7 +9,16 @@ spring:
     cache-names: dllCache
     caffeine:
       spec: maximumSize=1000000, expireAfterWrite=3600s
-
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            # client-id: TRIELA-PRIVATE
+            # client-secret: TRIELA-PRIVATE
+            redirect-uri: https://triela.ml:8443/login/oauth2/code/github
+            scope:
+              - read:repo
 distribution:
   s3-bucket-region: ap-north-east-1
   s3-bucket-name: triela-file

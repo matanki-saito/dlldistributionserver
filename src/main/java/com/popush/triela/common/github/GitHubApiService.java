@@ -1,20 +1,5 @@
 package com.popush.triela.common.github;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.popush.triela.common.exception.GitHubResourceException;
-import com.popush.triela.common.exception.GitHubServiceException;
-import com.popush.triela.common.exception.MachineException;
-import com.popush.triela.common.exception.OtherSystemException;
-import lombok.AllArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.Value;
-import lombok.extern.slf4j.Slf4j;
-import okhttp3.ResponseBody;
-import org.springframework.stereotype.Service;
-import retrofit2.Call;
-import retrofit2.Response;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -23,6 +8,23 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.google.common.annotations.VisibleForTesting;
+import lombok.AllArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.Value;
+import lombok.extern.slf4j.Slf4j;
+import okhttp3.ResponseBody;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+import retrofit2.Call;
+import retrofit2.Response;
+
+import com.popush.triela.common.exception.GitHubResourceException;
+import com.popush.triela.common.exception.GitHubServiceException;
+import com.popush.triela.common.exception.MachineException;
+import com.popush.triela.common.exception.OtherSystemException;
 
 @Slf4j
 @Service
@@ -77,18 +79,34 @@ public class GitHubApiService {
      * @return レポジトリ情報の一覧
      * @throws OtherSystemException exp
      */
-    public List<GitHubReposResponse> getMyAdminRepos(@NonNull String token) throws OtherSystemException {
+    @Cacheable("getMyAdminReposCached")
+    public List<GitHubReposResponse> getMyAdminReposCached(@NonNull String token) throws OtherSystemException {
+
+        final String tokenHeader = String.format("token %s", token);
+
+        final Call<List<GitHubReposResponse>> reposRequest = gitHubApiMapper.repos(tokenHeader);
+        final Response<List<GitHubReposResponse>> reposResponse = executer(reposRequest);
+        final List<GitHubReposResponse> reposResponseBody = responseCheck(reposResponse);
+        return reposResponseBody
+                .stream()
+                .filter(elem -> elem.getPermissions().containsKey("push")
+                                && elem.getPermissions().get("push"))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * レポジトリ情報の一覧を取得
+     *
+     * @param token アクセストークン
+     * @return レポジトリ情報の一覧
+     * @throws OtherSystemException exp
+     */
+    @Cacheable("getMyAdminRepos")
+    public List<GitHubReposResponse> getRepos(@NonNull String token) throws OtherSystemException {
         final Call<List<GitHubReposResponse>> request = gitHubApiMapper.repos(token);
 
         final Response<List<GitHubReposResponse>> response = executer(request);
-        final List<GitHubReposResponse> responseBody = responseCheck(response);
-
-        // push権限を持つ
-        return responseBody
-                .stream()
-                .filter(elem -> elem.getPermissions().containsKey("push") && elem.getPermissions()
-                        .get("push"))
-                .collect(Collectors.toList());
+        return responseCheck(response);
     }
 
     /**
@@ -100,12 +118,15 @@ public class GitHubApiService {
      * @return リリース一覧
      * @throws OtherSystemException exp
      */
+    @Cacheable(value = "getReleasesSync")
     public List<GitHubReleaseResponse> getReleasesSync(@NonNull String owner,
                                                        @NonNull String repoName,
                                                        @NonNull String token) throws OtherSystemException {
 
+        final String tokenHeader = String.format("token %s", token);
+
         final Call<List<GitHubReleaseResponse>> request = gitHubApiMapper.releases(
-                token,
+                tokenHeader,
                 owner,
                 repoName
         );
@@ -229,8 +250,10 @@ public class GitHubApiService {
                                      @NonNull Integer releaseId,
                                      @NonNull String token) throws OtherSystemException {
 
+        final var tokenHeader = String.format("token %s", token);
+
         final Call<GitHubReleaseResponse> request = gitHubApiMapper.release(
-                token,
+                tokenHeader,
                 owner,
                 repoName,
                 releaseId
@@ -253,4 +276,6 @@ public class GitHubApiService {
         private Path path;
         private Path originalFileNamePath;
     }
+
+
 }

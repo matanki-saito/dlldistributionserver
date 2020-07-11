@@ -18,10 +18,10 @@
 
 <main class="container" role="main">
 
-    <nav class="navbar navbar-expand-lg navbar-light bg-light" th:object="${condition}">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light" th:object="${view.conditionForm}">
         <div class="collapse navbar-collapse" id="Navber">
             <form class="form-inline my-2 my-lg-0" th:action="@{'/mgr/v1/product'}" th:method="get">
-                <input th:value="${condition.name}"
+                <input th:value="${view.conditionForm.name}"
                        type="search"
                        th:name="name"
                        class="form-control mr-sm-2"
@@ -40,7 +40,7 @@
         </div>
     </nav>
 
-    <table class="table table-hover" th:object="${form}">
+    <table class="table table-hover" th:object="${view}">
         <thead>
         <tr class="thead-light">
             <th scope="col">GitHub repository name</th>
@@ -49,7 +49,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="element : ${form.data}">
+        <tr th:each="element : ${view.pageData}">
             <td>
                 <a class="form-control btn btn-outline-primary"
                    th:href="'https://github.com/' + ${element.gitHubRepositoryName}"
@@ -67,27 +67,28 @@
         </tbody>
     </table>
 
-    <nav aria-label="..." th:unless="${form.getData().getSize() == 0}">
+    <nav aria-label="..." th:unless="${view.getPageData().getSize() == 0}">
         <ul class="pagination">
             <li class="page-item"
-                th:classappend="${form.getData().first} ? 'disabled':''">
+                th:classappend="${view.getPageData().first} ? 'disabled':''">
                 <a class="page-link"
-                   th:href="@{${'/mgr/v1/product'}(page=0,name=${condition.getName()})}"
+                   th:href="@{${'/mgr/v1/product'}(page=0,name=${view.conditionForm.getName()})}"
                    aria-label="|<">
                     first
                 </a>
             </li>
             <li class="page-item"
-                th:each='i : ${#numbers.sequence(0, form.getData().totalPages -1)}'
-                th:classappend="(${i}==${form.getData().number})? 'active' : ''">
-                <a class="page-link" href="#" th:href="@{${'/mgr/v1/product'}(page=${i},name=${condition.getName()})}">
+                th:each='i : ${#numbers.sequence(0, view.getPageData().totalPages -1)}'
+                th:classappend="(${i}==${view.getPageData().number})? 'active' : ''">
+                <a class="page-link" href="#"
+                   th:href="@{${'/mgr/v1/product'}(page=${i},name=${view.conditionForm.getName()})}">
                     <span th:text='${i+1}'>1</span>
                 </a>
             </li>
             <li class="page-item"
-                th:classappend="${form.getData().last} ? 'disabled':''">
+                th:classappend="${view.getPageData().last} ? 'disabled':''">
                 <a class="page-link" href="#" aria-label=">|"
-                   th:href="@{${'/mgr/v1/product'}(page=(${form.getData().totalPages}-1),name=${condition.getName()})}">
+                   th:href="@{${'/mgr/v1/product'}(page=(${view.getPageData().totalPages}-1),name=${view.conditionForm.getName()})}">
                     <span aria-hidden="true">Last</span>
                 </a>
             </li>

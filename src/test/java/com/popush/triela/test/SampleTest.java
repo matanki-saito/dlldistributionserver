@@ -1,7 +1,5 @@
 package com.popush.triela.test;
 
-import com.popush.triela.common.db.ExeSelectCondition;
-import com.popush.triela.db.ExeDao;
 import org.assertj.core.api.JUnitSoftAssertions;
 import org.junit.Rule;
 import org.junit.Test;
@@ -10,6 +8,9 @@ import org.mybatis.spring.boot.test.autoconfigure.MybatisTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import com.popush.triela.common.db.ExeSelectCondition;
+import com.popush.triela.db.ExeMapper;
 
 @RunWith(SpringRunner.class)
 @MybatisTest
@@ -22,11 +23,11 @@ public class SampleTest {
     /* こうしないとIntellijでアラートが出る */
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
-    private ExeDao dao;
+    private ExeMapper dao;
 
     @Test
     public void simpleTest() {
-        var list = dao.list(ExeSelectCondition.builder().id(1).build());
+        var list = dao.selectByCondition(ExeSelectCondition.builder().id(1).build(), 0, 10000);
 
         softly.assertThat(list.size()).isEqualTo(1);
     }

@@ -1,18 +1,15 @@
 package com.popush.triela.common.exception;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-
-import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @ControllerAdvice
@@ -46,32 +43,6 @@ public class ExceptionHandler {
         log.error("BindException|ArgumentException={}", e);
 
         return errorMap;
-    }
-
-    @org.springframework.web.bind.annotation.ExceptionHandler({RuntimeException.class})
-    @ResponseBody
-    public ResponseEntity handleRuntimeException(RuntimeException e) {
-        Map<String, Object> errorMap = new HashMap<>();
-        errorMap.put("title", "Runtime error");
-        errorMap.put("status", HttpStatus.INTERNAL_SERVER_ERROR);
-        errorMap.put("message", e.getMessage());
-
-        log.error("RuntimeException={}", e);
-
-        // work around
-        if (e.getMessage().startsWith("Access token provider returned a null access token,")) {
-            final HttpHeaders headers = new HttpHeaders();
-            headers.setLocation(URI.create("/logout"));
-
-            return ResponseEntity
-                    .status(HttpStatus.FOUND)
-                    .headers(headers)
-                    .body(errorMap);
-        } else {
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(errorMap);
-        }
     }
 
     @ResponseStatus(HttpStatus.BAD_GATEWAY)
