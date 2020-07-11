@@ -18,3 +18,9 @@ spring:
   redis:
     host: localhost
     port: 46379
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            redirect-uri: https://triela.ml:8443/login/oauth2/code/github
