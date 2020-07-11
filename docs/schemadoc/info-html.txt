@@ -1,5 +1,5 @@
-date=2020-05-16 19:54:51+0000
-os=Linux 4.15.0-1052-aws
+date=2020-07-11 18:39:54+0000
+os=Linux 4.15.0-1067-aws
 schemaspy-version=6.1.0-SNAPSHOT
 schemaspy-build=6.1.0-SNAPSHOT
 diagramImplementation=Graphviz dot 2.40
