@@ -33,8 +33,16 @@
             </filter>
         </appender>
 
-        <root level="DEBUG">
+        <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+            <target>System.out</target>
+            <encoder>
+                <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+
+        <root level="WARN">
             <appender-ref ref="ASYNC_DISCORD"/>
+            <appender-ref ref="STDOUT"/>
         </root>
     </springProfile>
 </configuration>

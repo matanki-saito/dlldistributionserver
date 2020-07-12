@@ -5,6 +5,7 @@ import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.web.firewall.RequestRejectedException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -26,8 +27,10 @@ public class ExceptionHandler {
     @ResponseBody
     public Map<String, Object> handleErrorHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
         Map<String, Object> errorMap = new HashMap<>();
-        errorMap.put("message", e.getMessage());
         errorMap.put("status", HttpStatus.METHOD_NOT_ALLOWED);
+
+        log.warn("HttpRequestMethodNotSupportedException={}", e);
+
         return errorMap;
     }
 
@@ -38,9 +41,8 @@ public class ExceptionHandler {
         Map<String, Object> errorMap = new HashMap<>();
         errorMap.put("title", "Bad request");
         errorMap.put("status", HttpStatus.BAD_REQUEST);
-        errorMap.put("message", e.getMessage());
 
-        log.error("BindException|ArgumentException={}", e);
+        log.warn("BindException|ArgumentException={}", e);
 
         return errorMap;
     }
@@ -50,13 +52,24 @@ public class ExceptionHandler {
     @ResponseBody
     public Map<String, Object> handleErrorOtherServiceException(OtherSystemException e) {
         Map<String, Object> errorMap = new HashMap<>();
-        errorMap.put("title", "other system is down");
+        errorMap.put("title", "Other system is down");
         errorMap.put("status", HttpStatus.BAD_GATEWAY);
-        errorMap.put("message", e.getMessage());
 
-        log.error("OtherSystemException={}", e);
+        log.warn("OtherSystemException={}", e);
 
         return errorMap;
     }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @org.springframework.web.bind.annotation.ExceptionHandler({RequestRejectedException.class})
+    @ResponseBody
+    public Map<String, Object> handleErrorRequestRejectedException(RequestRejectedException e) {
+        Map<String, Object> errorMap = new HashMap<>();
+        errorMap.put("title", "Reject request");
+        errorMap.put("status", HttpStatus.BAD_REQUEST);
+
+        log.warn("RequestRejectedException={}", e);
+
+        return errorMap;
+    }
 }
