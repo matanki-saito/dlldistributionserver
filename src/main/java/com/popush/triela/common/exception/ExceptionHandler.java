@@ -5,7 +5,6 @@ import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.web.firewall.RequestRejectedException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -56,19 +55,6 @@ public class ExceptionHandler {
         errorMap.put("status", HttpStatus.BAD_GATEWAY);
 
         log.warn("OtherSystemException={}", e);
-
-        return errorMap;
-    }
-
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @org.springframework.web.bind.annotation.ExceptionHandler({RequestRejectedException.class})
-    @ResponseBody
-    public Map<String, Object> handleErrorRequestRejectedException(RequestRejectedException e) {
-        Map<String, Object> errorMap = new HashMap<>();
-        errorMap.put("title", "Reject request");
-        errorMap.put("status", HttpStatus.BAD_REQUEST);
-
-        log.warn("RequestRejectedException={}", e);
 
         return errorMap;
     }
