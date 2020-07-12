@@ -6,6 +6,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import retrofit2.Call;
 import retrofit2.Response;
 
+import com.popush.triela.common.cache.CacheExpiring;
 import com.popush.triela.common.exception.GitHubResourceException;
 import com.popush.triela.common.exception.GitHubServiceException;
 import com.popush.triela.common.exception.MachineException;
@@ -80,6 +82,7 @@ public class GitHubApiService {
      * @throws OtherSystemException exp
      */
     @Cacheable("getMyAdminReposCached")
+    @CacheExpiring(value = 1, unit = ChronoUnit.HOURS)
     public List<GitHubReposResponse> getMyAdminReposCached(@NonNull String token) throws OtherSystemException {
 
         final String tokenHeader = String.format("token %s", token);
@@ -102,6 +105,7 @@ public class GitHubApiService {
      * @throws OtherSystemException exp
      */
     @Cacheable("getMyAdminRepos")
+    @CacheExpiring(value = 1, unit = ChronoUnit.HOURS)
     public List<GitHubReposResponse> getRepos(@NonNull String token) throws OtherSystemException {
         final Call<List<GitHubReposResponse>> request = gitHubApiMapper.repos(token);
 
@@ -119,6 +123,7 @@ public class GitHubApiService {
      * @throws OtherSystemException exp
      */
     @Cacheable(value = "getReleasesSync")
+    @CacheExpiring(value = 1, unit = ChronoUnit.HOURS)
     public List<GitHubReleaseResponse> getReleasesSync(@NonNull String owner,
                                                        @NonNull String repoName,
                                                        @NonNull String token) throws OtherSystemException {
