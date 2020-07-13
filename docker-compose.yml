@@ -14,6 +14,8 @@ services:
       - "53306:3306"
     volumes:
       - ./data/db:/var/lib/mysql
+      - ./data/dblog:/var/log/mysql
+      - ./Resource/mysql/conf.d:/etc/mysql/conf.d
     environment:
       MYSQL_USER: test
       MYSQL_PASSWORD: test
