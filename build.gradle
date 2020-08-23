@@ -44,9 +44,6 @@ buildscript {
             // https://swagger.io/
             'swagger'                           : '2.8.0',
 
-            // mapperをkotlinで記述しているので必要
-            'kotlinVersion'                     : "1.3.50",
-
             // githubのリリースを登録するのに必要
             // https://github.com/ajoberstar/gradle-git-publish
             'gradleGitPublishPlugin'            : "2.1.3",
@@ -97,9 +94,6 @@ buildscript {
         classpath("com.palantir.gradle.docker:gradle-docker:${versions.gradleDockerPlugin}")
         classpath("io.spring.gradle:dependency-management-plugin:${versions.gradleDependencyManagementPlugin}")
         classpath("net.researchgate:gradle-release:${versions.gradleReleasePlugin}")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlinVersion}")
-        classpath("org.jetbrains.kotlin:kotlin-allopen:${versions.kotlinVersion}")
-        classpath("org.jetbrains.kotlin:kotlin-noarg:${versions.kotlinVersion}")
         classpath("de.undercouch:gradle-download-task:${versions.gradleDownloadTaskletPlugin}")
         classpath("org.ajoberstar:gradle-git-publish:${versions.gradleGitPublishPlugin}")
         classpath("gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:${versions.gradleGitPropertiesGeneraterPlugin}")
@@ -107,9 +101,6 @@ buildscript {
 }
 
 apply plugin: 'java'
-apply plugin: "kotlin"
-// plugin kotlin-kaptを入れないこと。lombokと干渉する
-apply plugin: "kotlin-spring"
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'com.palantir.docker'
@@ -124,6 +115,11 @@ targetCompatibility = 14
 
 gitProperties {
     customProperty 'version', version
+}
+
+// Java 14のtext blockを使用する
+tasks.withType(JavaCompile) {
+    options.compilerArgs += ['--enable-preview']
 }
 
 repositories {

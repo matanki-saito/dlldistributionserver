@@ -47,7 +47,7 @@ public class DistributionController extends TrielaManagerV1Controller {
         var exeEntities = exeMapper.selectByCondition(ExeSelectCondition.builder()
                                                                         .gitHubRepoId(gitHubRepoId)
                                                                         .build(),
-                                                      0, 5);
+                                                      0L, 5);
 
         // 縦軸
         final List<GitHubReleaseResponse> allReleases = gitHubApiService.getReleasesSync(
