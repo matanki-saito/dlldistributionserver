@@ -254,7 +254,6 @@ dependencies {
     implementation("org.slf4j:slf4j-api:${versions.slf4jApi}")
     implementation("com.github.napstr:logback-discord-appender:${versions.logbackDiscord}")
     implementation('software.amazon.awssdk:s3')
-    implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation("commons-codec:commons-codec:${versions.apacheCommonCodec}")
 
     runtimeOnly('mysql:mysql-connector-java')
