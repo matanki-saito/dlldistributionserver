@@ -3,7 +3,7 @@ buildscript {
             // Spring
             'springBootVersion'                 : '2.3.1.RELEASE',
 
-            // OR mepper
+            // OR mapper
             // https://mybatis.org/mybatis-3/ja/
             'mybatisSpringBootStater'           : '2.1.2',
 
@@ -15,10 +15,6 @@ buildscript {
             // https://square.github.io/okhttp/
             'okhttp'                            : '3.11.0',
             'retrofit'                          : '2.5.0',
-
-            // discord client library
-            // https://github.com/DV8FromTheWorld/JDA
-            'JDA'                               : '4.1.1_101',
 
             // aws library
             // https://github.com/aws/aws-sdk-java-v2/
@@ -43,9 +39,6 @@ buildscript {
             // API document 生成
             // https://swagger.io/
             'swagger'                           : '2.8.0',
-
-            // mapperをkotlinで記述しているので必要
-            'kotlinVersion'                     : "1.3.50",
 
             // githubのリリースを登録するのに必要
             // https://github.com/ajoberstar/gradle-git-publish
@@ -82,7 +75,17 @@ buildscript {
             // アクセスログを標準出力に吐き出す
             // https://github.com/akihyro/logback-access-spring-boot-starter
             // https://qiita.com/mito1213/items/0d9394d75dbd5642f37d
-            'accessLog'                         : '2.7.1'
+            'accessLog'                         : '2.7.1',
+
+            // grpc用。サービス間通信で使う
+            // https://github.com/google/protobuf-gradle-plugin
+            // https://github.com/LogNet/grpc-spring-boot-starter
+            // https://grpc.io/
+            // https://github.com/grpc/grpc-java
+            'protobufPlugin'                    : '0.8.8',
+            'grpcSpringStarter'                 : '3.5.7',
+            'grpc'                              : '3.12.0',
+            'grpcGenJava'                       : '1.31.1'
     ]
 
     repositories {
@@ -97,19 +100,18 @@ buildscript {
         classpath("com.palantir.gradle.docker:gradle-docker:${versions.gradleDockerPlugin}")
         classpath("io.spring.gradle:dependency-management-plugin:${versions.gradleDependencyManagementPlugin}")
         classpath("net.researchgate:gradle-release:${versions.gradleReleasePlugin}")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlinVersion}")
-        classpath("org.jetbrains.kotlin:kotlin-allopen:${versions.kotlinVersion}")
-        classpath("org.jetbrains.kotlin:kotlin-noarg:${versions.kotlinVersion}")
         classpath("de.undercouch:gradle-download-task:${versions.gradleDownloadTaskletPlugin}")
         classpath("org.ajoberstar:gradle-git-publish:${versions.gradleGitPublishPlugin}")
         classpath("gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:${versions.gradleGitPropertiesGeneraterPlugin}")
+        classpath("com.google.protobuf:protobuf-gradle-plugin:${versions.protobufPlugin}")
+        classpath("gradle.plugin.ua.eshepelyuk:ManifestClasspath:1.0.0")
     }
 }
 
+// windowsのCreateProcess error=206への対応
+apply plugin: "ua.eshepelyuk.ManifestClasspath"
+
 apply plugin: 'java'
-apply plugin: "kotlin"
-// plugin kotlin-kaptを入れないこと。lombokと干渉する
-apply plugin: "kotlin-spring"
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'com.palantir.docker'
@@ -117,6 +119,8 @@ apply plugin: 'net.researchgate.release'
 apply plugin: 'de.undercouch.download'
 apply plugin: 'org.ajoberstar.git-publish'
 apply plugin: 'com.gorylenko.gradle-git-properties'
+apply plugin: 'com.google.protobuf'
+
 
 group = 'com.popush'
 sourceCompatibility = 14
@@ -124,6 +128,14 @@ targetCompatibility = 14
 
 gitProperties {
     customProperty 'version', version
+}
+
+// Java 14のtext blockを使用する
+tasks.withType(JavaCompile) {
+    options.compilerArgs += ['--enable-preview']
+}
+test {
+    jvmArgs(['--enable-preview'])
 }
 
 repositories {
@@ -230,6 +242,7 @@ dependencies {
     implementation("io.springfox:springfox-swagger2:${versions.swagger}")
     implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:${versions.mybatisSpringBootStater}")
     implementation("net.rakugakibox.spring.boot:logback-access-spring-boot-starter:${versions.accessLog}")
+    implementation("io.github.lognet:grpc-spring-boot-starter:${versions.grpcSpringStarter}")
 
     // other
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${versions.jacksonDatatypeJsr310}")
@@ -241,22 +254,16 @@ dependencies {
     implementation("org.slf4j:slf4j-api:${versions.slf4jApi}")
     implementation("com.github.napstr:logback-discord-appender:${versions.logbackDiscord}")
     implementation('software.amazon.awssdk:s3')
-    implementation("net.dv8tion:JDA:${versions.JDA}")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation("commons-codec:commons-codec:${versions.apacheCommonCodec}")
-
 
     runtimeOnly('mysql:mysql-connector-java')
     runtimeOnly('org.springframework.boot:spring-boot-devtools')
-
 
     // lombokにはcompileOnly,annotationProcessor,testImplementationが必要
     // https://medium.com/@tsuyoshiushio/gradle-5-0-with-lombok-and-spring-boot-e8ca564fc552
     annotationProcessor("org.projectlombok:lombok:${versions.lombok}")
     compileOnly("org.projectlombok:lombok:${versions.lombok}")
     compileOnly('org.springframework.boot:spring-boot-configuration-processor')
-    compileOnly('org.springframework.boot:spring-boot-configuration-processor')
-
 
     testImplementation('org.springframework.boot:spring-boot-starter-test')
     testImplementation('org.springframework.security:spring-security-test')
@@ -272,3 +279,28 @@ dependencyManagement {
     }
 }
 
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:${versions.grpc}"
+    }
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java:${versions.grpcGenJava}"
+        }
+    }
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+        }
+    }
+}
+
+// for IDEA
+sourceSets {
+    main {
+        java {
+            srcDirs 'build/generated/source/proto/main/grpc'
+            srcDirs 'build/generated/source/proto/main/java'
+        }
+    }
+}

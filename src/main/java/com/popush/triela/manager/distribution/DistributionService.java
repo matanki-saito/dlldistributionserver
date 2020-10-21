@@ -45,15 +45,15 @@ import com.popush.triela.common.exception.MachineException;
 import com.popush.triela.common.exception.OtherSystemException;
 import com.popush.triela.common.github.GitHubApiService;
 import com.popush.triela.db.ExeMapper;
-import com.popush.triela.db.FileDao;
+import com.popush.triela.db.FileMapper;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class DistributionService {
 
-    private final ExeMapper exeMapperMapper;
-    private final FileDao fileDaoMapper;
+    private final ExeMapper exeMapper;
+    private final FileMapper fileMapper;
     private final GitHubApiService gitHubApiService;
     private final DistributionProperties properties;
     private final S3Service s3Service;
@@ -138,7 +138,7 @@ public class DistributionService {
             throw new OtherSystemException("json read value error", e);
         }
 
-        fileDaoMapper.upsert(
+        fileMapper.upsert(
                 FileDto.builder()
                        .assetId(assetId)
                        .data(null)
@@ -169,7 +169,7 @@ public class DistributionService {
                                                  key
             );
 
-            fileDaoMapper.upsert(
+            fileMapper.upsert(
                     FileDto.builder()
                            .assetId(assetId)
                            .data(null)
@@ -186,7 +186,7 @@ public class DistributionService {
                 throw new OtherSystemException("Cannot read file", e);
             }
 
-            fileDaoMapper.upsert(
+            fileMapper.upsert(
                     FileDto.builder()
                            .assetId(assetId)
                            .data(allDataBytes)
@@ -208,14 +208,14 @@ public class DistributionService {
                                                           int gitHubRepoId,
                                                           @NotNull String dllMd5,
                                                           @NotNull String phase) {
-        return fileDaoMapper.list(FileSelectCondition.builder()
-                                                     .distributedExeMd5(exeMd5)
-                                                     .gitHubRepoId(gitHubRepoId)
-                                                     .md5(dllMd5)
-                                                     .phase(phase)
-                                                     .build())
-                            .stream()
-                            .findFirst();
+        return fileMapper.list(FileSelectCondition.builder()
+                                                  .distributedExeMd5(exeMd5)
+                                                  .gitHubRepoId(gitHubRepoId)
+                                                  .md5(dllMd5)
+                                                  .phase(phase)
+                                                  .build())
+                         .stream()
+                         .findFirst();
     }
 
     /**
@@ -229,13 +229,13 @@ public class DistributionService {
     public Optional<FileDto> getMatchDllData(@NotNull String exeMd5,
                                              int gitHubRepoId,
                                              @NotNull String phase) {
-        return fileDaoMapper.list(FileSelectCondition.builder()
-                                                     .distributedExeMd5(exeMd5)
-                                                     .gitHubRepoId(gitHubRepoId)
-                                                     .phase(phase)
-                                                     .build())
-                            .stream()
-                            .findFirst();
+        return fileMapper.list(FileSelectCondition.builder()
+                                                  .distributedExeMd5(exeMd5)
+                                                  .gitHubRepoId(gitHubRepoId)
+                                                  .phase(phase)
+                                                  .build())
+                         .stream()
+                         .findFirst();
     }
 
     /**
@@ -248,12 +248,12 @@ public class DistributionService {
     @Transactional(readOnly = true)
     public Optional<FileDto> getLatestDllData(int gitHubRepoId,
                                               @NotNull String phase) {
-        return fileDaoMapper.list(FileSelectCondition.builder()
-                                                     .gitHubRepoId(gitHubRepoId)
-                                                     .phase(phase)
-                                                     .build())
-                            .stream()
-                            .findFirst();
+        return fileMapper.list(FileSelectCondition.builder()
+                                                  .gitHubRepoId(gitHubRepoId)
+                                                  .phase(phase)
+                                                  .build())
+                         .stream()
+                         .findFirst();
     }
 
     /**
@@ -448,7 +448,7 @@ public class DistributionService {
                                  @NonNull String repoName,
                                  int assetId,
                                  String token) throws OtherSystemException {
-        final Optional<FileDto> fileDao = fileDaoMapper.selectByAssetId(assetId);
+        final Optional<FileDto> fileDao = fileMapper.selectByAssetId(assetId);
         if (fileDao.isEmpty()) {
 
             // gitHubからアセットを取得
@@ -516,13 +516,13 @@ public class DistributionService {
                     .gitHubRepoId(repoId)
                     .build();
 
-            final List<ExeEntity> exeDaoList = exeMapperMapper.selectByCondition(condition, 0, 10000);
+            final List<ExeEntity> exeDaoList = exeMapper.selectByCondition(condition, 0L, 10000);
 
             if (exeDaoList.size() != 1) {
                 throw new OtherSystemException("exeDaoList is not one. Maybe db state error.");
             }
 
-            exeMapperMapper.update(
+            exeMapper.update(
                     condition,
                     ExeEntity
                             .builder()
@@ -531,5 +531,4 @@ public class DistributionService {
             );
         }
     }
-
 }

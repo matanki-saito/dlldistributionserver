@@ -52,7 +52,7 @@ public class WebHookAsyncService {
                         .gitHubRepoId(repoId)
                         .autoUpdate(true)
                         .build(),
-                0, 10000
+                0L, 10000
         );
 
         Map<Integer, Integer> mapping = list

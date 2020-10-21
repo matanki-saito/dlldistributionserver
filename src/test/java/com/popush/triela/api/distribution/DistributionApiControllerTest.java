@@ -29,7 +29,7 @@ class DistributionApiControllerTest {
     private DistributionService service;
 
     @Test
-    public void fileGetNoUpdate(SoftAssertions softly) throws Exception {
+    void fileGetNoUpdate(SoftAssertions softly) throws Exception {
         // リクエスト
         final int gitHubRepoId = 10000;
         final String exeMd5 = "aaaaaaaaaaaaaaaaaaaaa";
@@ -60,7 +60,7 @@ class DistributionApiControllerTest {
     }
 
     @Test
-    public void fileGetUpdate(SoftAssertions softly) throws Exception {
+    void fileGetUpdate(SoftAssertions softly) throws Exception {
         // リクエスト
         final int gitHubRepoId = 10000;
         final String exeMd5 = "aaaaaaaaaaaaaaaaaaaaa";
@@ -98,7 +98,7 @@ class DistributionApiControllerTest {
     }
 
     @Test
-    public void fileGetLatest(SoftAssertions softly) throws Exception {
+    void fileGetLatest(SoftAssertions softly) throws Exception {
         // リクエスト
         final int gitHubRepoId = 10000;
         final String exeMd5 = "aaaaaaaaaaaaaaaaaaaaa";
@@ -141,7 +141,7 @@ class DistributionApiControllerTest {
     }
 
     @Test
-    public void fileGetLatestNoUpdate(SoftAssertions softly) throws Exception {
+    void fileGetLatestNoUpdate(SoftAssertions softly) throws Exception {
         // リクエスト
         final int gitHubRepoId = 10000;
         final String exeMd5 = "aaaaaaaaaaaaaaaaaaaaa";

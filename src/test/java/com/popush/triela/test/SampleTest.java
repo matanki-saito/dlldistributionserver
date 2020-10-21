@@ -23,11 +23,11 @@ public class SampleTest {
     /* こうしないとIntellijでアラートが出る */
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
-    private ExeMapper dao;
+    private ExeMapper exeMapper;
 
     @Test
     public void simpleTest() {
-        var list = dao.selectByCondition(ExeSelectCondition.builder().id(1).build(), 0, 10000);
+        var list = exeMapper.selectByCondition(ExeSelectCondition.builder().id(1).build(), 0L, 10000);
 
         softly.assertThat(list.size()).isEqualTo(1);
     }
