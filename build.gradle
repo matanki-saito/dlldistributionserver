@@ -133,6 +133,7 @@ gitProperties {
 // Java 14のtext blockを使用する
 tasks.withType(JavaCompile) {
     options.compilerArgs += ['--enable-preview']
+    options.encoding = 'UTF-8'
 }
 test {
     jvmArgs(['--enable-preview'])
@@ -155,6 +156,10 @@ bootJar {
 javadoc {
     options.charSet = 'UTF-8'
     options.encoding = 'UTF-8'
+}
+javadoc.options {
+    addBooleanOption('-enable-preview', true)
+    addStringOption('-release', '14')
 }
 
 task unpack(type: Copy) {
