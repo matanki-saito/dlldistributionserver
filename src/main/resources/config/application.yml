@@ -1,5 +1,5 @@
 server:
-  port: 8443
+  port: 80
   servlet:
     context-path: /
 spring:
@@ -14,9 +14,6 @@ spring:
       client:
         registration:
           github:
-            # client-id: TRIELA-PRIVATE
-            # client-secret: TRIELA-PRIVATE
-            redirect-uri: https://triela.ml:8443/login/oauth2/code/github
             scope:
               - read:repo
 distribution:

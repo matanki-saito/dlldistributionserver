@@ -30,7 +30,7 @@ executors:
         environment:
           MYSQL_ROOT_PASSWORD: 1qaz2wsx
           MYSQL_DATABASE: testdb
-        command: [--character-set-server=utf8mb4, --collation-server=utf8mb4_general_ci, --default-storage-engine=innodb]
+        command: [ --character-set-server=utf8mb4, --collation-server=utf8mb4_general_ci, --default-storage-engine=innodb ]
   deployer:
     working_directory: ~/repo
     docker:
@@ -43,9 +43,9 @@ executors:
         environment:
           MYSQL_ROOT_PASSWORD: 1qaz2wsx
           MYSQL_DATABASE: testdb
-        command: [--character-set-server=utf8mb4, --collation-server=utf8mb4_general_ci, --default-storage-engine=innodb]
+        command: [ --character-set-server=utf8mb4, --collation-server=utf8mb4_general_ci, --default-storage-engine=innodb ]
       - image: gnagaoka/schemaspyweb:latest
-        command: [-servermode]
+        command: [ -servermode ]
 
 commands:
   restore_gradle:
@@ -128,16 +128,3 @@ workflows:
           filters:
             branches:
               only: master
-
-  restart_service:
-    jobs:
-      - aws-ecs/deploy-service-update:
-          family: 'triela-task'
-          cluster-name: 'girls'
-          service-name: 'triela-sv'
-          container-image-name-updates: 'container=triela-app,image-and-tag=registry.hub.docker.com/gnagaoka/triela-app:${CIRCLE_TAG}'
-          filters:
-            tags:
-              only: /[0-9]+\.[0-9]+\.[0-9]+/
-            branches:
-              ignore: /.*/
