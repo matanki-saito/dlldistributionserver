@@ -8,7 +8,7 @@ services:
     volumes:
       - ./data/redis:/data
   db:
-    image: mysql:8.0.15
+    image: mysql:8.0.20
     restart: always
     ports:
       - "53306:3306"

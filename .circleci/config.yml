@@ -26,7 +26,7 @@ executors:
           # Customize the JVM maximum heap limit
           JVM_OPTS: -Xmx3200m
           TERM: dumb
-      - image: mysql:8.0.20
+      - image: mysql:8.0.15
         environment:
           MYSQL_ROOT_PASSWORD: 1qaz2wsx
           MYSQL_DATABASE: testdb
@@ -39,7 +39,7 @@ executors:
           # Customize the JVM maximum heap limit
           JVM_OPTS: -Xmx3200m
           TERM: dumb
-      - image: mysql:8.0.15
+      - image: mysql:8.0.20
         environment:
           MYSQL_ROOT_PASSWORD: 1qaz2wsx
           MYSQL_DATABASE: testdb

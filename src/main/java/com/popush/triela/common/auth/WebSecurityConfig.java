@@ -4,6 +4,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @EnableWebSecurity
@@ -15,7 +16,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                                                                   "/authorize/**",
                                                                   "/login/**",
                                                                   "/api/**",
-                                                                  "/swagger-ui.html",
                                                                   "/error")
                                                      .permitAll()
                                                      .anyRequest()

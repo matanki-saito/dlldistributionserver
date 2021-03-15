@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:mysql://127.0.0.1:53306/mydb?characterEncoding=UTF-8&serverTimezone=JST
+    url: jdbc:mysql://127.0.0.1:53306/testdb?characterEncoding=UTF-8&serverTimezone=JST
     username: root
-    #password: from env
+    password: 1qaz2wsx
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
       maximum-pool-size: 20
@@ -17,6 +17,6 @@ spring:
       client:
         registration:
           github:
-            # client-id: from env
+            client-id: c3b647914aed0ff081da
             # client-secret: from env
             redirect-uri: http://local.triela.popush.cloud/login/oauth2/code/github
