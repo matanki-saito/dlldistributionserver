@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<database name="testdb" schema="testdb" type="MySQL - 8.0.15">
+<database name="testdb" schema="testdb" type="MySQL - 8.0.20">
    <tables>
       <table catalog="testdb" name="exe" numRows="1" remarks="" type="TABLE">
          <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="github_repo_id" nullable="false" remarks="" size="10" type="INT" typeCode="4"/>
@@ -9,7 +9,7 @@
          <column autoUpdated="false" defaultValue="null" digits="0" id="4" name="distribution_asset_id" nullable="true" remarks="" size="10" type="INT" typeCode="4"/>
          <column autoUpdated="true" defaultValue="null" digits="0" id="5" name="id" nullable="false" remarks="" size="10" type="INT" typeCode="4"/>
          <column autoUpdated="false" defaultValue="prod" digits="0" id="6" name="phase" nullable="false" remarks="" size="45" type="VARCHAR" typeCode="12"/>
-         <column autoUpdated="false" defaultValue="0" digits="0" id="7" name="auto_update" nullable="false" remarks="" size="1" type="TINYINT UNSIGNED" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="0" digits="0" id="7" name="auto_update" nullable="false" remarks="" size="3" type="TINYINT UNSIGNED" typeCode="-6"/>
          <primaryKey column="id" sequenceNumberInPK="1"/>
          <index name="PRIMARY" unique="true">
             <column ascending="true" name="id"/>

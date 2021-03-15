@@ -12,7 +12,6 @@ com.popush.triela.common.exception
 com.popush.triela.common.filter
 com.popush.triela.common.github
 com.popush.triela.db
-com.popush.triela.help
 com.popush.triela.manager
 com.popush.triela.manager.distribution
 com.popush.triela.manager.exe
