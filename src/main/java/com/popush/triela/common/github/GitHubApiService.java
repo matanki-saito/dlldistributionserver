@@ -10,23 +10,24 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+
 import com.google.common.annotations.VisibleForTesting;
+import com.popush.triela.common.cache.CacheExpiring;
+import com.popush.triela.common.exception.GitHubResourceException;
+import com.popush.triela.common.exception.GitHubServiceException;
+import com.popush.triela.common.exception.MachineException;
+import com.popush.triela.common.exception.OtherSystemException;
+
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.ResponseBody;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Service;
 import retrofit2.Call;
 import retrofit2.Response;
-
-import com.popush.triela.common.cache.CacheExpiring;
-import com.popush.triela.common.exception.GitHubResourceException;
-import com.popush.triela.common.exception.GitHubServiceException;
-import com.popush.triela.common.exception.MachineException;
-import com.popush.triela.common.exception.OtherSystemException;
 
 @Slf4j
 @Service
@@ -38,8 +39,10 @@ public class GitHubApiService {
      * レスポンスチェック
      *
      * @param response レスポンス
-     * @param <T>      レスポンスボディ　Type
+     * @param <T> レスポンスボディ　Type
+     *
      * @return レスポンスボディ
+     *
      * @throws OtherSystemException exp
      */
     private <T> T responseCheck(Response<T> response) throws OtherSystemException {
@@ -62,8 +65,10 @@ public class GitHubApiService {
      * 通信を実施する
      *
      * @param caller http request caller
-     * @param <R>    Response type
+     * @param <R> Response type
+     *
      * @return Retrofit Response
+     *
      * @throws GitHubServiceException 通信異常
      */
     private <R> Response<R> executer(Call<R> caller) throws GitHubServiceException {
@@ -78,11 +83,13 @@ public class GitHubApiService {
      * レポジトリ情報の一覧を取得
      *
      * @param token アクセストークン
+     *
      * @return レポジトリ情報の一覧
+     *
      * @throws OtherSystemException exp
      */
     @Cacheable("getMyAdminReposCached")
-    @CacheExpiring(value = 1, unit = ChronoUnit.HOURS)
+    @CacheExpiring(value = 3, unit = ChronoUnit.MINUTES)
     public List<GitHubReposResponse> getMyAdminReposCached(@NonNull String token) throws OtherSystemException {
 
         final String tokenHeader = String.format("token %s", token);
@@ -101,11 +108,13 @@ public class GitHubApiService {
      * レポジトリ情報の一覧を取得
      *
      * @param token アクセストークン
+     *
      * @return レポジトリ情報の一覧
+     *
      * @throws OtherSystemException exp
      */
     @Cacheable("getMyAdminRepos")
-    @CacheExpiring(value = 1, unit = ChronoUnit.HOURS)
+    @CacheExpiring(value = 3, unit = ChronoUnit.MINUTES)
     public List<GitHubReposResponse> getRepos(@NonNull String token) throws OtherSystemException {
         final Call<List<GitHubReposResponse>> request = gitHubApiMapper.repos(token);
 
@@ -116,14 +125,16 @@ public class GitHubApiService {
     /**
      * リリース一覧を取得する
      *
-     * @param owner    レポジトリのオーナー
+     * @param owner レポジトリのオーナー
      * @param repoName レポジトリ名
-     * @param token    アクセストークン
+     * @param token アクセストークン
+     *
      * @return リリース一覧
+     *
      * @throws OtherSystemException exp
      */
     @Cacheable(value = "getReleasesSync")
-    @CacheExpiring(value = 1, unit = ChronoUnit.HOURS)
+    @CacheExpiring(value = 3, unit = ChronoUnit.MINUTES)
     public List<GitHubReleaseResponse> getReleasesSync(@NonNull String owner,
                                                        @NonNull String repoName,
                                                        @NonNull String token) throws OtherSystemException {
@@ -143,11 +154,13 @@ public class GitHubApiService {
     /**
      * アセットのURIとフォーマットを取得する
      *
-     * @param owner    レポジトリのオーナー
+     * @param owner レポジトリのオーナー
      * @param repoName レポジトリ名
-     * @param assetId  アセットID
-     * @param token    アクセストークン
+     * @param assetId アセットID
+     * @param token アクセストークン
+     *
      * @return アセットのURIとMimeType
+     *
      * @throws OtherSystemException exp
      */
     private NetworkResource getAssetDownloadUrl(@NonNull String owner,
@@ -185,8 +198,10 @@ public class GitHubApiService {
      * URLからアセット（zipファイル）を取ってくる
      *
      * @param networkResource アセットのURLとタイプ
-     * @param token           アクセストークン
+     * @param token アクセストークン
+     *
      * @return 一時ファイルになったzipファイルのパス
+     *
      * @throws OtherSystemException exp
      */
     @VisibleForTesting
@@ -226,11 +241,13 @@ public class GitHubApiService {
     /**
      * アセットを取得
      *
-     * @param owner    アセットのオーナー
+     * @param owner アセットのオーナー
      * @param repoName レポジトリ名
-     * @param assetId  アセットID
-     * @param token    アクセストークン
+     * @param assetId アセットID
+     * @param token アクセストークン
+     *
      * @return アセットファイル
+     *
      * @throws OtherSystemException exp
      */
     public NetworkResource getDllFromAsset(@NonNull String owner,
@@ -244,10 +261,11 @@ public class GitHubApiService {
     /**
      * asset idを取得する
      *
-     * @param owner     repositoryのオーナー名
-     * @param repoName  レポジトリ名
+     * @param owner repositoryのオーナー名
+     * @param repoName レポジトリ名
      * @param releaseId release ID
-     * @param token     アクセストークン
+     * @param token アクセストークン
+     *
      * @return asset ID
      */
     public List<Integer> getAssetIds(@NonNull String owner,
@@ -281,6 +299,5 @@ public class GitHubApiService {
         private Path path;
         private Path originalFileNamePath;
     }
-
 
 }
