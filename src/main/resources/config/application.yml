@@ -31,4 +31,8 @@ management:
   info:
     git:
       mode: full
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,prometheus"
 
