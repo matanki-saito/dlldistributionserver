@@ -1,5 +1,0 @@
-date=2021-08-13 16:09:20+0000
-os=Linux 4.15.0-1106-aws
-schemaspy-version=6.1.0-SNAPSHOT
-schemaspy-build=6.1.0-SNAPSHOT
-diagramImplementation=Graphviz dot 2.40
