@@ -1,7 +1,7 @@
 buildscript {
     ext.versions = [
             // Spring
-            'springBootVersion'                 : '2.3.1.RELEASE',
+            'springBootVersion'                 : '2.4.5',
 
             // OR mapper
             // https://mybatis.org/mybatis-3/ja/
@@ -9,12 +9,12 @@ buildscript {
 
             // redis client 実装
             // https://lettuce.io/
-            'lettuce'                           : '5.1.4.RELEASE',
+            'lettuce'                           : '6.1.1.RELEASE',
 
             // http client
             // https://square.github.io/okhttp/
-            'okhttp'                            : '3.11.0',
-            'retrofit'                          : '2.5.0',
+            'okhttp'                            : '4.9.1',
+            'retrofit'                          : '2.9.0',
 
             // aws library
             // https://github.com/aws/aws-sdk-java-v2/
@@ -42,15 +42,15 @@ buildscript {
 
             // Dockerhubにdocker imageをuploadするのに必要
             // https://github.com/palantir/gradle-docker
-            'gradleDockerPlugin'                : "0.25.0",
+            'gradleDockerPlugin'                : "0.26.0",
 
             // schemaspyで作った結果をダウンロードするのに必要
             // https://github.com/michel-kraemer/gradle-download-task
-            'gradleDownloadTaskletPlugin'       : '4.0.4',
+            'gradleDownloadTaskletPlugin'       : '4.1.1',
 
             // actuator apiでコミットversionを確認する
             // https://plugins.gradle.org/plugin/com.gorylenko.gradle-git-properties
-            'gradleGitPropertiesGeneraterPlugin': '2.2.2',
+            'gradleGitPropertiesGeneraterPlugin': '2.3.1',
 
             // リリース処理に必要
             // https://github.com/researchgate/gradle-release
@@ -62,16 +62,16 @@ buildscript {
 
             // test用
             // https://assertj.github.io/doc/
-            'assertj'                           : '3.15.0',
+            'assertj'                           : '3.19.0',
 
             // lombok
             //
-            'lombok'                            : '1.18.12',
+            'lombok'                            : '1.18.20',
 
             // アクセスログを標準出力に吐き出す
             // https://github.com/akihyro/logback-access-spring-boot-starter
             // https://qiita.com/mito1213/items/0d9394d75dbd5642f37d
-            'accessLog'                         : '2.7.1',
+            'accessLog'                         : '3.0.0',
 
             // grpc用。サービス間通信で使う
             // https://github.com/google/protobuf-gradle-plugin
@@ -81,7 +81,15 @@ buildscript {
             'protobufPlugin'                    : '0.8.8',
             'grpcSpringStarter'                 : '3.5.7',
             'grpc'                              : '3.12.0',
-            'grpcGenJava'                       : '1.31.1'
+            'grpcGenJava'                       : '1.31.1',
+
+            // micrometer
+            // spring actuatorがprometheus形式でmetrixを出力するために必要
+            'micrometer'                        : '1.7.5',
+
+            // mysql connector for java
+            // TODO: Version uPの時にconnectionTimeZone=SERVERの対応する
+            'mysqlj'                            : '8.0.20'
     ]
 
     repositories {
@@ -98,7 +106,7 @@ buildscript {
         classpath("net.researchgate:gradle-release:${versions.gradleReleasePlugin}")
         classpath("de.undercouch:gradle-download-task:${versions.gradleDownloadTaskletPlugin}")
         classpath("org.ajoberstar:gradle-git-publish:${versions.gradleGitPublishPlugin}")
-        classpath("gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:${versions.gradleGitPropertiesGeneraterPlugin}")
+        classpath("com.gorylenko.gradle-git-properties:gradle-git-properties:${versions.gradleGitPropertiesGeneraterPlugin}")
         classpath("com.google.protobuf:protobuf-gradle-plugin:${versions.protobufPlugin}")
         classpath("gradle.plugin.ua.eshepelyuk:ManifestClasspath:1.0.0")
     }
@@ -119,8 +127,8 @@ apply plugin: 'com.google.protobuf'
 
 
 group = 'com.popush'
-sourceCompatibility = 14
-targetCompatibility = 14
+sourceCompatibility = 15
+targetCompatibility = 15
 
 gitProperties {
     customProperty 'version', version
@@ -155,7 +163,7 @@ javadoc {
 }
 javadoc.options {
     addBooleanOption('-enable-preview', true)
-    addStringOption('-release', '14')
+    addStringOption('-release', '15')
 }
 
 task unpack(type: Copy) {
@@ -240,10 +248,11 @@ dependencies {
 
     // spring support
     implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:${versions.mybatisSpringBootStater}")
-    implementation("net.rakugakibox.spring.boot:logback-access-spring-boot-starter:${versions.accessLog}")
+    implementation("dev.akkinoc.spring.boot:logback-access-spring-boot-starter:${versions.accessLog}")
     implementation("io.github.lognet:grpc-spring-boot-starter:${versions.grpcSpringStarter}")
 
     // other
+    implementation("io.micrometer:micrometer-registry-prometheus:${versions.micrometer}")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${versions.jacksonDatatypeJsr310}")
     implementation("io.lettuce:lettuce-core:${versions.lettuce}")
     implementation("com.squareup.okhttp3:okhttp:${versions.okhttp}")
@@ -255,7 +264,7 @@ dependencies {
     implementation('software.amazon.awssdk:s3')
     implementation("commons-codec:commons-codec:${versions.apacheCommonCodec}")
 
-    runtimeOnly('mysql:mysql-connector-java:8.0.20')
+    runtimeOnly("mysql:mysql-connector-java:${versions.mysqlj}")
     runtimeOnly('org.springframework.boot:spring-boot-devtools')
 
     // lombokにはcompileOnly,annotationProcessor,testImplementationが必要
