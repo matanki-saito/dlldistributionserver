@@ -12,7 +12,7 @@ executors:
     working_directory: ~/repo
     docker:
       # specify the version you desire here
-      - image: circleci/openjdk:14.0.1-buster
+      - image: circleci/openjdk:15-buster
         environment:
           # Customize the JVM maximum heap limit
           JVM_OPTS: -Xmx3200m
@@ -21,12 +21,12 @@ executors:
     working_directory: ~/repo
     docker:
       # specify the version you desire here
-      - image: circleci/openjdk:14.0.1-buster
+      - image: circleci/openjdk:15-buster
         environment:
           # Customize the JVM maximum heap limit
           JVM_OPTS: -Xmx3200m
           TERM: dumb
-      - image: mysql:8.0.15
+      - image: mysql:8.0.20
         environment:
           MYSQL_ROOT_PASSWORD: 1qaz2wsx
           MYSQL_DATABASE: testdb
@@ -34,7 +34,7 @@ executors:
   deployer:
     working_directory: ~/repo
     docker:
-      - image: circleci/openjdk:14.0.1-buster
+      - image: circleci/openjdk:15-buster
         environment:
           # Customize the JVM maximum heap limit
           JVM_OPTS: -Xmx3200m
