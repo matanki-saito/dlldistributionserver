@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
@@ -25,6 +24,8 @@ import com.popush.triela.common.github.GitHubReleaseResponse;
 import com.popush.triela.common.github.GitHubReposResponse;
 import com.popush.triela.db.ExeMapper;
 import com.popush.triela.manager.TrielaManagerV1Controller;
+
+import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequiredArgsConstructor
@@ -47,7 +48,7 @@ public class DistributionController extends TrielaManagerV1Controller {
         var exeEntities = exeMapper.selectByCondition(ExeSelectCondition.builder()
                                                                         .gitHubRepoId(gitHubRepoId)
                                                                         .build(),
-                                                      0L, 5);
+                                                      0L, 10);
 
         // 縦軸
         final List<GitHubReleaseResponse> allReleases = gitHubApiService.getReleasesSync(
@@ -65,7 +66,6 @@ public class DistributionController extends TrielaManagerV1Controller {
         model.addAttribute("view", view);
         return "distribution";
     }
-
 
     @PostMapping("product/{gitHubRepoId}/distribution")
     public String distributionPost(
@@ -96,7 +96,8 @@ public class DistributionController extends TrielaManagerV1Controller {
         return "redirect:distribution";
     }
 
-    private GitHubReposResponse getHavingPushAuthorityRepo(int gitHubRepoId, OAuth2AuthorizedClient authorizedClient)
+    private GitHubReposResponse getHavingPushAuthorityRepo(int gitHubRepoId,
+                                                           OAuth2AuthorizedClient authorizedClient)
             throws OtherSystemException, ArgumentException {
         // 権限チェック
         var repoInfo = controllerSupport.hasPushAuthorityRepoInfo(gitHubRepoId, authorizedClient);
