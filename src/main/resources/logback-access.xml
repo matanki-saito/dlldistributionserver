@@ -4,7 +4,7 @@
     <encoder>
       <!--  combined log ltsv format-->
       <pattern>
-        <![CDATA[RemoteHost:%h\tRemoteLogName:%l\tUserName:%u\tdate:%date{"yyyy-MM-dd'T'HH:mm:ss,SSSXXX", UTC}\tRequestUri:%r\tStatusCode:%s\tResponseLength:%b\tReferer:%i{Referer}\tUserAgent:%i{User-Agent}]]></pattern>
+        <![CDATA[RemoteHost:%h\tRemoteLogName:%l\tUserName:%u\tdate:%date{"yyyy-MM-dd'T'HH:mm:ss.SSSXXX", UTC}\tRequestUri:%r\tStatusCode:%s\tResponseLength:%b\tReferer:%i{Referer}\tUserAgent:%i{User-Agent}]]></pattern>
     </encoder>
   </appender>
 

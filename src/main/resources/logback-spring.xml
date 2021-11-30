@@ -9,7 +9,7 @@
     <target>System.out</target>
     <encoder>
       <pattern>
-        <![CDATA[date:%date{"yyyy-MM-dd'T'HH:mm:ss,SSSXXX", UTC}\tthread:%thread\tX-Track:%X{X-Track}\tlevel:%-5level\tlogger:%-48logger{48}\tmessage:%msg%n]]></pattern>
+        <![CDATA[date:%date{"yyyy-MM-dd'T'HH:mm:ss.SSSXXX", UTC}\tthread:%thread\tX-Track:%X{X-Track}\tlevel:%-5level\tlogger:%-48logger{48}\tmessage:%msg%n]]></pattern>
     </encoder>
   </appender>
 
