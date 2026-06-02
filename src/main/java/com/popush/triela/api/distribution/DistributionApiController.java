@@ -103,7 +103,7 @@ public class DistributionApiController extends TrielaApiV1Controller {
 
         return ResponseEntity
                 .status(status)
-                .cacheControl(CacheControl.maxAge(15, TimeUnit.MINUTES))
+                .cacheControl(CacheControl.maxAge(31536000, TimeUnit.SECONDS))
                 .headers(headers)
                 .body(responseBody);
 
