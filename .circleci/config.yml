@@ -1,150 +1,55 @@
-# Java Gradle CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-java/ for more details
-#
+# Use the latest 2.1 version of CircleCI pipeline process engine.
+# See: https://circleci.com/docs/reference/configuration-reference
 version: 2.1
 
-orbs:
-  aws-ecs: circleci/aws-ecs@0.0.8
+# Define a job to be invoked later in a workflow.
+# See: https://circleci.com/docs/guides/orchestrate/jobs-steps/#jobs-overview & https://circleci.com/docs/reference/configuration-reference/#jobs
+jobs:
+  build:
+    # Specify the execution environment. You can specify an image from Docker Hub or use one of our convenience images from CircleCI's Developer Hub.
+    # See: https://circleci.com/docs/guides/execution-managed/executor-intro/ & https://circleci.com/docs/reference/configuration-reference/#executor-job
+    docker:
+      # Specify the version you desire here
+      # See: https://circleci.com/developer/images/image/cimg/openjdk
+      - image: cimg/openjdk:8.0
 
-executors:
-  default:
-    working_directory: ~/repo
-    docker:
-      # specify the version you desire here
-      - image: circleci/openjdk:15-buster
-        environment:
-          # Customize the JVM maximum heap limit
-          JVM_OPTS: -Xmx3200m
-          TERM: dumb
-  tester:
-    working_directory: ~/repo
-    docker:
-      # specify the version you desire here
-      - image: circleci/openjdk:15-buster
-        environment:
-          # Customize the JVM maximum heap limit
-          JVM_OPTS: -Xmx3200m
-          TERM: dumb
-      - image: mysql:8.0.20
-        environment:
-          MYSQL_ROOT_PASSWORD: 1qaz2wsx
-          MYSQL_DATABASE: testdb
-        command: [ --character-set-server=utf8mb4, --collation-server=utf8mb4_general_ci, --default-storage-engine=innodb ]
-  deployer:
-    working_directory: ~/repo
-    docker:
-      - image: circleci/openjdk:15-buster
-        environment:
-          # Customize the JVM maximum heap limit
-          JVM_OPTS: -Xmx3200m
-          TERM: dumb
-      - image: mysql:8.0.20
-        environment:
-          MYSQL_ROOT_PASSWORD: 1qaz2wsx
-          MYSQL_DATABASE: testdb
-        command: [ --character-set-server=utf8mb4, --collation-server=utf8mb4_general_ci, --default-storage-engine=innodb ]
-      - image: gnagaoka/schemaspyweb:latest
-        command: [ -servermode ]
+      # Specify service dependencies here if necessary
+      # CircleCI maintains a library of pre-built images
+      # documented at https://circleci.com/docs/circleci-images/
+      # - image: circleci/postgres:9.4
 
-commands:
-  restore_gradle:
+    environment:
+      # Customize the JVM maximum heap limit
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
+
+    # Add steps to the job
+    # See: https://circleci.com/docs/guides/orchestrate/jobs-steps/#steps-overview & https://circleci.com/docs/reference/configuration-reference/#steps
     steps:
+      # Checkout the code as the first step.
+      - checkout
+
+      # Download and cache dependencies
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "build.gradle" }}
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
-  save_gradle:
-    steps:
+
+      - run: gradle dependencies
+
       - save_cache:
           paths:
             - ~/.gradle
           key: v1-dependencies-{{ checksum "build.gradle" }}
 
-jobs:
-  setup:
-    executor:
-      name: default
-    steps:
-      - checkout
-      - restore_gradle
-      - run: ./gradlew dependencies
-      - save_gradle
+      # run tests!
+      - run: gradle test
 
-  test:
-    executor:
-      name: tester
-    steps:
-      - checkout
-      - restore_gradle
-      - run: dockerize -wait tcp://localhost:3306 -timeout 1m
-      - run: ./gradlew test
-
-  deploy:
-    executor:
-      name: deployer
-    steps:
-      - checkout
-      - restore_gradle
-      - setup_remote_docker:
-          docker_layer_caching: false # 有料になった
-      - run: |
-          set -x
-          VER="18.06.0-ce"
-          curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
-          tar -xz -C /tmp -f /tmp/docker-$VER.tgz
-          sudo mv -f /tmp/docker/* /usr/bin
-      - run: |
-          docker login -u $DOCKER_USER -p $DOCKER_PASS
-          ./gradlew docker dockerPush
-      - add_ssh_keys:
-          fingerprints:
-            - "27:9e:e8:82:c9:46:d9:b1:f0:0f:97:cd:1f:ab:fc:fd"
-      - run: git config --global user.email "matanki.saito@gmail.com"
-      - run: git config --global user.name "circleci"
-      - run: |
-          ./gradlew release -Prelease.useAutomaticVersion=true
-          ./gradlew test
-          ./gradlew schemaspydoc
-          ./gradlew gitPublishPush
-
-  update:
-    executor:
-      name: default
-    steps:
-      - run: |
-          curl \
-          -X POST \
-          -H "Accept: application/vnd.github.v3+json" \
-          -H "Authorization: token ${PERSONAL_ACCESS_TOKEN}" \
-          https://api.github.com/repos/matanki-saito/localservers/actions/workflows/update.yaml/dispatches \
-          -d "{\"ref\":\"main\", \"inputs\": { \"source\":\"ente-pubblico-per-il-benessere-sociale/triela/deployment.yaml\", \"target\":\"spec.template.spec.containers.0.image\", \"value\":\"gnagaoka/triela-app:${CIRCLE_TAG}\"}}"
-
+# Orchestrate jobs using workflows
+# See: https://circleci.com/docs/guides/orchestrate/workflows/ & https://circleci.com/docs/reference/configuration-reference/#workflows
 workflows:
-  build_and_docker_deploy:
+  sample: # This is the name of the workflow, feel free to change it to better match your workflow.
+    # Inside the workflow, you define the jobs you want to run.
     jobs:
-      - setup:
-          filters:
-            branches:
-              only: develop
-
-      - test:
-          requires:
-            - setup
-          filters:
-            branches:
-              only: develop
-
-      - deploy:
-          filters:
-            branches:
-              only: master
-  restart_service:
-    jobs:
-      - update:
-          filters:
-            tags:
-              only: /[0-9]+\.[0-9]+\.[0-9]+/
-            branches:
-              ignore: /.*/
+      - build
